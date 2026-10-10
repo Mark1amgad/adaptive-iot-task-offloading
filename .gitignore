@@ -218,3 +218,60 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+# ---------------------------------------------------------------------------
+# Project additions: Java / iFogSim / IDE / OS
+# (These extend the Python template above; the original rules are preserved.)
+# ---------------------------------------------------------------------------
+
+# Java compilation output
+*.class
+
+# Maven
+target/
+**/target/
+pom.xml.tag
+pom.xml.releaseBackup
+pom.xml.versionsBackup
+pom.xml.next
+release.properties
+dependency-reduced-pom.xml
+buildNumber.properties
+.mvn/timing.properties
+.mvn/wrapper/maven-wrapper.jar
+
+# Gradle
+.gradle/
+**/build/
+!gradle/wrapper/gradle-wrapper.jar
+
+# Eclipse
+.project
+.classpath
+.settings/
+bin/
+
+# IntelliJ IDEA (project-level)
+.idea/
+*.iml
+*.ipr
+*.iws
+out/
+
+# VS Code
+.vscode/
+
+# OS files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Logs and temporary files
+*.log
+*.tmp
+
+# Local experiment outputs that should not be committed by default.
+# Curated/processed results intended for the report are added explicitly.
+results/raw/**
+!results/raw/.gitkeep
+!results/processed/.gitkeep

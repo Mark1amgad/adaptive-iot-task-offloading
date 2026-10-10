@@ -1,0 +1,26 @@
+# Normalize line endings to LF in the repository, regardless of contributor OS.
+* text=auto eol=lf
+
+# Explicit text sources
+*.md    text eol=lf
+*.py    text eol=lf
+*.java  text eol=lf
+*.json  text eol=lf
+*.xml   text eol=lf
+*.toml  text eol=lf
+*.txt   text eol=lf
+*.yml   text eol=lf
+*.yaml  text eol=lf
+.gitignore   text eol=lf
+.gitattributes text eol=lf
+
+# Binary / generated artifacts should not be text-normalized
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.pdf binary
+*.jar binary
+*.zip binary
+*.gz binary
+*.class binary

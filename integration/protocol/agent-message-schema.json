@@ -1,0 +1,74 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.invalid/adaptive-iot-task-offloading/agent-message-schema.json",
+  "title": "Agent message (DRAFT)",
+  "description": "PRELIMINARY DRAFT protocol between the Java/iFogSim simulator and the Python Q-Learning agent. NOT an agreed contract. Field names, units, and encodings are provisional and require agreement between Ayoub (simulator) and Ibrahim (agent). This schema accepts EITHER a request (simulator -> agent) OR a response (agent -> simulator) via oneOf. It does not describe a working implementation.",
+  "oneOf": [
+    { "$ref": "#/$defs/request" },
+    { "$ref": "#/$defs/response" }
+  ],
+  "$defs": {
+    "categoricalBand": {
+      "type": "string",
+      "enum": ["Low", "Medium", "High"],
+      "description": "PROVISIONAL categorical band. Exact discretization boundaries and their units are undecided and must be documented by the team."
+    },
+    "request": {
+      "type": "object",
+      "title": "State request (simulator -> agent)",
+      "description": "Illustrative request. Each measured feature may be sent either as a raw numeric value (units TBD) or as a documented categorical band; the team must pick one representation and document it.",
+      "required": ["task_id", "task_size", "network_latency", "edge_utilization", "deadline_category"],
+      "additionalProperties": false,
+      "properties": {
+        "task_id": {
+          "type": "string",
+          "description": "PROVISIONAL field name. Unique identifier for the task; must be echoed back by the agent so outcomes can be linked to the original task."
+        },
+        "task_size": {
+          "description": "PROVISIONAL. Task size, either a raw numeric value (unit TBD, e.g. MB) or a categorical band. The chosen encoding must be documented.",
+          "oneOf": [
+            { "type": "number", "minimum": 0 },
+            { "$ref": "#/$defs/categoricalBand" }
+          ]
+        },
+        "network_latency": {
+          "description": "PROVISIONAL. Observed network latency, either a raw numeric value (units MUST be documented, e.g. milliseconds) or a categorical band.",
+          "oneOf": [
+            { "type": "number", "minimum": 0 },
+            { "$ref": "#/$defs/categoricalBand" }
+          ]
+        },
+        "edge_utilization": {
+          "description": "PROVISIONAL. Edge node utilization, either a raw numeric value (unit TBD: fraction 0-1 or percentage 0-100) or a categorical band.",
+          "oneOf": [
+            { "type": "number", "minimum": 0 },
+            { "$ref": "#/$defs/categoricalBand" }
+          ]
+        },
+        "deadline_category": {
+          "type": "string",
+          "enum": ["Tight", "Relaxed"],
+          "description": "PROVISIONAL. Deadline band for the task. The rule mapping raw deadlines to these categories is undecided."
+        }
+      }
+    },
+    "response": {
+      "type": "object",
+      "title": "Action response (agent -> simulator)",
+      "description": "The agent's selected placement action. The simulator must actually apply this action and independently verify the real execution destination.",
+      "required": ["task_id", "action"],
+      "additionalProperties": false,
+      "properties": {
+        "task_id": {
+          "type": "string",
+          "description": "Must echo the task_id from the corresponding request."
+        },
+        "action": {
+          "type": "string",
+          "enum": ["Local", "Edge", "Cloud"],
+          "description": "Selected offloading action for the task."
+        }
+      }
+    }
+  }
+}

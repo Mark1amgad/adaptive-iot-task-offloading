@@ -1,0 +1,14 @@
+# Python dependencies for the Q-Learning agent.
+#
+# STATUS: The agent implementation has not started (rl-agent/src is a placeholder).
+# This list is intentionally minimal. Add dependencies ONLY when actual code in
+# rl-agent/src (or tests) genuinely requires them, and pin versions once a real
+# requirement is known.
+#
+# Tabular Q-Learning can be implemented in pure Python, so no heavy numerical or
+# ML libraries are required up front. If the state space or experimentation later
+# justifies NumPy/pandas/etc., add them here at that time with a clear reason.
+
+# Test runner used by rl-agent/tests once tests are written.
+# Left unpinned until the team standardizes on a version.
+pytest
