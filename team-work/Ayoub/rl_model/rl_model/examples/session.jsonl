@@ -1,0 +1,5 @@
+{"protocol_version":"1.0","type":"hello","run_id":"demo-run","phase":"dev","sim_seed":42,"simulator":{"name":"iFogSim","version":"TO CONFIRM"}}
+{"protocol_version":"1.0","type":"observation","task_id":"t-1","features":{"task_mi":2500,"wan_latency_ms":45.0,"edge_utilization":0.62,"deadline_ms":400}}
+{"protocol_version":"1.0","type":"outcome","task_id":"t-1","action_executed":"Edge","status":"completed","latency_ms":212.4,"deadline_met":true,"resource_metrics":{"bandwidth_bytes":48200,"energy_joules":0.8}}
+{"protocol_version":"1.0","type":"save"}
+{"protocol_version":"1.0","type":"shutdown"}

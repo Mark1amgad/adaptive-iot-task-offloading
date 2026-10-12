@@ -1,0 +1,32 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "rl_model/observation/1.0",
+  "title": "Observation (Java -> Python), sent BEFORE the offloading decision",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["protocol_version", "type", "task_id", "features"],
+  "properties": {
+    "protocol_version": {"const": "1.0"},
+    "type": {"const": "observation"},
+    "task_id": {"type": "string", "minLength": 1, "maxLength": 128},
+    "sim_time_ms": {"type": "number", "minimum": 0, "description": "informational only; not part of the state"},
+    "features": {
+      "type": "object",
+      "description": "Exactly the enabled state features (see config/default.json). Only values known BEFORE execution.",
+      "additionalProperties": {"type": "number"},
+      "required": ["task_mi", "wan_latency_ms", "edge_utilization", "deadline_ms"],
+      "properties": {
+        "task_mi": {"type": "number", "minimum": 0},
+        "wan_latency_ms": {"type": "number", "minimum": 0},
+        "edge_utilization": {"type": "number", "minimum": 0, "maximum": 1},
+        "deadline_ms": {"type": "number", "minimum": 0},
+        "device_utilization": {"type": "number", "minimum": 0, "maximum": 1}
+      }
+    },
+    "available_actions": {
+      "type": "array", "minItems": 1, "uniqueItems": true,
+      "items": {"enum": ["Local", "Edge", "Cloud", 0, 1, 2]},
+      "description": "Optional action mask; omitted = all three allowed."
+    }
+  }
+}

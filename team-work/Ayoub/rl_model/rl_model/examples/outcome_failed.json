@@ -1,0 +1,1 @@
+{"protocol_version":"1.0","type":"outcome","task_id":"t-000124","action_executed":"Cloud","status":"failed","failure_reason":"timeout","latency_ms":null,"deadline_met":false,"resource_metrics":{"bandwidth_bytes":48200},"terminal":true}
