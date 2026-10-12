@@ -1,0 +1,19 @@
+{
+  "dataset_name": "The Bot-IoT Dataset",
+  "institution": "كانبيرا، أستراليا؛ UNSW Canberra Cyber / Cyber Range Lab.",
+  "country_or_region": "غير متحقق منه",
+  "collection_period": "تاريخ/فترة تقويمية غير متحقق؛ الورقة تذكر 16 ساعة للحركة السليمة والهجمات ضمن تجارب منفصلة.",
+  "publication_year": "ورقة المجلة وسجل IEEE DataPort في 2019؛ صفحة UNSW آخر تحديث مذكور 2021.",
+  "data_collection_method": "testbed افتراضي/مختبري في Cyber Range؛ خمس خدمات منزل ذكي موصوفة بأنها محاكاة Node-RED، حركة عادية مولدة بـOstinato وهجمات من Kali؛ التقطت الحركة فعليًا ثم اشتقت التدفقات. لا يمثل قياسًا ميدانيًا لأجهزة IoT منشورة.",
+  "data_types": "غير متحقق منه",
+  "original_url": "https://research.unsw.edu.au/projects/bot-iot-dataset",
+  "download_url": "غير متحقق منه",
+  "paper_title": [],
+  "paper_doi": [
+    "https://doi.org/10.1016/j.future.2019.05.041"
+  ],
+  "license": "صفحة UNSW تذكر استخدامًا أكاديميًا مجانيًا، واستخدامًا تجاريًا يتطلب اتفاقًا مع المؤلفين؛ لم يُتحقق من ترخيص مفتوح معياري.",
+  "download_status": "فُحصت الصفحة الرسمية والورقة وفهرس SharePoint؛ لم يُنزّل أو يُفحص أي PCAP/CSV/Argus. إمكانية التنزيل الفعلي من SharePoint دون تسجيل دخول غير متحققة؛ DataPort يتطلب دخولًا/اشتراكًا بحسب الوصف.",
+  "inspection_status": "غير متحقق منه",
+  "verification_notes": []
+}

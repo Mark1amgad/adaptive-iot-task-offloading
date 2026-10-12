@@ -1,0 +1,27 @@
+[
+  {
+    "file": "raw/collection_events.schema.json",
+    "bytes": 1440,
+    "status": "downloaded_and_present"
+  },
+  {
+    "file": "raw/instance_events.schema.json",
+    "bytes": 1605,
+    "status": "downloaded_and_present"
+  },
+  {
+    "file": "raw/instance_usage.schema.json",
+    "bytes": 2193,
+    "status": "downloaded_and_present"
+  },
+  {
+    "file": "raw/machine_attributes.schema.json",
+    "bytes": 386,
+    "status": "downloaded_and_present"
+  },
+  {
+    "file": "raw/machine_events.schema.json",
+    "bytes": 772,
+    "status": "downloaded_and_present"
+  }
+]

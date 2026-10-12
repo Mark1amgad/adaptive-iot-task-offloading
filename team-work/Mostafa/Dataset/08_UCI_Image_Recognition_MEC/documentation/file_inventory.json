@@ -1,0 +1,37 @@
+[
+  {
+    "file": "raw/uci_extracted/TATDescriptionDataset.zip",
+    "bytes": 80911,
+    "status": "downloaded_and_present"
+  },
+  {
+    "file": "raw/uci_extracted/final/TATDescriptionDataset/DatasetExpeirmentalDescription.pdf",
+    "bytes": 42933,
+    "status": "downloaded_and_present"
+  },
+  {
+    "file": "raw/uci_extracted/final/TATDescriptionDataset/MacBookPro1.csv",
+    "bytes": 44844,
+    "status": "downloaded_and_present"
+  },
+  {
+    "file": "raw/uci_extracted/final/TATDescriptionDataset/MacBookPro2.csv",
+    "bytes": 44375,
+    "status": "downloaded_and_present"
+  },
+  {
+    "file": "raw/uci_extracted/final/TATDescriptionDataset/RasberryPi.csv",
+    "bytes": 43787,
+    "status": "downloaded_and_present"
+  },
+  {
+    "file": "raw/uci_extracted/final/TATDescriptionDataset/VM.csv",
+    "bytes": 44405,
+    "status": "downloaded_and_present"
+  },
+  {
+    "file": "raw/uci_image_recognition_mec.zip",
+    "bytes": 80831,
+    "status": "downloaded_and_present"
+  }
+]

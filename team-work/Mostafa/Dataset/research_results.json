@@ -1,0 +1,351 @@
+{
+  "record_type": "normalized_raw_research_verification_results",
+  "language": "ar",
+  "source_and_scope": {
+    "source": "نتائج التحقق التي قدمها المستخدم في التكليف حصراً",
+    "additional_search_or_fetch": false,
+    "additional_data_download_or_inspection": false,
+    "interpretation": "الحقائق المنقولة أدناه تحفظ حالات الفحص كما وردت؛ وصف ملف في README أو ورقة لا يعني معاينة محتواه الفعلي. لا تعامل مقاييس التدفق تلقائياً كمهام MEC أو كمون مهام."
+  },
+  "dataset_results": [
+    {
+      "id": "PhuLai/eua-dataset",
+      "name": "EUA Dataset — Edge Users Allocation",
+      "official_url": "https://github.com/PhuLai/eua-dataset",
+      "publication_and_collection": {
+        "publication": "الورقة الأصلية 2018؛ أنشئ مستودع GitHub في 2018-06-05؛ سجل IEEE DataPort منفصل أنشئ في 2026-02-13.",
+        "collection_period": "فترة موحدة غير متحقق منها. README ينسب ملف كتل IP الأسترالية إلى APNIC بتاريخ 08/05/2018؛ اصطلاح التاريخ وتاريخ بقية الملفات غير مثبتين. ليست سلسلة زمنية."
+      },
+      "region_and_institution": "أستراليا؛ ملفات على مستوى البلاد وأخرى لـMelbourne CBD وMelbourne metropolitan. Swinburne Edge / Swinburne University of Technology؛ مصادر المواقع ACMA وAPNIC وIP-API.",
+      "files_and_fields": [
+        "edge-servers/site.csv: README يقول 95,562×10؛ الأعمدة SITE_ID,LATITUDE,LONGITUDE,NAME,STATE,LICENSING_AREA_ID,POSTCODE,SITE_PRECISION,ELEVATION,HCIS_L2؛ الحجم نحو 9.76 MB في شجرة GitHub؛ لم يُفحص المحتوى.",
+        "edge-servers/site-optus-melbCBD.csv: 125 سجلًا وفق README؛ فُحص فعليًا؛ 126 سطرًا مع الرأس؛ الرأس SITE_ID,LATITUDE,LONGITUDE,NAME,STATE,LICENSING_AREA_ID,POSTCODE,SITE_PRECISION,ELEVATION,HCIS_L2.",
+        "all-telco-sites-metro.html وall-optus-sites-metro.html: خرائط HTML موصوفة بـ9,318 و1,464 محطة؛ لم تُفحص.",
+        "users/australia-ip-ranges.csv: كتل CIDR؛ لقطة APNIC حتى التاريخ المذكور في README؛ لم تُفحص.",
+        "users/users-aus.csv: 4,748×7 وفق README؛ فُحص الرأس وعينة وعدد الأسطر؛ IP,Latitude,Longitude,PostCode,City,State,Country.",
+        "users/users-melbcbd-generated.csv: 816×2؛ فُحص؛ Latitude,Longitude؛ مواقع مولدة بتوزيع منتظم في Melbourne CBD.",
+        "users/users-melbmetro-generated.csv: 131,312×2 وفق README، نحو 5.10 MB؛ لم يُنزّل/يُفحص.",
+        "users-melbmetro-generated.zip وخرائط HTML موصوفة فقط؛ لم تُفحص."
+      ],
+      "method_and_real_synthetic_status": "إحداثيات محطات الاتصالات من سجل تراخيص الراديو ACMA بوصفها مواقع حافة افتراضية؛ كتل IP من APNIC وعناوين مختارة أُسندت إلى مواقع تقريبية بواسطة IP-API؛ مواقع إضافية مولدة بانتظام حول المواقع المستخرجة. نطاقات التغطية العشوائية 450–750 م والسعات/الأحمال في الورقة افتراضات/تجارب مولدة، لا قياسات فعلية لهذه المتغيرات.",
+      "download_and_inspection": "التنزيل العام متحقق جزئيًا: نُزّلت وفُحصت 3 CSV فقط: site-optus-melbCBD.csv وusers-melbcbd-generated.csv وusers-aus.csv. لم يُنزّل المستودع كاملًا ولا الملفات الكبيرة أو خرائط HTML.",
+      "license": "المستودع يعلن MIT؛ README يوضح أن بيانات ACMA مملوكة لـACMA ويلزم الالتزام بقواعدها. شروط APNIC/IP-API غير محسومة من MIT وحده.",
+      "metrics_presence": {
+        "user_server_locations": "نعم جزئيًا؛ إحداثيات مواقع محطات قاعدة ومستخدمين في ملفات منفصلة، دون تعيين مرصود لكل مستخدم إلى خادم.",
+        "task_arrival_task_size_cpu_requirements_deadline_latency_network_delay_bandwidth_energy_cpu_memory_actual_offloading_decisions": "لا؛ لا تسجلها ملفات المجموعة كقياسات."
+      },
+      "edgecloudsim_mapping": [
+        "إسقاط LATITUDE/LONGITUDE إلى إحداثيات محلية بالمتر حول Melbourne؛ تمثيل المحطات كعقد حافة والمستخدمين كأجهزة، دون محول EUA→EdgeCloudSim رسمي أو تخصيص hosts جاهز.",
+        "تهيئة الأجهزة ونقاط الحافة عبر نماذج الموقع/السيناريو؛ إضافة LoadGenerator مستقل لأوقات وصول المهام والأحجام ودورات CPU والمهل، وNetworkModel مستقل للشبكة.",
+        "التغطية قيد مكاني تجريبي فقط، لا بديل عن قياس latency؛ نتائج سياسات EdgeOrchestrator مخرجات محاكاة لا حقائق من EUA."
+      ],
+      "limitations": [
+        "ليست trace تطبيق IoT/MEC أو workload تفريغ؛ لا وصول مهام أو حجم أو CPU أو deadlines أو قرارات offloading مرصودة.",
+        "إسناد IP تقريبي وليس GPS لمستخدم فعلي؛ بعض المواقع اصطناعية؛ البيانات ثابتة مكانيًا.",
+        "لا مقاييس latency أو bandwidth أو طاقة أو CPU/ذاكرة؛ تغطية الخلايا والسعات تجريبية في الورقة.",
+        "MIT لا يحسم شروط البيانات الخارجية؛ توثيق فترة معظم الملفات غير متحقق."
+      ],
+      "recommendation": "مناسب بدرجة جيدة للدراسات المكانية/تموضع الحافة أو خريطة أساس لـEdgeCloudSim، وليس وحده لتدريب/اختبار offloading أو المقارنة الكمية في latency/energy/task workload.",
+      "scores_0_to_5": {"Access": 4, "Dynamic_Conditions": 1, "EdgeCloudSim": 1, "Edge_MEC": 5, "IoT": 1, "Network_Metrics": 1, "Real_Measurement": 2, "Reproducibility": 3, "Resource_Metrics": 1, "Task_Offloading": 2, "Task_Workload": 0},
+      "evidence_urls": [
+        "https://github.com/PhuLai/eua-dataset",
+        "https://raw.githubusercontent.com/PhuLai/eua-dataset/master/edge-servers/README.md",
+        "https://raw.githubusercontent.com/PhuLai/eua-dataset/master/users/README.md",
+        "https://raw.githubusercontent.com/PhuLai/eua-dataset/master/LICENSE",
+        "https://doi.org/10.1007/978-3-030-03596-9_15",
+        "https://doi.org/10.1007/978-3-030-33702-5_8",
+        "https://ieee-dataport.org/documents/eua-dataset",
+        "https://www.acma.gov.au/industry/spectrum/radiocomms-licensing/register-radiocommunications-licences/radiocomms-licence-data"
+      ]
+    },
+    {
+      "id": "ton_iot",
+      "name": "ToN_IoT Datasets",
+      "official_url": "https://research.unsw.edu.au/projects/toniot-datasets",
+      "publication_and_collection": {
+        "catalog_date": "Research Data Australia يورد تاريخ بيانات 2019-09-02؛ لا يحدد نطاق جمع بداية/نهاية.",
+        "publication": "سجل المجموعة 2019؛ ورقة telemetry 2020؛ ورقة شبكة 2021. لا تخلط هذه التواريخ."
+      },
+      "region_and_institution": "أستراليا؛ مختبرات Cyber Range وIoT في UNSW Canberra.",
+      "files_and_fields": [
+        "صفحة UNSW تصف بيانات IoT/IIoT خام log وCSV؛ شبكة pcap وlog وCSV من Zeek؛ Linux بصيغ TXT/CSV وأداة atop؛ Windows بصيغ BLG وCSV.",
+        "مجلدات موصوفة: Raw datasets, Processed datasets, Train_Test_datasets, Description_stats_datasets, SecurityEvents_GroundTruth_datasets؛ لم تُفحص محتوياتها.",
+        "ورقة telemetry تصف سبع فئات: Fridge, Garage, GPS Tracker, Modbus, Light Motion, Thermostat, Weather؛ الحقول التفصيلية واردة في الورقة لا من فحص ملفات.",
+        "ورقة الشبكة تصف 44 خاصية تدفق مشتقة بواسطة Zeek؛ أسماء الأعمدة الكاملة غير متحققة مباشرة."
+      ],
+      "method_and_real_synthetic_status": "testbed مختبري شبكي يمثل بيئة IoT/IIoT متوسطة الحجم بطبقات Edge/Fog/Cloud؛ telemetry وحركة شبكة وسجلات Linux/Windows، مع سيناريوهات طبيعية وهجمات مضبوطة. مختلط/مختبري؛ لا يثبت أنه تشغيل إنتاجي ميداني.",
+      "download_and_inspection": "لم يُنزّل أي ملف بيانات. رابط SharePoint أعاد HTTP 200 إلى واجهة OneDrive لكن فهرس الملفات لم يظهر بالاستخراج غير التفاعلي؛ CloudStor تعذر حل نطاقه، وDataPort يقول إن الملفات غير مرفوعة ويتطلب اشتراكًا.",
+      "license": "سجل Research Data Australia يذكر GPL-3.0؛ صفحة UNSW لا تعرض ترخيصًا بنفسها ولم تُفحص ملفات الحزمة، لذا يلزم التأكيد على نسخة الملفات. CC BY 4.0 للورقة لا يثبت ترخيص البيانات.",
+      "metrics_presence": {
+        "cpu_memory": "جزئي؛ موارد/نشاط نظام Linux/Windows على مستوى المضيف، لا متطلبات أو تخصيص لكل مهمة.",
+        "bandwidth": "لا حقل مؤكد؛ قد يمكن اشتقاق معدل من pcap بعد الفحص، ولم يُشتق هنا.",
+        "actual_offloading_decisions": "غير موجودة/غير موثقة؛ label/type تسميات أمنية.",
+        "task_arrival_task_size_cpu_requirements_deadline_energy_network_delay_task_latency": "غير موثقة لمهام offloading.",
+        "user_server_locations": "جزئي فقط؛ GPS Tracker موصوف بإحداثيات، لا دليل على مواقع مستخدم وخوادم edge مع ربط offloading."
+      },
+      "edgecloudsim_mapping": [
+        "يمكن استعمال timestamps وسجلات CPU/ذاكرة كسياق حمل خلفي على مستوى المضيف فقط بعد التحقق من الدقة والهوية.",
+        "قد تُشتق حركة من pcap/Zeek بعد فحص الحقول، لكن لا تسمى bandwidth مسجلة ولا task latency.",
+        "إنشاء المهام ومواصفاتها والمهل منفصلًا وبافتراضات معلنة؛ لا تستخدم label/type كقرارات تفريغ."
+      ],
+      "limitations": [
+        "ليست benchmark task offloading ولا تتضمن مهام حوسبة أو قرارات تخصيص.",
+        "بيانات مختبرية/هجمات مضبوطة؛ لا تضمن تمثيل الإنتاج أو التنقل.",
+        "وجود طبقات edge/fog/cloud لا يعني تسجيل أداء أو offloading بينها.",
+        "لم تُعاين الملفات؛ اختلاف وصف أكثر من 10 حساسات على صفحة UNSW مقابل سبع فئات في الأوراق غير محلول.",
+        "واجهة التنزيل استجابت لكن تنزيل البيانات لم يتحقق؛ ترخيص نسخة الملفات يحتاج تأكيدًا."
+      ],
+      "recommendation": "مكمل لسياق IoT/IIoT أو أمن الشبكات أو بعض موارد المضيف بعد استلام الملفات؛ غير مباشر لبحث MEC task offloading وEdgeCloudSim.",
+      "scores_0_to_5": {"Access": 2, "Dynamic_Conditions": 3, "EdgeCloudSim": 1, "Edge_MEC": 2, "IoT": 5, "Network_Metrics": 4, "Real_Measurement": 2, "Reproducibility": 3, "Resource_Metrics": 3, "Task_Offloading": 0, "Task_Workload": 1},
+      "evidence_urls": [
+        "https://research.unsw.edu.au/projects/toniot-datasets",
+        "https://unsw-my.sharepoint.com/:f:/g/personal/z5025758_ad_unsw_edu_au/EvBTaetotpdGnW7rJQ8fCvYBh8063CNeY9W33MpRsarJaQ?e=yZlnxW",
+        "https://ieee-dataport.org/documents/toniot-datasets",
+        "https://researchdata.edu.au/new-generations-internet-toniot-datasets/1957406",
+        "https://doi.org/10.1109/ACCESS.2020.3022862",
+        "https://www.sciencedirect.com/science/article/pii/S2210670721002808",
+        "https://doi.org/10.1109/JIOT.2021.3085194"
+      ]
+    },
+    {
+      "id": "google-cluster-data-clusterdata-2019-v3",
+      "name": "Google Cluster Data — Borg workload traces v3",
+      "official_url": "https://github.com/google/cluster-data",
+      "publication_and_collection": {"collection_period": "v3: مايو 2019 في ثماني خلايا Borg. v2.1: مايو 2011، خلية واحدة ونحو 12.5 ألف آلة و29 يومًا. v1: سبع ساعات في 2009.", "publication": "إتاحة/وصف v3 وورقة Borg: The Next Generation في 2020؛ الجمع 2019."},
+      "region_and_institution": "خلايا Google/Borg؛ الموقع الجغرافي/الدولة غير متحققين.",
+      "files_and_fields": [
+        "خمسة جداول JSON مضغوطة gzip أو BigQuery: collection_events (أحداث المجموعة، الزمن، النوع، المستخدم، scheduler وحقول أخرى)، instance_events (أحداث المهمة، machine_id، resource_request، constraint)، machine_events (capacity وswitch/platform)، machine_attributes (name/value)، instance_usage (CPU distributions/usage وassigned_memory وحقول usage أخرى).",
+        "نُزّلت وفُحصت ملفات schema JSON الخمسة من GCS؛ لم تُقرأ صفوف بيانات.",
+        "ملفات مساعدة في المستودع تشمل proto ودفاتر تحليل ووثائق ETA وPowerData2019 المنفصلة؛ ليست جداول workload v3 المفحوصة."
+      ],
+      "method_and_real_synthetic_status": "أثر تشغيل فعلي لنظام إدارة Borg: أحداث تقديم وجدولة وإنهاء/إخلاء، طلبات موارد واستخدام CPU/ذاكرة. الاستخدام ضمن نوافذ غالبًا خمس دقائق مع عينات تقريبية كل ثانية. بعض القيم محجوبة/مطبعة لأسباب السرية.",
+      "download_and_inspection": "لم يُنزّل shard بيانات. فحص HEAD لملف instance_usage أظهر HTTP 200 وحجمًا معلنًا 498,371,634 بايتًا لذلك الشارد وحده. وثيقة Google تذكر نحو 2.4 TiB مضغوطة. schemas فقط هي التي نُزلت وفُحصت؛ استعلام BigQuery لم يُختبر.",
+      "license": "CC BY 4.0 بحسب المستودع ووثيقة v3.",
+      "metrics_presence": {
+        "task_arrival": "نعم في سياق Borg: أحداث SUBMIT وطوابع زمنية للتقديم، لا وصول جهاز IoT.",
+        "cpu_memory": "نعم؛ طلبات واستخدام CPU وذاكرة/حدود، مع قيم مطبّعة أو مبهمة.",
+        "cpu_requirements": "نعم؛ resource_request يتضمن CPU والذاكرة المطلوبة.",
+        "actual_offloading_decisions": "لا لوجهة MEC؛ يوجد SCHEDULE إلى machine_id في Borg، وهو placement/جدولة مركز بيانات.",
+        "bandwidth_deadline_energy_latency_network_delay_task_payload_size_user_server_locations": "لا وفق مخطط v3 الموصوف؛ لا مواقع مستخدم/خادم جغرافية."
+      },
+      "edgecloudsim_mapping": [
+        "قراءة BigQuery أو JSON.gz مع الحفاظ على SUBMIT/SCHEDULE/EVICT/FAIL/FINISH، وربط instance_events بالاستخدام التاريخي.",
+        "يمكن ربط resource_request وusage وmachine capacity بموارد عقد افتراضية، مع توثيق وحدات الموارد المطبعة.",
+        "لا تعتبر machine_id نموذج شبكة MEC أو قرار offloading؛ أضف أحجام المهام والمهل والشبكة والطاقة والمواقع والحركة من مصدر مستقل/افتراض معلن.",
+        "تحليل فترة/خلية صغيرة أولًا بسبب الحجم؛ قارن إعادة تشغيل التخصيصات التاريخية دون وصفها بأنها MEC."
+      ],
+      "limitations": [
+        "أثر مركز بيانات/سحابة لا IoT أو MEC أو cloudlet.",
+        "لا أحجام input/output أو deadlines أو كمون/شبكة أو طاقة أو مواقع جغرافية.",
+        "التعيين إلى machine_id ليس offloading من مستخدم إلى MEC؛ الموارد مطبعة/مبهمة.",
+        "نافذة v3 شهر، الحجم نحو 2.4 TiB مضغوط وبعض موارد BigQuery قد تكون مدفوعة."
+      ],
+      "recommendation": "قوي لأبحاث أحمال وجدولة وموارد مراكز البيانات الحقيقية؛ غير مناسب وحده لبيانات IoT/MEC أو تدريب/تقييم task offloading.",
+      "scores_0_to_5": {"Access": 4, "Dynamic_Conditions": 4, "EdgeCloudSim": 2, "Edge_MEC": 0, "IoT": 0, "Network_Metrics": 1, "Real_Measurement": 5, "Reproducibility": 4, "Resource_Metrics": 5, "Task_Offloading": 0, "Task_Workload": 4},
+      "evidence_urls": [
+        "https://github.com/google/cluster-data",
+        "https://github.com/google/cluster-data/blob/master/ClusterData2019.md",
+        "https://raw.githubusercontent.com/google/cluster-data/master/clusterdata_trace_format_v3.proto",
+        "https://storage.googleapis.com/clusterdata_2019_schema/collection_events.schema.json",
+        "https://storage.googleapis.com/clusterdata_2019_schema/instance_events.schema.json",
+        "https://storage.googleapis.com/clusterdata_2019_schema/machine_events.schema.json",
+        "https://storage.googleapis.com/clusterdata_2019_schema/machine_attributes.schema.json",
+        "https://storage.googleapis.com/clusterdata_2019_schema/instance_usage.schema.json",
+        "https://doi.org/10.1145/3342195.3387517",
+        "https://creativecommons.org/licenses/by/4.0/"
+      ]
+    },
+    {
+      "id": "CICIoT2023",
+      "name": "CIC IoT Dataset 2023",
+      "official_url": "https://www.unb.ca/cic/datasets/iotdataset-2023.html",
+      "publication_and_collection": {"publication": "الورقة الأصلية 2023؛ نشرت 2023-06-25.", "collection_period": "الورقة تذكر 16 ساعة لجمع benign؛ تاريخ الجمع التقويمي غير متحقق."},
+      "region_and_institution": "فريدريكتون، نيو برونزويك، كندا؛ Canadian Institute for Cybersecurity بجامعة New Brunswick.",
+      "files_and_fields": [
+        "صفحة التنزيل تصف PCAP وCSV وExample وSupplementary material؛ نحو 548GB لحركة PCAP وفق الورقة/الوصف.",
+        "أسماء سمات التدفق كما في جدول الصفحة الرسمية: flow_duration, Header_Length, Protocol type, Duration, Rate, Srate, Drate، رايات/عدادات بروتوكول، HTTP/HTTPS/DNS وغيرها، Tot sum/Min/Max/AVG/Std/Tot size/IAT وغيرها.",
+        "الأسماء أعلاه ليست تحققًا من رأس CSV؛ اسم حقل label الفعلي غير متحقق."
+      ],
+      "method_and_real_synthetic_status": "التقاط حزم عبر Gigamon Network Tap وWireshark على مختبر يضم 105 أجهزة IoT؛ الاستخدام السليم مختبري، والهجمات الـ33 أُنشئت عمدًا. قياس شبكي فعلي داخل مختبر، وليس محاكاة شبكية كاملة أو قياسًا ميدانيًا إنتاجيًا.",
+      "download_and_inspection": "لم تُنزّل PCAP/CSV. فُحصت صفحة UNB والورقة وصفحة التنزيل؛ نموذج التنزيل يطلب بيانات شخصية ومهنية ولم يُرسل. أسماء الميزات من وصف الصفحة لا من فحص الملف.",
+      "license": "ترخيص ملفات dataset غير متحقق؛ لا يستنتج من كون الورقة مفتوحة الوصول.",
+      "metrics_presence": {"actual_offloading_decisions": false, "bandwidth": false, "cpu_memory": false, "cpu_requirements": false, "deadline": false, "energy": false, "latency": false, "network_delay": false, "task_arrival": false, "task_size": false, "user_server_locations": false},
+      "edgecloudsim_mapping": [
+        "استخدمها لتحليل حركة/كشف هجمات أو كأثر شبكة فقط، لا كسجل task offloading.",
+        "أي تحويل تدفقات إلى وصول/أحجام مهام وافتراضات CPU/deadline اصطناعي ويجب وسمه كذلك.",
+        "نماذج شبكة/حركة/موارد/منسق EdgeCloudSim يجب إعدادها من مصادر مستقلة؛ مخرجات المحاكاة ليست قياسات CICIoT2023."
+      ],
+      "limitations": ["لا مهام أو CPU أو deadlines أو قرارات offloading أو موارد خوادم.", "لا latency أو bandwidth أو energy موصوفة؛ Rate/Srate/Drate مؤشرات حركة وليست سعة وصلة.", "مختبر محدود وهجمات منشأة؛ ملف البيانات لم يُفحص والترخيص غير واضح."],
+      "recommendation": "لأمن IoT وكشف الهجمات لا benchmark MEC/offloading؛ يمكن استعمالها كأثر حركة مع تحويلات معلنة اصطناعية فقط.",
+      "scores_0_to_5": {"Access": 2, "Dynamic_Conditions": 2, "EdgeCloudSim": 1, "Edge_MEC": 0, "IoT": 5, "Network_Metrics": 4, "Real_Measurement": 4, "Reproducibility": 3, "Resource_Metrics": 0, "Task_Offloading": 0, "Task_Workload": 0},
+      "evidence_urls": ["https://www.unb.ca/cic/datasets/iotdataset-2023.html", "https://cicresearch.ca/IOTDataset/CIC_IOT_Dataset2023/", "https://doi.org/10.3390/s23135941", "https://github.com/CagataySonmez/EdgeCloudSim"]
+    },
+    {
+      "id": "UNSW-IoTraffic",
+      "name": "UNSW IoT traffic data with packets, flows, and protocols",
+      "official_url": "https://iotanalytics.unsw.edu.au/unsw-iotraffic.html",
+      "publication_and_collection": {"collection_period": "تقريبًا 2016-09-22 إلى 2017-04-13؛ نحو 203 أيام إجمالية مع اختلاف مدة الالتقاط حسب الجهاز.", "publication": "مقال الوصف 2025-08-25؛ سجل Dryad 2025-08-29؛ الجمع 2016–2017."},
+      "region_and_institution": "سيدني، أستراليا؛ UNSW Sydney.",
+      "files_and_fields": [
+        "27 ملف PCAP خاصًا بالأجهزة؛ flows.zip يحوي 27 CSV؛ protocols.zip نماذج JSON وCSV لمعلمات الطلب/الاستجابة؛ scripts.zip أدوات تحليل.",
+        "device_pcap_summary.csv رأسه المفحوص: Device Name, Device MAC Address, First Seen, Last Seen, Number of Packets, Number of Flows.",
+        "protocol_diversity_prevalence.csv رأسه المفحوص: Protocol, Number of Devices, Number of Flows.",
+        "حقول التدفق المذكورة في وصف الإيداع تشمل time, srcMac, dstMac, ethType, srcIp, dstIp, ipProto, srcPort, dstPort, srcNumPackets, dstNumPackets, srcPayloadSize, dstPayloadSize, flowDuration, interarrival statistics, protocol؛ لم تفحص CSV التدفقات مباشرة.",
+        "الأحجام المدرجة: 28.47 GB إجمالي ملفات، UNSW-IoTraffic.zip 14.24 GB وpcaps.zip 13.92 GB؛ لا تخلط النسخ/الأرشيفات."
+      ],
+      "method_and_real_synthetic_status": "التقاط فعلي عبر tcpdump على بوابة TP-Link Archer C7 v2/OpenWrt في testbed LAN لـ27 جهاز IoT استهلاكيًا؛ فصل الآثار وفق MAC. حركة أجهزة فعلية في مختبر، وليست مهام حوسبة أو قرارات offloading.",
+      "download_and_inspection": "فُحصت الصفحة الرسمية وDryad وDataCite ومقال الوصف ومعاينتا CSV الملخصتين فقط. لم تُفتح PCAP أو ملفات التدفقات/الأرشيفات؛ طلبات HTTP HEAD لروابط Dryad أعادت 403، لذلك لم يُنزّل أي أرشيف.",
+      "license": "CC0 1.0 وفق سجل Dryad.",
+      "metrics_presence": {
+        "task_arrival": "لا وصول مهمة؛ يمكن استعمال time (وقت أول حزمة) proxy لحركة التدفق فقط.",
+        "task_size": "لا حجم مهمة؛ توجد أحجام حمولة نقل بايتية كـproxy محتمل.",
+        "network_delay": "لا قياس مباشر؛ قد تساعد طوابع الحزم/PCAP في اشتقاق مقاييس بعد الفحص.",
+        "bandwidth": "لا سعة وصلة؛ يمكن حساب معدل نقل مرصود بعد تحديد نافذة.",
+        "cpu_memory_deadline_energy_task_latency_actual_offloading_decisions_user_server_locations": "غير موجود/غير موثق. MAC/IP لا تعني إحداثيات."
+      },
+      "edgecloudsim_mapping": [
+        "يمكن استخدام أول حزمة وتوقيتات التدفقات لمحاكاة حركة خلفية، لا تسميها task arrivals دون افتراض صريح.",
+        "يمكن استخدام بايتات payload كحجوم نقل تقريبية لا CPU cycles؛ موارد ومواقع وشبكة ومهل وطاقة وقرارات offloading تحتاج مصدرًا/نموذجًا مستقلاً.",
+        "لا تنسب نتائج EdgeCloudSim إلى UNSW-IoTraffic."
+      ],
+      "limitations": ["لا مهام MEC ولا موارد/قرارات offloading.", "لا CPU/RAM/energy/deadline أو إحداثيات مستخدم/خادم.", "testbed واحد وأجهزة من 2016–2017؛ لا دليل على التنقل أو MEC حي.", "الأرشيفات لم تُنزّل؛ رؤوس التدفقات مصدرها وصف الإيداع لا معاينة CSV."],
+      "recommendation": "ملائم كأثر حركة IoT خلفي بعد إتاحة الأرشيف وفحصه؛ ليس مدخل مهام جاهزًا لـEdgeCloudSim.",
+      "scores_0_to_5": {"Access": 3, "Dynamic_Conditions": 3, "EdgeCloudSim": 0, "Edge_MEC": 0, "IoT": 5, "Network_Metrics": 4, "Real_Measurement": 5, "Reproducibility": 3, "Resource_Metrics": 0, "Task_Offloading": 0, "Task_Workload": 1},
+      "evidence_urls": ["https://iotanalytics.unsw.edu.au/unsw-iotraffic.html", "https://datadryad.org/dataset/doi:10.5061/dryad.w0vt4b94b", "https://api.datacite.org/dois/10.5061/dryad.w0vt4b94b", "https://datadryad.org/downloads/file_stream/4322592", "https://doi.org/10.1109/IEEEDATA.2025.3602010", "https://creativecommons.org/publicdomain/zero/1.0/"]
+    },
+    {
+      "id": "bot-iot",
+      "name": "The Bot-IoT Dataset",
+      "official_url": "https://research.unsw.edu.au/projects/bot-iot-dataset",
+      "publication_and_collection": {"publication": "ورقة المجلة وسجل IEEE DataPort في 2019؛ صفحة UNSW آخر تحديث مذكور 2021.", "collection_period": "تاريخ/فترة تقويمية غير متحقق؛ الورقة تذكر 16 ساعة للحركة السليمة والهجمات ضمن تجارب منفصلة."},
+      "region_and_institution": "كانبيرا، أستراليا؛ UNSW Canberra Cyber / Cyber Range Lab.",
+      "files_and_fields": [
+        "SharePoint يبين مجلدات PCAPs وGround Truth وDataset وARGUS، وملفي PDF؛ أسماء الملفات الداخلية لم تُفحص.",
+        "الوصف يذكر PCAP نحو 69.3 GB وأكثر من 72 مليون سجل، CSV تدفقات 16.7 GB؛ عينة 5% أربعة ملفات نحو 1.07 GB.",
+        "ملف DataPort المفهرس UNSW_2018_IoT_Botnet_Full5pc_1.csv بحجم 259.72 MB يتطلب دخولًا وفق الوصف؛ لم يُنزّل.",
+        "أعمدة منشورة في الورقة: pkSeqID, Stime, flgs, Proto, saddr, sport, daddr, dport, pkts, bytes, state, ltime, dur, mean, stddev, sum, min, max, spkts, dpkts, sbytes, dbytes, rate, srate, drate, attack, category, subcategory وغيرها؛ لم تُفحص ملفات CSV فعليًا."
+      ],
+      "method_and_real_synthetic_status": "testbed افتراضي/مختبري في Cyber Range؛ خمس خدمات منزل ذكي موصوفة بأنها محاكاة Node-RED، حركة عادية مولدة بـOstinato وهجمات من Kali؛ التقطت الحركة فعليًا ثم اشتقت التدفقات. لا يمثل قياسًا ميدانيًا لأجهزة IoT منشورة.",
+      "download_and_inspection": "فُحصت الصفحة الرسمية والورقة وفهرس SharePoint؛ لم يُنزّل أو يُفحص أي PCAP/CSV/Argus. إمكانية التنزيل الفعلي من SharePoint دون تسجيل دخول غير متحققة؛ DataPort يتطلب دخولًا/اشتراكًا بحسب الوصف.",
+      "license": "صفحة UNSW تذكر استخدامًا أكاديميًا مجانيًا، واستخدامًا تجاريًا يتطلب اتفاقًا مع المؤلفين؛ لم يُتحقق من ترخيص مفتوح معياري.",
+      "metrics_presence": {"actual_offloading_decisions": false, "bandwidth": false, "cpu_memory": false, "cpu_requirements": false, "deadline": false, "energy": false, "latency": false, "network_delay": false, "task_arrival": false, "task_size": false, "user_server_locations": false, "proxy": "Stime وbytes/rate خصائص تدفق؛ ليست task arrival أو task size أو bandwidth capacity."},
+      "edgecloudsim_mapping": [
+        "يمكن إعادة تشغيل أنماط حركة/هجمات أو استخدام Stime وbytes كـproxy مشتق لحركة الشبكة بعد فحص الملف، لا كمهام حقيقية.",
+        "توليد CPU/deadlines/energy/المواقع وقرار offloading في نموذج مستقل معلن؛ افصل نتائج المحاكاة عن بيانات Bot-IoT."
+      ],
+      "limitations": ["لا مهام حوسبة أو موارد تنفيذ أو قرارات offloading.", "حركة مختبرية مولدة/محاكاة في جوهرها؛ لا مواقع أو CPU/ذاكرة/طاقة أو network delay مستقل.", "حجم البيانات كبير، التنزيل الفعلي لم يُتحقق، والأعمدة من الورقة لا فحص CSV."],
+      "recommendation": "مناسب لكشف التسلل وتحليل حركة IoT في testbed؛ غير مناسب كبيانات حقيقة لتقييم task offloading.",
+      "scores_0_to_5": {"Access": 3, "Dynamic_Conditions": 2, "EdgeCloudSim": 1, "Edge_MEC": 1, "IoT": 4, "Network_Metrics": 4, "Real_Measurement": 2, "Reproducibility": 3, "Resource_Metrics": 0, "Task_Offloading": 0, "Task_Workload": 1},
+      "evidence_urls": ["https://research.unsw.edu.au/projects/bot-iot-dataset", "https://unsw-my.sharepoint.com/:f:/g/personal/z5131399_ad_unsw_edu_au/EjlBDf2KODxPgXmqbO3MxxsBBVARCKZxGUG47OiFHb_AnQ", "https://ieee-dataport.org/documents/bot-iot-dataset", "https://doi.org/10.1016/j.future.2019.05.041", "https://arxiv.org/abs/1811.00701"]
+    },
+    {
+      "id": "UNSW-NB15",
+      "name": "The UNSW-NB15 Dataset",
+      "official_url": "https://research.unsw.edu.au/projects/unsw-nb15-dataset",
+      "publication_and_collection": {"publication": "الورقة الأصلية 2015؛ سجل البيانات يذكر إتاحة 2019.", "collection_period": "RDA يذكر تاريخ بيانات 2015-09-30؛ نطاق الالتقاط الأوسع غير متحقق."},
+      "region_and_institution": "كانبرا، أستراليا؛ UNSW Canberra at ADFA / Cyber Range Lab.",
+      "files_and_fields": [
+        "صفحة UNSW تصف 4 ملفات UNSW-NB15_1.csv إلى UNSW-NB15_4.csv بإجمالي 2,540,044 سجلًا؛ UNSW-NB15_features.csv (49 خاصية وحقل فئة)، UNSW-NB15_GT.csv، UNSW-NB15_LIST_EVENTS.csv، training-set (175,341) وtesting-set (82,332).",
+        "فهرس SharePoint يعرض مجلدات PCAP وCSV وArgus وBRO وتقارير وReadMe.pdf؛ الملف لم يُفتح.",
+        "رؤوس/أسماء الأعمدة التفصيلية غير متحقق منها لأن CSV لم يُفحص."
+      ],
+      "method_and_real_synthetic_status": "IXIA PerfectStorm ولّد مزيجًا من نشاط طبيعي وسلوك هجوم اصطناعي؛ tcpdump التقط 100GB PCAP وفق الصفحة؛ اشتق Argus وBro-IDS خصائص التدفق. مختلط، ولا يثبت حركة IoT أو MEC حية.",
+      "download_and_inspection": "فُحصت صفحة UNSW وسجل RDA وصفحة IEEE وفهرس SharePoint؛ لم يُنزّل أو يُفتح أي CSV/PCAP أو ReadMe.pdf.",
+      "license": "غير محسوم: صفحة UNSW تسمح أكاديميًا وتطلب اتفاقًا/موافقة للاستخدام التجاري؛ سجل RDA يعرض GPL-3.0. لا تفترض تطابق الشرطين.",
+      "metrics_presence": {
+        "actual_offloading_decisions_cpu_memory_cpu_requirements_deadline_energy_latency_network_delay_task_arrival_user_server_locations": "غير موجودة/غير موصوفة.",
+        "bandwidth": "غير متحقق من وجود حقل؛ لا توجد سعة وصلة MEC موصوفة. خصائص التدفق الشبكية ليست تلقائيًا bandwidth capacity.",
+        "task_size": "لا حجم مهمة موصوف؛ قد توجد خصائص بايت تدفق لكن لم تُفحص ولا تساوي حجم task."
+      },
+      "edgecloudsim_mapping": [
+        "بعد تنزيل نسخة وفحص قاموس الخصائص يمكن استخدام خصائص تدفق كملخصات لحركة شبكة فقط، دون مساواتها بحجم مهمة.",
+        "توليد وصول المهام وCPU وdeadline ومواقع/موارد الخوادم من مصدر منفصل معلن؛ لا تستخدم وسوم الهجوم كقرارات offloading.",
+        "افصل قياسات/خصائص المصدر عن المدخلات الاصطناعية ومخرجات المحاكاة."
+      ],
+      "limitations": ["الغرض IDS لا IoT/MEC/task offloading.", "الهجمات اصطناعية؛ لا CPU/RAM/energy/deadline أو مواقع MEC.", "تاريخ الكتالوج لا يثبت مدة الجمع؛ لم تُفحص أعمدة/صفوف فعلية.", "تعارض شروط الترخيص يحتاج توضيحًا قبل التجاري أو إعادة التوزيع."],
+      "recommendation": "ليس مجموعة أساسية لـIoT/MEC/offloading؛ قد يصلح لسياق IDS/شبكة بعد فحص الحقول وتسوية الترخيص.",
+      "scores_0_to_5": {"Access": 3, "Dynamic_Conditions": 2, "EdgeCloudSim": 1, "Edge_MEC": 0, "IoT": 0, "Network_Metrics": 4, "Real_Measurement": 3, "Reproducibility": 4, "Resource_Metrics": 0, "Task_Offloading": 0, "Task_Workload": 1},
+      "evidence_urls": ["https://research.unsw.edu.au/projects/unsw-nb15-dataset", "https://unsw-my.sharepoint.com/:f:/g/personal/z5025758_ad_unsw_edu_au/EnuQZZn3XuNBjgfcUu4DIVMBLCHyoLHqOswirpOQifr1ag?e=gKWkLS", "https://ieeexplore.ieee.org/document/7348942", "https://researchdata.edu.au/the-unsw-nb15-dataset/1957529", "https://doi.org/10.26190/5d7ac5b1e8485", "https://www.gnu.org/licenses/gpl-3.0.html"]
+    },
+    {
+      "id": "uci-859-image-recognition-mec",
+      "name": "Image Recognition Task Execution Times in Mobile Edge Computing",
+      "official_url": "https://archive.ics.uci.edu/dataset/859/image+recognition+task+execution+times+in+mobile+edge+comput",
+      "publication_and_collection": {"collection_period": "26 نوفمبر 2020؛ طوابع CSV تقريبًا 13:05–17:03 وفق الوقت المكتوب.", "repository_deposit": "UCI يسجل التبرع في 2023؛ UCI تربط اقتباسًا بورقة 2019 لكن صلة ملفات القياس بتلك الورقة غير متحققة."},
+      "region_and_institution": "موقع القياس غير متحقق؛ مقدمو المجموعة مرتبطون بجامعة Glasgow وفق UCI.",
+      "files_and_fields": [
+        "الأرشيف الخارجي TATDescriptionDataset.zip ويحتوي أرشيفًا داخليًا؛ الملف DatasetExpeirmentalDescription.pdf (التهجئة كما في الملف).",
+        "MacBookPro1.csv، MacBookPro2.csv، VM.csv، RasberryPi.csv (تهجئة كما في الملف)، كل منها 1,000 صف وعمودان فعليان: Time, Execution Time؛ 4,000 سجل إجمالًا.",
+        "وصف التجربة: صورة ترسل كل ثانية؛ Execution Time هو زمن الدوران من بدء نقل الصورة حتى وصول نتيجة التعرف، بحسب وصف التجربة. لا task ID أو حجم input."
+      ],
+      "method_and_real_synthetic_status": "قياس تنفيذ مهمة تعرف صور باستخدام ImageAI.Prediction على MacBook Pro 1 و2 وUbuntu VM على VirtualBox وRaspberry Pi 4B. العميل الطرفي المتنقل ممثل بعملية محاكاة؛ الحمل بوتيرة مضبوطة. قياسات فعلية في إعداد تجريبي، لا أثر شبكة جوال ميداني.",
+      "download_and_inspection": "مكتمل: نُزّل وفُك الأرشيف الرسمي؛ فُحص PDF وCSV الأربعة؛ 1,000 سجل لكل ملف. Execution Time المرصود في المجموعة المفحوصة نحو 0.093–20.789 ثانية وفق النتائج المقدمة.",
+      "license": "CC BY 4.0 وفق صفحة UCI.",
+      "metrics_presence": {
+        "latency": "موجود؛ Execution Time زمن دوران شامل من بدء نقل الصورة حتى استلام النتيجة.",
+        "task_arrival": "جزئي؛ Time موجود، ووصف التجربة يقول صورة كل ثانية؛ لا عمود وصول مستقل أو task ID.",
+        "network_delay": "جزئي وغير مفصول عن زمن المعالجة.",
+        "cpu_memory": "جزئي على مستوى مواصفات CPU/RAM الأساسية للأجهزة؛ لا استخدام زمني أو متطلبات مهمة.",
+        "actual_offloading_decisions": "غير موجودة؛ أزمنة بديلة على خوادم، لا قرار اختيار فعلي لكل مهمة.",
+        "bandwidth_cpu_requirements_deadline_energy_task_size_user_server_locations": "غير موجودة في ملفات CSV/الوصف المفحوص."
+      },
+      "edgecloudsim_mapping": [
+        "استيراد الملفات كآثار زمنية لكل نوع خادم؛ استخدام Time كتوقيت حمل مع التصريح بأن إيقاع الإرسال كل ثانية من وصف التجربة.",
+        "استخدام Execution Time كزمن دوران شامل أو لمعايرة توزيع latency؛ لا تجمعه مع مكونات شبكة/معالجة أخرى إذا أدى ذلك إلى عد مزدوج.",
+        "لا تستنتج حجم صورة أو CPU cycles أو bandwidth أو مواقع؛ إذا لزم إدخال هذه الحقول في EdgeCloudSim فأنشئ افتراضات منفصلة ووسمها اصطناعية.",
+        "قرارات الخادم التي ينتجها EdgeOrchestrator محاكاة جديدة وليست labels في UCI."
+      ],
+      "limitations": [
+        "مهمة تعرف صور وحمل محدود مضبوط؛ لا تنوع ديناميكي أو بيانات مهام IoT.",
+        "لا أحجام أو متطلبات CPU أو deadlines أو energy أو offloading choices؛ زمن الدوران لا يفصل النقل عن المعالجة.",
+        "عميل محاكى وVM ضمن الخيارات؛ لا توصف كقياس MEC ميداني كامل.",
+        "فجوة توثيق: ملفات القياس مؤرخة 2020، بينما الورقة المرتبطة 2019 التي فُحصت تصف بيانات أخرى؛ لا ورقة مستقلة لهذه الملفات تحققت."
+      ],
+      "recommendation": "الرئيسية لمعايرة/مقارنة زمن دوران مهمة تعرف صور عبر أربعة أنواع خادم، لا كبيانات كاملة لتدريب أو اختبار task offloading.",
+      "scores_0_to_5": {"Access": 5, "Dynamic_Conditions": 2, "EdgeCloudSim": 3, "Edge_MEC": 4, "IoT": 2, "Network_Metrics": 1, "Real_Measurement": 3, "Reproducibility": 3, "Resource_Metrics": 1, "Task_Offloading": 4, "Task_Workload": 2},
+      "evidence_urls": ["https://archive.ics.uci.edu/dataset/859/image+recognition+task+execution+times+in+mobile+edge+comput", "https://archive.ics.uci.edu/static/public/859/image+recognition+task+execution+times+in+mobile+edge+computing.zip", "https://doi.org/10.24432/C5N617", "https://doi.org/10.1109/WD.2019.8734210", "https://eprints.gla.ac.uk/179591/", "https://creativecommons.org/licenses/by/4.0/legalcode"]
+    }
+  ],
+  "cross_dataset_findings": {
+    "complete_offloading_benchmark_found": false,
+    "key_gap": "لا تجمع مجموعة واحدة من الثماني أوقات وصول مهام حوسبة وأحجامها ومتطلبات CPU والمهل والقرارات الفعلية وقياسات منفصلة للكمون/الشبكة/الطاقة والمواقع.",
+    "primary_recommendation": "UCI Image Recognition Task Execution Times in Mobile Edge Computing، لاستخدام محدود في معايرة زمن الدوران لمهمة تعرف صور على أربعة أنواع خوادم. يجب ذكر أن العميل محاكى، وأن زمن الشبكة والمعالجة مدمج، وأن صلة الورقة 2019 غير متحققة.",
+    "auxiliary_recommendation": "EUA لإضافة أساس مكاني تقريبي لمحطات/مستخدمين في Melbourne؛ ليس بيانات latency أو حركة. ملفات كبيرة لم تُفحص، ومواقع IP تقريبية وبعض المستخدمين مولدون.",
+    "alternative_for_compute_workload": "Google Cluster Data v3 لتحليل حمل وجدولة CPU/ذاكرة حقيقيين في Borg، مع عدم الخلط بمركز بيانات MEC؛ بيانات trace لم تُنزّل.",
+    "alternative_for_iot_network_background": "UNSW-IoTraffic بعد الحصول على الأرشيف وفحصه؛ المعاينتان الملخصتان فقط متاحتان هنا، والـZIP لم يُنزّل."
+  },
+  "explicit_failures_and_unverified_items": [
+    {"dataset": "EUA", "status": "تنزيل/فحص جزئي", "not_done": "لم يُنزّل المستودع كاملًا؛ لم تُفحص site.csv الوطني الكبير، users-melbmetro-generated.csv، ZIP أو خرائط HTML. فترة الجمع الموحدة وشروط APNIC/IP-API غير محسومة."},
+    {"dataset": "ToN_IoT", "status": "لا تنزيل بيانات", "not_done": "واجهة SharePoint استجابت لكن فهرس الملفات لم يظهر في الاستخراج غير التفاعلي؛ لم تُفحص أي CSV/PCAP/TXT/BLG. CloudStor تعذر حل نطاقه. أسماء الأعمدة من المصادر الوصفية."},
+    {"dataset": "Google Cluster Data v3", "status": "schemas فقط", "not_done": "لم يُنزّل shard أو تُقرأ صفوف البيانات؛ HEAD فقط لملف واحد بحجم معلن 498,371,634 بايتًا. لم يُختبر BigQuery."},
+    {"dataset": "CICIoT2023", "status": "لم يُنزّل", "not_done": "لم يُرسل نموذج التنزيل، ولم تُفحص PCAP/CSV. أسماء الخصائص من الصفحة الرسمية لا من رؤوس الملفات، والترخيص غير متحقق."},
+    {"dataset": "UNSW-IoTraffic", "status": "معاينتا CSV فقط", "not_done": "لم تُفحص أرشيفات التدفق/PCAP/البروتوكول؛ HEAD لروابط Dryad أعاد 403. رؤوس التدفق مصدرها وصف الإيداع."},
+    {"dataset": "Bot-IoT", "status": "فهرس فقط", "not_done": "لم يُنزّل أو يُفحص CSV/PCAP/Argus؛ فهرس SharePoint ظهر لكن نجاح تنزيل البيانات الفعلي غير متحقق، وDataPort يتطلب دخولًا وفق الصفحة."},
+    {"dataset": "UNSW-NB15", "status": "صفحات وفهرس فقط", "not_done": "لم تُنزّل أو تُفحص ملفات CSV/PCAP أو ReadMe.pdf؛ أسماء الأعمدة غير متحققة. تعارض الترخيص لم يُحل."},
+    {"dataset": "UCI Image Recognition MEC", "status": "تنزيل وفحص ناجح", "not_done": "لم تُعَد التجربة الأصلية؛ لم تُحل فجوة نسبة ملفات 2020 إلى الورقة المرتبطة 2019، ولم يُعثر على دراسة مستقلة موثوقة لهذه الملفات."},
+    {"dataset": "مرشح Mobility-Aware MEC–Metro Offloading Dataset", "status": "لم يُضمّن ضمن الثماني ولم يُفحص ملفه", "not_done": "السجل يصفه بأنه محاكاة ويتطلب اشتراكًا؛ لم تُفحص الملفات أو يُتحقق من ورقة مستقلة مصاحبة. ذُكر في نتائج التحقق الأصلية كمرشح وظيفي فقط، لا كبديل متحقق."},
+    {"dataset": "Dynamic MEC Scheduling Dataset / VEC / بدائل IEEE DataPort الأخرى", "status": "وصف فهرسي فقط في نتائج التحقق", "not_done": "ملفاتها محجوبة/تتطلب دخولًا في الأوصاف المقدمة؛ لا فحص للملفات ولا تحقق مستقل من المصدر العلمي. لم تُستخدم كدليل على مجموعة أفضل متحققة."}
+  ],
+  "edgecloudsim_plan": [
+    "إنشاء محول مواقع مستقل لملفات EUA المفحوصة وتحويل الإحداثيات إلى إطار محلي؛ وسم كل مصدر موقع (ACMA، IP-API تقريبي، مولد).",
+    "استخدام UCI كمعايرة زمن دوران شامل لخدمة تعرف الصور؛ تجنب عدّ التأخير مرتين.",
+    "إنشاء LoadGeneratorModel مستقل لأوقات الوصول والأحجام وCPU cycles والمهل؛ أي قيم غير مرصودة تُوسم افتراضات/بيانات اصطناعية ولا تُضاف كحقائق للمصدر.",
+    "إنشاء NetworkModel مستقل للشبكة وقياس/افتراض bandwidth وdelay/loss؛ آثار الحزم لا تساوي سعة وصلة أو task latency.",
+    "تعريف edge/cloud nodes وEdgeOrchestrator وسياسات الاختيار كإعدادات/مخرجات محاكاة منفصلة عن المصادر.",
+    "استعمال Google فقط إذا كان السؤال عن حمل CPU/ذاكرة/جدولة Borg، مع توثيق اختلاف السياق والوحدات؛ واستعمال UNSW-IoTraffic اختياريًا كحركة خلفية بعد إتاحة الملفات وفحصها.",
+    "الإبلاغ عن حساسية النتائج، وتحديد مصدر كل حقل والفجوات، وعدم وصف أي نتيجة محاكاة بأنها قياس offloading أصلي."
+  ],
+  "failure_summary": "إخفاقات الوصول/التحقق الواردة أعلاه ليست استنتاجًا بأن الملفات غير موجودة؛ إنها حدود ما نُفّذ أو أمكن فحصه في نتائج التحقق. لا ادعاء بتنزيل كامل لأي Dataset عدا أرشيف UCI الصغير والملفات الثلاثة من EUA؛ كما نُزلت schemas الخمسة الخاصة بـGoogle، لا بيانات trace.",
+  "references": [
+    {"id": 1, "title": "EUA repository, READMEs, license, ACMA source", "urls": ["https://github.com/PhuLai/eua-dataset", "https://raw.githubusercontent.com/PhuLai/eua-dataset/master/edge-servers/README.md", "https://raw.githubusercontent.com/PhuLai/eua-dataset/master/users/README.md", "https://raw.githubusercontent.com/PhuLai/eua-dataset/master/LICENSE", "https://www.acma.gov.au/industry/spectrum/radiocomms-licensing/register-radiocommunications-licences/radiocomms-licence-data"]},
+    {"id": 2, "title": "EUA papers and DataPort record", "urls": ["https://doi.org/10.1007/978-3-030-03596-9_15", "https://doi.org/10.1007/978-3-030-33702-5_8", "https://ieee-dataport.org/documents/eua-dataset"]},
+    {"id": 3, "title": "ToN_IoT official page, catalog, and papers", "urls": ["https://research.unsw.edu.au/projects/toniot-datasets", "https://researchdata.edu.au/new-generations-internet-toniot-datasets/1957406", "https://ieee-dataport.org/documents/toniot-datasets", "https://doi.org/10.1109/ACCESS.2020.3022862", "https://www.sciencedirect.com/science/article/pii/S2210670721002808", "https://doi.org/10.1109/JIOT.2021.3085194"]},
+    {"id": 4, "title": "Google Cluster Data and v3 schemas", "urls": ["https://github.com/google/cluster-data", "https://github.com/google/cluster-data/blob/master/ClusterData2019.md", "https://raw.githubusercontent.com/google/cluster-data/master/clusterdata_trace_format_v3.proto", "https://storage.googleapis.com/clusterdata_2019_schema/collection_events.schema.json", "https://storage.googleapis.com/clusterdata_2019_schema/instance_events.schema.json", "https://storage.googleapis.com/clusterdata_2019_schema/machine_events.schema.json", "https://storage.googleapis.com/clusterdata_2019_schema/machine_attributes.schema.json", "https://storage.googleapis.com/clusterdata_2019_schema/instance_usage.schema.json", "https://doi.org/10.1145/3342195.3387517"]},
+    {"id": 5, "title": "CICIoT2023 source and paper", "urls": ["https://www.unb.ca/cic/datasets/iotdataset-2023.html", "https://cicresearch.ca/IOTDataset/CIC_IOT_Dataset2023/", "https://doi.org/10.3390/s23135941"]},
+    {"id": 6, "title": "UNSW-IoTraffic official page, Dryad and descriptor paper", "urls": ["https://iotanalytics.unsw.edu.au/unsw-iotraffic.html", "https://datadryad.org/dataset/doi:10.5061/dryad.w0vt4b94b", "https://api.datacite.org/dois/10.5061/dryad.w0vt4b94b", "https://doi.org/10.1109/IEEEDATA.2025.3602010", "https://creativecommons.org/publicdomain/zero/1.0/"]},
+    {"id": 7, "title": "Bot-IoT official page and paper", "urls": ["https://research.unsw.edu.au/projects/bot-iot-dataset", "https://ieee-dataport.org/documents/bot-iot-dataset", "https://doi.org/10.1016/j.future.2019.05.041", "https://arxiv.org/abs/1811.00701"]},
+    {"id": 8, "title": "UNSW-NB15 official page, catalog and paper", "urls": ["https://research.unsw.edu.au/projects/unsw-nb15-dataset", "https://researchdata.edu.au/the-unsw-nb15-dataset/1957529", "https://ieeexplore.ieee.org/document/7348942", "https://doi.org/10.26190/5d7ac5b1e8485"]},
+    {"id": 9, "title": "UCI Image Recognition MEC official dataset, download, paper and license", "urls": ["https://archive.ics.uci.edu/dataset/859/image+recognition+task+execution+times+in+mobile+edge+comput", "https://archive.ics.uci.edu/static/public/859/image+recognition+task+execution+times+in+mobile+edge+computing.zip", "https://doi.org/10.24432/C5N617", "https://doi.org/10.1109/WD.2019.8734210", "https://eprints.gla.ac.uk/179591/", "https://creativecommons.org/licenses/by/4.0/legalcode"]},
+    {"id": 10, "title": "EdgeCloudSim official repository and paper", "urls": ["https://github.com/CagataySonmez/EdgeCloudSim", "https://doi.org/10.1002/ett.3493"]}
+  ]
+}

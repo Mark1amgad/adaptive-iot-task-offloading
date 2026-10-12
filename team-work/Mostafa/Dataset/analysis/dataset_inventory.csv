@@ -1,0 +1,9 @@
+﻿file,sample_rows,columns,missing_cells,duplicate_rows
+/home/ubuntu/Dataset/01_EUA/raw/site-optus-melbCBD.csv,125,10,116,0
+/home/ubuntu/Dataset/01_EUA/raw/users-aus.csv,1000,7,21,0
+/home/ubuntu/Dataset/01_EUA/raw/users-melbcbd-generated.csv,816,2,0,0
+/home/ubuntu/Dataset/08_UCI_Image_Recognition_MEC/raw/uci_extracted/final/TATDescriptionDataset/MacBookPro1.csv,1000,2,0,0
+/home/ubuntu/Dataset/08_UCI_Image_Recognition_MEC/raw/uci_extracted/final/TATDescriptionDataset/MacBookPro2.csv,1000,2,0,0
+/home/ubuntu/Dataset/08_UCI_Image_Recognition_MEC/raw/uci_extracted/final/TATDescriptionDataset/RasberryPi.csv,1000,2,0,0
+/home/ubuntu/Dataset/08_UCI_Image_Recognition_MEC/raw/uci_extracted/final/TATDescriptionDataset/VM.csv,1000,2,0,0
+/home/ubuntu/Dataset/MASTER_DATASET_COMPARISON.csv,8,27,24,0

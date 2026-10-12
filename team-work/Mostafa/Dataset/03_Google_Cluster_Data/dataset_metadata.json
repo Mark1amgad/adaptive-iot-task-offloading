@@ -1,0 +1,19 @@
+{
+  "dataset_name": "Google Cluster Data — Borg workload traces v3",
+  "institution": "خلايا Google/Borg؛ الموقع الجغرافي/الدولة غير متحققين.",
+  "country_or_region": "غير متحقق منه",
+  "collection_period": "v3: مايو 2019 في ثماني خلايا Borg. v2.1: مايو 2011، خلية واحدة ونحو 12.5 ألف آلة و29 يومًا. v1: سبع ساعات في 2009.",
+  "publication_year": "إتاحة/وصف v3 وورقة Borg: The Next Generation في 2020؛ الجمع 2019.",
+  "data_collection_method": "أثر تشغيل فعلي لنظام إدارة Borg: أحداث تقديم وجدولة وإنهاء/إخلاء، طلبات موارد واستخدام CPU/ذاكرة. الاستخدام ضمن نوافذ غالبًا خمس دقائق مع عينات تقريبية كل ثانية. بعض القيم محجوبة/مطبعة لأسباب السرية.",
+  "data_types": "غير متحقق منه",
+  "original_url": "https://github.com/google/cluster-data",
+  "download_url": "غير متحقق منه",
+  "paper_title": [],
+  "paper_doi": [
+    "https://doi.org/10.1145/3342195.3387517"
+  ],
+  "license": "CC BY 4.0 بحسب المستودع ووثيقة v3.",
+  "download_status": "لم يُنزّل shard بيانات. فحص HEAD لملف instance_usage أظهر HTTP 200 وحجمًا معلنًا 498,371,634 بايتًا لذلك الشارد وحده. وثيقة Google تذكر نحو 2.4 TiB مضغوطة. schemas فقط هي التي نُزلت وفُحصت؛ استعلام BigQuery لم يُختبر.",
+  "inspection_status": "غير متحقق منه",
+  "verification_notes": []
+}

@@ -1,0 +1,19 @@
+{
+  "dataset_name": "UNSW IoT traffic data with packets, flows, and protocols",
+  "institution": "سيدني، أستراليا؛ UNSW Sydney.",
+  "country_or_region": "غير متحقق منه",
+  "collection_period": "تقريبًا 2016-09-22 إلى 2017-04-13؛ نحو 203 أيام إجمالية مع اختلاف مدة الالتقاط حسب الجهاز.",
+  "publication_year": "مقال الوصف 2025-08-25؛ سجل Dryad 2025-08-29؛ الجمع 2016–2017.",
+  "data_collection_method": "التقاط فعلي عبر tcpdump على بوابة TP-Link Archer C7 v2/OpenWrt في testbed LAN لـ27 جهاز IoT استهلاكيًا؛ فصل الآثار وفق MAC. حركة أجهزة فعلية في مختبر، وليست مهام حوسبة أو قرارات offloading.",
+  "data_types": "غير متحقق منه",
+  "original_url": "https://iotanalytics.unsw.edu.au/unsw-iotraffic.html",
+  "download_url": "غير متحقق منه",
+  "paper_title": [],
+  "paper_doi": [
+    "https://doi.org/10.1109/IEEEDATA.2025.3602010"
+  ],
+  "license": "CC0 1.0 وفق سجل Dryad.",
+  "download_status": "فُحصت الصفحة الرسمية وDryad وDataCite ومقال الوصف ومعاينتا CSV الملخصتين فقط. لم تُفتح PCAP أو ملفات التدفقات/الأرشيفات؛ طلبات HTTP HEAD لروابط Dryad أعادت 403، لذلك لم يُنزّل أي أرشيف.",
+  "inspection_status": "غير متحقق منه",
+  "verification_notes": []
+}
