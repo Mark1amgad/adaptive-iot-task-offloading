@@ -1,0 +1,13 @@
+task_id,policy,scenario,run_id,completed,latency_ms,deadline_ms,selected_location
+T001,Local Only,S1_Normal,run_01,true,30,100,Local
+T002,Local Only,S1_Normal,run_01,true,45,100,Local
+T003,Local Only,S1_Normal,run_01,false,,100,Local
+T001,Edge Only,S1_Normal,run_01,true,22,100,Edge
+T002,Edge Only,S1_Normal,run_01,true,38,100,Edge
+T003,Edge Only,S1_Normal,run_01,true,80,100,Edge
+T001,Cloud Only,S1_Normal,run_01,true,70,100,Cloud
+T002,Cloud Only,S1_Normal,run_01,true,95,100,Cloud
+T003,Cloud Only,S1_Normal,run_01,true,110,100,Cloud
+T001,AI Model,S1_Normal,run_01,true,20,100,Edge
+T002,AI Model,S1_Normal,run_01,true,35,100,Local
+T003,AI Model,S1_Normal,run_01,true,75,100,Cloud
