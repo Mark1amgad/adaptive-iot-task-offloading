@@ -1,0 +1,19 @@
+{
+  "dataset_name": "The UNSW-NB15 Dataset",
+  "institution": "كانبرا، أستراليا؛ UNSW Canberra at ADFA / Cyber Range Lab.",
+  "country_or_region": "غير متحقق منه",
+  "collection_period": "RDA يذكر تاريخ بيانات 2015-09-30؛ نطاق الالتقاط الأوسع غير متحقق.",
+  "publication_year": "الورقة الأصلية 2015؛ سجل البيانات يذكر إتاحة 2019.",
+  "data_collection_method": "IXIA PerfectStorm ولّد مزيجًا من نشاط طبيعي وسلوك هجوم اصطناعي؛ tcpdump التقط 100GB PCAP وفق الصفحة؛ اشتق Argus وBro-IDS خصائص التدفق. مختلط، ولا يثبت حركة IoT أو MEC حية.",
+  "data_types": "غير متحقق منه",
+  "original_url": "https://research.unsw.edu.au/projects/unsw-nb15-dataset",
+  "download_url": "غير متحقق منه",
+  "paper_title": [],
+  "paper_doi": [
+    "https://doi.org/10.26190/5d7ac5b1e8485"
+  ],
+  "license": "غير محسوم: صفحة UNSW تسمح أكاديميًا وتطلب اتفاقًا/موافقة للاستخدام التجاري؛ سجل RDA يعرض GPL-3.0. لا تفترض تطابق الشرطين.",
+  "download_status": "فُحصت صفحة UNSW وسجل RDA وصفحة IEEE وفهرس SharePoint؛ لم يُنزّل أو يُفتح أي CSV/PCAP أو ReadMe.pdf.",
+  "inspection_status": "غير متحقق منه",
+  "verification_notes": []
+}

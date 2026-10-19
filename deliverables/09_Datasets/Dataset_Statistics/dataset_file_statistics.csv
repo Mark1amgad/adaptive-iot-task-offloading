@@ -1,0 +1,11 @@
+file,rows,columns,column_names,missing_cells,duplicate_rows,numeric_columns
+01_EUA/raw/site-optus-melbCBD.csv,125,10,SITE_ID|LATITUDE|LONGITUDE|NAME|STATE|LICENSING_AREA_ID|POSTCODE|SITE_PRECISION|ELEVATION|HCIS_L2,116,0,SITE_ID|LATITUDE|LONGITUDE|LICENSING_AREA_ID
+01_EUA/raw/users-aus.csv,4748,7,IP|Latitude|Longitude|PostCode|City|State|Country,2273,0,Latitude|Longitude
+01_EUA/raw/users-melbcbd-generated.csv,816,2,Latitude|Longitude,0,0,Latitude|Longitude
+08_UCI_Image_Recognition_MEC/raw/uci_extracted/final/TATDescriptionDataset/MacBookPro1.csv,1000,2,Time|Execution Time,0,0,Execution Time
+08_UCI_Image_Recognition_MEC/raw/uci_extracted/final/TATDescriptionDataset/MacBookPro2.csv,1000,2,Time|Execution Time,0,0,Execution Time
+08_UCI_Image_Recognition_MEC/raw/uci_extracted/final/TATDescriptionDataset/RasberryPi.csv,1000,2,Time|Execution Time,0,0,Execution Time
+08_UCI_Image_Recognition_MEC/raw/uci_extracted/final/TATDescriptionDataset/VM.csv,1000,2,Time|Execution Time,0,0,Execution Time
+analysis/dataset_inventory.csv,8,5,file|sample_rows|columns|missing_cells|duplicate_rows,0,0,sample_rows|columns|missing_cells|duplicate_rows
+dataset_comparison.csv,6,20,dataset_name|official_url|collection_year|publication_year|country|source_measurement|real_synthetic_mixed|license|download_status|inspection_status|files_columns_rows_sizes|quality_missing_values|metrics_available|metrics_missing|training_suitability|evaluation_suitability|simulation_suitability|papers_that_used_it|recommendation|evidence_urls,10,0,
+MASTER_DATASET_COMPARISON.csv,8,27,Dataset Name|Institution / University|Country|Publication Year|Dataset Type|Real / Synthetic / Mixed|Original URL|Download URL|Associated Papers|Has Task Arrival Data|Has Task Size|Has CPU Requirements|Has Network Delay|Has Bandwidth|Has CPU / Memory Metrics|Has Energy Metrics|Has User / Server Locations|Has Actual Offloading Decisions|Dynamic Conditions Support|EdgeCloudSim Compatibility|License|Download Status|Verification Status|Strengths|Limitations|Relevance Score|Recommendation,24,0,Dynamic Conditions Support|EdgeCloudSim Compatibility

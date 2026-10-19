@@ -1,0 +1,3 @@
+{"ts":1791913574.831,"level":"warning","event":"placeholder_thresholds","features":["task_mi","deadline_ms"]}
+{"ts":1791913574.831,"level":"info","event":"decision","task_id":"t-1","state":26,"action":"Local","mode":"explore"}
+{"ts":1791913574.832,"level":"warning","event":"action_override","task_id":"t-1","decided":"Local","executed":"Edge"}

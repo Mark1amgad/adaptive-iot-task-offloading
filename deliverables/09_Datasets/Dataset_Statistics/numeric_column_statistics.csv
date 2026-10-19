@@ -1,0 +1,19 @@
+file,column,count,mean,median,min,max,outlier_count_iqr
+01_EUA/raw/site-optus-melbCBD.csv,SITE_ID,125,1344085.128,135213.0,11571.0,10004576.0,16
+01_EUA/raw/site-optus-melbCBD.csv,LATITUDE,125,-37.814601792,-37.814904999999996,-37.82091,-37.809041,0
+01_EUA/raw/site-optus-melbCBD.csv,LONGITUDE,125,144.963246032,144.962515,144.952075,144.97476,0
+01_EUA/raw/site-optus-melbCBD.csv,LICENSING_AREA_ID,125,2.0,2.0,2.0,2.0,0
+01_EUA/raw/users-aus.csv,Latitude,4748,-32.92779774641954,-33.8553,-43.3142,-10.5808,369
+01_EUA/raw/users-aus.csv,Longitude,4748,144.99569262847515,149.1168,113.6594,153.6021,520
+01_EUA/raw/users-melbcbd-generated.csv,Latitude,816,-37.814137469827784,-37.81413174121843,-37.82086812931496,-37.80783692839932,0
+01_EUA/raw/users-melbcbd-generated.csv,Longitude,816,144.963326447521,144.96329295531908,144.95174470517404,144.9744434939978,0
+08_UCI_Image_Recognition_MEC/raw/uci_extracted/final/TATDescriptionDataset/MacBookPro1.csv,Execution Time,1000,0.10815345335006714,0.1074373722076416,0.09291887283325195,0.2263927459716797,9
+08_UCI_Image_Recognition_MEC/raw/uci_extracted/final/TATDescriptionDataset/MacBookPro2.csv,Execution Time,1000,0.34829165410995483,0.30697858333587646,0.26859307289123535,1.6071553230285645,23
+08_UCI_Image_Recognition_MEC/raw/uci_extracted/final/TATDescriptionDataset/RasberryPi.csv,Execution Time,1000,1.0169308009147644,1.0174806118011475,0.8511631488800049,3.167850971221924,42
+08_UCI_Image_Recognition_MEC/raw/uci_extracted/final/TATDescriptionDataset/VM.csv,Execution Time,1000,0.42681368184089663,0.4117746353149414,0.16689109802246094,20.789386987686157,70
+analysis/dataset_inventory.csv,sample_rows,8,743.625,1000.0,8.0,1000.0,1
+analysis/dataset_inventory.csv,columns,8,6.75,2.0,2.0,27.0,1
+analysis/dataset_inventory.csv,missing_cells,8,20.125,0.0,0.0,116.0,1
+analysis/dataset_inventory.csv,duplicate_rows,8,0.0,0.0,0.0,0.0,0
+MASTER_DATASET_COMPARISON.csv,Dynamic Conditions Support,8,2.375,2.0,1.0,4.0,0
+MASTER_DATASET_COMPARISON.csv,EdgeCloudSim Compatibility,8,1.25,1.0,0.0,3.0,3

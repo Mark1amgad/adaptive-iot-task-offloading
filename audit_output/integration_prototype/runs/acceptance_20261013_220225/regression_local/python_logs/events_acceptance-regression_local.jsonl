@@ -1,0 +1,2 @@
+{"ts":1791918153.42,"level":"warning","event":"placeholder_thresholds","features":["task_mi","deadline_ms"]}
+{"ts":1791918153.582,"level":"info","event":"decision","task_id":"acceptance-regression_local:task:1","state":27,"action":"Local","mode":"baseline"}

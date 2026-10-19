@@ -1,0 +1,3 @@
+PASS
+devices=3
+links=2

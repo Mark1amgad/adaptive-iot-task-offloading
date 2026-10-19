@@ -1,0 +1,100 @@
+relative_path,file_type,size_bytes,inspected,classification,notes
+team-work/Mostafa/Dataset/01_EUA/columns_dictionary_AR.xlsx,spreadsheet,6610,yes,documentation/metadata,OOXML container readable; 9 entries; sheets: قاموس الأعمدة
+team-work/Mostafa/Dataset/01_EUA/dataset_metadata.json,documentation/code/metadata,2273,yes,metadata/schema,
+team-work/Mostafa/Dataset/01_EUA/documentation/file_inventory.json,documentation/code/metadata,329,yes,metadata/schema,
+team-work/Mostafa/Dataset/01_EUA/edgecloudsim_mapping_AR.xlsx,spreadsheet,6063,yes,documentation/metadata,OOXML container readable; 9 entries; sheets: EdgeCloudSim_Mapping
+team-work/Mostafa/Dataset/01_EUA/limitations_AR.md,documentation/code/metadata,647,yes,documentation/metadata,
+team-work/Mostafa/Dataset/01_EUA/raw/site-optus-melbCBD.csv,structured data,14609,yes,data,"125 data rows; 10 columns; parsed utf-8-sig ','"
+team-work/Mostafa/Dataset/01_EUA/raw/users-aus.csv,structured data,248399,yes,data,"4748 data rows; 7 columns; parsed utf-8-sig ','"
+team-work/Mostafa/Dataset/01_EUA/raw/users-melbcbd-generated.csv,structured data,30377,yes,data,"816 data rows; 2 columns; parsed utf-8-sig ','"
+team-work/Mostafa/Dataset/01_EUA/README_AR.md,documentation/code/metadata,5888,yes,documentation/metadata,
+team-work/Mostafa/Dataset/01_EUA/source_and_citations.md,documentation/code/metadata,606,yes,documentation/metadata,
+team-work/Mostafa/Dataset/01_EUA/suitability_assessment_AR.md,documentation/code/metadata,528,yes,documentation/metadata,
+team-work/Mostafa/Dataset/02_ToN_IoT/columns_dictionary_AR.xlsx,spreadsheet,6215,yes,documentation/metadata,OOXML container readable; 9 entries; sheets: قاموس الأعمدة
+team-work/Mostafa/Dataset/02_ToN_IoT/dataset_metadata.json,documentation/code/metadata,1765,yes,metadata/schema,
+team-work/Mostafa/Dataset/02_ToN_IoT/documentation/file_inventory.json,documentation/code/metadata,2,yes,metadata/schema,
+team-work/Mostafa/Dataset/02_ToN_IoT/edgecloudsim_mapping_AR.xlsx,spreadsheet,5905,yes,documentation/metadata,OOXML container readable; 9 entries; sheets: EdgeCloudSim_Mapping
+team-work/Mostafa/Dataset/02_ToN_IoT/limitations_AR.md,documentation/code/metadata,698,yes,documentation/metadata,
+team-work/Mostafa/Dataset/02_ToN_IoT/README_AR.md,documentation/code/metadata,4237,yes,documentation/metadata,
+team-work/Mostafa/Dataset/02_ToN_IoT/source_and_citations.md,documentation/code/metadata,540,yes,documentation/metadata,
+team-work/Mostafa/Dataset/02_ToN_IoT/suitability_assessment_AR.md,documentation/code/metadata,462,yes,documentation/metadata,
+team-work/Mostafa/Dataset/03_Google_Cluster_Data/columns_dictionary_AR.xlsx,spreadsheet,6170,yes,documentation/metadata,OOXML container readable; 9 entries; sheets: قاموس الأعمدة
+team-work/Mostafa/Dataset/03_Google_Cluster_Data/dataset_metadata.json,documentation/code/metadata,1669,yes,metadata/schema,
+team-work/Mostafa/Dataset/03_Google_Cluster_Data/documentation/file_inventory.json,documentation/code/metadata,573,yes,metadata/schema,
+team-work/Mostafa/Dataset/03_Google_Cluster_Data/edgecloudsim_mapping_AR.xlsx,spreadsheet,6109,yes,documentation/metadata,OOXML container readable; 9 entries; sheets: EdgeCloudSim_Mapping
+team-work/Mostafa/Dataset/03_Google_Cluster_Data/limitations_AR.md,documentation/code/metadata,478,yes,documentation/metadata,
+team-work/Mostafa/Dataset/03_Google_Cluster_Data/raw/collection_events.schema.json,documentation/code/metadata,1440,yes,metadata/schema,
+team-work/Mostafa/Dataset/03_Google_Cluster_Data/raw/instance_events.schema.json,documentation/code/metadata,1605,yes,metadata/schema,
+team-work/Mostafa/Dataset/03_Google_Cluster_Data/raw/instance_usage.schema.json,documentation/code/metadata,2193,yes,metadata/schema,
+team-work/Mostafa/Dataset/03_Google_Cluster_Data/raw/machine_attributes.schema.json,documentation/code/metadata,386,yes,metadata/schema,
+team-work/Mostafa/Dataset/03_Google_Cluster_Data/raw/machine_events.schema.json,documentation/code/metadata,772,yes,metadata/schema,
+team-work/Mostafa/Dataset/03_Google_Cluster_Data/README_AR.md,documentation/code/metadata,4786,yes,documentation/metadata,
+team-work/Mostafa/Dataset/03_Google_Cluster_Data/source_and_citations.md,documentation/code/metadata,790,yes,documentation/metadata,
+team-work/Mostafa/Dataset/03_Google_Cluster_Data/suitability_assessment_AR.md,documentation/code/metadata,468,yes,documentation/metadata,
+team-work/Mostafa/Dataset/04_CICIoT2023/columns_dictionary_AR.xlsx,spreadsheet,6076,yes,documentation/metadata,OOXML container readable; 9 entries; sheets: قاموس الأعمدة
+team-work/Mostafa/Dataset/04_CICIoT2023/dataset_metadata.json,documentation/code/metadata,1589,yes,metadata/schema,
+team-work/Mostafa/Dataset/04_CICIoT2023/documentation/file_inventory.json,documentation/code/metadata,2,yes,metadata/schema,
+team-work/Mostafa/Dataset/04_CICIoT2023/edgecloudsim_mapping_AR.xlsx,spreadsheet,5902,yes,documentation/metadata,OOXML container readable; 9 entries; sheets: EdgeCloudSim_Mapping
+team-work/Mostafa/Dataset/04_CICIoT2023/limitations_AR.md,documentation/code/metadata,392,yes,documentation/metadata,
+team-work/Mostafa/Dataset/04_CICIoT2023/README_AR.md,documentation/code/metadata,3636,yes,documentation/metadata,
+team-work/Mostafa/Dataset/04_CICIoT2023/source_and_citations.md,documentation/code/metadata,259,yes,documentation/metadata,
+team-work/Mostafa/Dataset/04_CICIoT2023/suitability_assessment_AR.md,documentation/code/metadata,441,yes,documentation/metadata,
+team-work/Mostafa/Dataset/05_UNSW_IoTraffic/columns_dictionary_AR.xlsx,spreadsheet,6356,yes,documentation/metadata,OOXML container readable; 9 entries; sheets: قاموس الأعمدة
+team-work/Mostafa/Dataset/05_UNSW_IoTraffic/dataset_metadata.json,documentation/code/metadata,1502,yes,metadata/schema,
+team-work/Mostafa/Dataset/05_UNSW_IoTraffic/documentation/file_inventory.json,documentation/code/metadata,2,yes,metadata/schema,
+team-work/Mostafa/Dataset/05_UNSW_IoTraffic/edgecloudsim_mapping_AR.xlsx,spreadsheet,5895,yes,documentation/metadata,OOXML container readable; 9 entries; sheets: EdgeCloudSim_Mapping
+team-work/Mostafa/Dataset/05_UNSW_IoTraffic/limitations_AR.md,documentation/code/metadata,411,yes,documentation/metadata,
+team-work/Mostafa/Dataset/05_UNSW_IoTraffic/README_AR.md,documentation/code/metadata,4010,yes,documentation/metadata,
+team-work/Mostafa/Dataset/05_UNSW_IoTraffic/source_and_citations.md,documentation/code/metadata,389,yes,documentation/metadata,
+team-work/Mostafa/Dataset/05_UNSW_IoTraffic/suitability_assessment_AR.md,documentation/code/metadata,414,yes,documentation/metadata,
+team-work/Mostafa/Dataset/06_Bot_IoT/columns_dictionary_AR.xlsx,spreadsheet,6277,yes,documentation/metadata,OOXML container readable; 9 entries; sheets: قاموس الأعمدة
+team-work/Mostafa/Dataset/06_Bot_IoT/dataset_metadata.json,documentation/code/metadata,1810,yes,metadata/schema,
+team-work/Mostafa/Dataset/06_Bot_IoT/documentation/file_inventory.json,documentation/code/metadata,2,yes,metadata/schema,
+team-work/Mostafa/Dataset/06_Bot_IoT/edgecloudsim_mapping_AR.xlsx,spreadsheet,5805,yes,documentation/metadata,OOXML container readable; 9 entries; sheets: EdgeCloudSim_Mapping
+team-work/Mostafa/Dataset/06_Bot_IoT/limitations_AR.md,documentation/code/metadata,414,yes,documentation/metadata,
+team-work/Mostafa/Dataset/06_Bot_IoT/README_AR.md,documentation/code/metadata,4085,yes,documentation/metadata,
+team-work/Mostafa/Dataset/06_Bot_IoT/source_and_citations.md,documentation/code/metadata,374,yes,documentation/metadata,
+team-work/Mostafa/Dataset/06_Bot_IoT/suitability_assessment_AR.md,documentation/code/metadata,418,yes,documentation/metadata,
+team-work/Mostafa/Dataset/07_UNSW_NB15/columns_dictionary_AR.xlsx,spreadsheet,6044,yes,documentation/metadata,OOXML container readable; 9 entries; sheets: قاموس الأعمدة
+team-work/Mostafa/Dataset/07_UNSW_NB15/dataset_metadata.json,documentation/code/metadata,1454,yes,metadata/schema,
+team-work/Mostafa/Dataset/07_UNSW_NB15/documentation/file_inventory.json,documentation/code/metadata,2,yes,metadata/schema,
+team-work/Mostafa/Dataset/07_UNSW_NB15/edgecloudsim_mapping_AR.xlsx,spreadsheet,5916,yes,documentation/metadata,OOXML container readable; 9 entries; sheets: EdgeCloudSim_Mapping
+team-work/Mostafa/Dataset/07_UNSW_NB15/limitations_AR.md,documentation/code/metadata,409,yes,documentation/metadata,
+team-work/Mostafa/Dataset/07_UNSW_NB15/README_AR.md,documentation/code/metadata,3597,yes,documentation/metadata,
+team-work/Mostafa/Dataset/07_UNSW_NB15/source_and_citations.md,documentation/code/metadata,441,yes,documentation/metadata,
+team-work/Mostafa/Dataset/07_UNSW_NB15/suitability_assessment_AR.md,documentation/code/metadata,422,yes,documentation/metadata,
+team-work/Mostafa/Dataset/08_UCI_Image_Recognition_MEC/columns_dictionary_AR.xlsx,spreadsheet,6096,yes,documentation/metadata,OOXML container readable; 9 entries; sheets: قاموس الأعمدة
+team-work/Mostafa/Dataset/08_UCI_Image_Recognition_MEC/dataset_metadata.json,documentation/code/metadata,1610,yes,metadata/schema,
+team-work/Mostafa/Dataset/08_UCI_Image_Recognition_MEC/documentation/file_inventory.json,documentation/code/metadata,980,yes,metadata/schema,
+team-work/Mostafa/Dataset/08_UCI_Image_Recognition_MEC/edgecloudsim_mapping_AR.xlsx,spreadsheet,6134,yes,documentation/metadata,OOXML container readable; 9 entries; sheets: EdgeCloudSim_Mapping
+team-work/Mostafa/Dataset/08_UCI_Image_Recognition_MEC/limitations_AR.md,documentation/code/metadata,665,yes,documentation/metadata,
+team-work/Mostafa/Dataset/08_UCI_Image_Recognition_MEC/raw/uci_extracted/final/TATDescriptionDataset/DatasetExpeirmentalDescription.pdf,document,42933,yes,documentation/metadata,PDF signature verified; text/layout not extracted because no PDF parser is declared/available
+team-work/Mostafa/Dataset/08_UCI_Image_Recognition_MEC/raw/uci_extracted/final/TATDescriptionDataset/MacBookPro1.csv,structured data,44844,yes,data,"1000 data rows; 2 columns; parsed utf-8-sig ','"
+team-work/Mostafa/Dataset/08_UCI_Image_Recognition_MEC/raw/uci_extracted/final/TATDescriptionDataset/MacBookPro2.csv,structured data,44375,yes,data,"1000 data rows; 2 columns; parsed utf-8-sig ','"
+team-work/Mostafa/Dataset/08_UCI_Image_Recognition_MEC/raw/uci_extracted/final/TATDescriptionDataset/RasberryPi.csv,structured data,43787,yes,data,"1000 data rows; 2 columns; parsed utf-8-sig ','"
+team-work/Mostafa/Dataset/08_UCI_Image_Recognition_MEC/raw/uci_extracted/final/TATDescriptionDataset/VM.csv,structured data,44405,yes,data,"1000 data rows; 2 columns; parsed utf-8-sig ','"
+team-work/Mostafa/Dataset/08_UCI_Image_Recognition_MEC/raw/uci_extracted/TATDescriptionDataset.zip,archive,80911,yes,documentation/metadata,archive readable; 5 entries; nested archives: 0
+team-work/Mostafa/Dataset/08_UCI_Image_Recognition_MEC/raw/uci_image_recognition_mec.zip,archive,80831,yes,documentation/metadata,archive readable; 1 entries; nested archives: 1
+team-work/Mostafa/Dataset/08_UCI_Image_Recognition_MEC/README_AR.md,documentation/code/metadata,4315,yes,documentation/metadata,
+team-work/Mostafa/Dataset/08_UCI_Image_Recognition_MEC/source_and_citations.md,documentation/code/metadata,450,yes,documentation/metadata,
+team-work/Mostafa/Dataset/08_UCI_Image_Recognition_MEC/suitability_assessment_AR.md,documentation/code/metadata,477,yes,documentation/metadata,
+team-work/Mostafa/Dataset/analysis/compare_datasets.py,documentation/code/metadata,711,yes,documentation/metadata,
+team-work/Mostafa/Dataset/analysis/dataset_inventory.csv,structured data,796,yes,data,"8 data rows; 5 columns; parsed utf-8-sig ','"
+team-work/Mostafa/Dataset/analysis/dataset_quality_report.py,documentation/code/metadata,957,yes,documentation/metadata,
+team-work/Mostafa/Dataset/analysis/inspect_dataset.py,documentation/code/metadata,779,yes,documentation/metadata,
+team-work/Mostafa/Dataset/dataset_comparison.csv,structured data,24610,yes,data,"6 data rows; 20 columns; parsed utf-8-sig ','"
+team-work/Mostafa/Dataset/DATASET_RESEARCH_REPORT_AR.docx,document,45697,yes,documentation/metadata,OOXML container readable; 17 entries
+team-work/Mostafa/Dataset/DATASET_RESEARCH_REPORT_AR.pdf,document,174816,yes,documentation/metadata,PDF signature verified; text/layout not extracted because no PDF parser is declared/available
+team-work/Mostafa/Dataset/documentation_research_synthesis.md,documentation/code/metadata,28249,yes,documentation/metadata,
+team-work/Mostafa/Dataset/MASTER_DATASET_COMPARISON.csv,structured data,22478,yes,data,"8 data rows; 27 columns; parsed utf-8-sig ','"
+team-work/Mostafa/Dataset/MASTER_DATASET_COMPARISON.xlsx,spreadsheet,23272,yes,documentation/metadata,"OOXML container readable; 12 entries; sheets: Comparison, Arabic_Comparison, Data_Gaps, Scientific_Evidence"
+team-work/Mostafa/Dataset/README_AR.md,documentation/code/metadata,1309,yes,documentation/metadata,
+team-work/Mostafa/Dataset/real_offloading_research.md,documentation/code/metadata,23917,yes,documentation/metadata,
+team-work/Mostafa/Dataset/real_offloading_results.json,documentation/code/metadata,35978,yes,metadata/schema,
+team-work/Mostafa/Dataset/references.bib,documentation/code/metadata,837,yes,documentation/metadata,
+team-work/Mostafa/Dataset/REPRODUCIBILITY_GUIDE_AR.md,documentation/code/metadata,1087,yes,documentation/metadata,
+team-work/Mostafa/Dataset/requirements.txt,documentation/code/metadata,43,yes,documentation/metadata,
+team-work/Mostafa/Dataset/REQUIREMENTS_AND_GAPS.xlsx,spreadsheet,10099,yes,documentation/metadata,"OOXML container readable; 10 entries; sheets: Data_Gaps, Requirements"
+team-work/Mostafa/Dataset/research_results.json,documentation/code/metadata,51547,yes,metadata/schema,
+team-work/Mostafa/Dataset/research_synthesis.md,documentation/code/metadata,28249,yes,documentation/metadata,
+team-work/Mostafa/Dataset/verified_sources_table_AR.md,documentation/code/metadata,9567,yes,documentation/metadata,

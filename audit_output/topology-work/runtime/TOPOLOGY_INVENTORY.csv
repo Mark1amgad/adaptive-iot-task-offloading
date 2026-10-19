@@ -1,0 +1,6 @@
+record_type,name_or_source,id_or_source,parent_or_destination,role_or_direction,mips,ram,pes,host_storage,host_bandwidth,uplink_bandwidth,downlink_bandwidth,latency_ms,module,latency_source
+"device","cloud","2","-1","cloud_executor","44800.0","40000","1","990000","10000","100000.0","100000.0","0.0","cloud_executor","runtime"
+"device","edge","3","2","edge_executor","2800.0","4000","1","990000","10000","10000.0","10000.0","45.0","edge_executor","runtime"
+"device","local","4","3","local_executor","1000.0","2000","1","990000","10000","10000.0","10000.0","2.0","local_executor","runtime"
+"link","edge","3","cloud","child_to_parent / parent_to_child","","","","","","10000.0","100000.0","45.0","","derived_by_Controller_from_child_uplink_latency"
+"link","local","4","edge","child_to_parent / parent_to_child","","","","","","10000.0","10000.0","2.0","","derived_by_Controller_from_child_uplink_latency"

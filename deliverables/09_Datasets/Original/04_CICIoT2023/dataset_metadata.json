@@ -1,0 +1,19 @@
+{
+  "dataset_name": "CIC IoT Dataset 2023",
+  "institution": "فريدريكتون، نيو برونزويك، كندا؛ Canadian Institute for Cybersecurity بجامعة New Brunswick.",
+  "country_or_region": "غير متحقق منه",
+  "collection_period": "الورقة تذكر 16 ساعة لجمع benign؛ تاريخ الجمع التقويمي غير متحقق.",
+  "publication_year": "الورقة الأصلية 2023؛ نشرت 2023-06-25.",
+  "data_collection_method": "التقاط حزم عبر Gigamon Network Tap وWireshark على مختبر يضم 105 أجهزة IoT؛ الاستخدام السليم مختبري، والهجمات الـ33 أُنشئت عمدًا. قياس شبكي فعلي داخل مختبر، وليس محاكاة شبكية كاملة أو قياسًا ميدانيًا إنتاجيًا.",
+  "data_types": "غير متحقق منه",
+  "original_url": "https://www.unb.ca/cic/datasets/iotdataset-2023.html",
+  "download_url": "غير متحقق منه",
+  "paper_title": [],
+  "paper_doi": [
+    "https://doi.org/10.3390/s23135941"
+  ],
+  "license": "ترخيص ملفات dataset غير متحقق؛ لا يستنتج من كون الورقة مفتوحة الوصول.",
+  "download_status": "لم تُنزّل PCAP/CSV. فُحصت صفحة UNB والورقة وصفحة التنزيل؛ نموذج التنزيل يطلب بيانات شخصية ومهنية ولم يُرسل. أسماء الميزات من وصف الصفحة لا من فحص الملف.",
+  "inspection_status": "غير متحقق منه",
+  "verification_notes": []
+}

@@ -1,0 +1,17 @@
+[
+  {
+    "file": "raw/site-optus-melbCBD.csv",
+    "bytes": 14735,
+    "status": "downloaded_and_present"
+  },
+  {
+    "file": "raw/users-aus.csv",
+    "bytes": 253148,
+    "status": "downloaded_and_present"
+  },
+  {
+    "file": "raw/users-melbcbd-generated.csv",
+    "bytes": 31194,
+    "status": "downloaded_and_present"
+  }
+]

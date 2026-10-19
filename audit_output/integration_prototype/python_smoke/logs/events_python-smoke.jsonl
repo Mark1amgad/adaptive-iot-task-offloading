@@ -1,0 +1,2 @@
+{"ts":1791917013.205,"level":"warning","event":"placeholder_thresholds","features":["task_mi","deadline_ms"]}
+{"ts":1791917013.205,"level":"info","event":"decision","task_id":"python-smoke-task-1","state":25,"action":"Edge","mode":"baseline"}

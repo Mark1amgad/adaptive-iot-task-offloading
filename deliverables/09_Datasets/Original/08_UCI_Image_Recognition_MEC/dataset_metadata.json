@@ -1,0 +1,20 @@
+{
+  "dataset_name": "Image Recognition Task Execution Times in Mobile Edge Computing",
+  "institution": "موقع القياس غير متحقق؛ مقدمو المجموعة مرتبطون بجامعة Glasgow وفق UCI.",
+  "country_or_region": "غير متحقق منه",
+  "collection_period": "26 نوفمبر 2020؛ طوابع CSV تقريبًا 13:05–17:03 وفق الوقت المكتوب.",
+  "publication_year": "غير متحقق منه",
+  "data_collection_method": "قياس تنفيذ مهمة تعرف صور باستخدام ImageAI.Prediction على MacBook Pro 1 و2 وUbuntu VM على VirtualBox وRaspberry Pi 4B. العميل الطرفي المتنقل ممثل بعملية محاكاة؛ الحمل بوتيرة مضبوطة. قياسات فعلية في إعداد تجريبي، لا أثر شبكة جوال ميداني.",
+  "data_types": "غير متحقق منه",
+  "original_url": "https://archive.ics.uci.edu/dataset/859/image+recognition+task+execution+times+in+mobile+edge+comput",
+  "download_url": "غير متحقق منه",
+  "paper_title": [],
+  "paper_doi": [
+    "https://doi.org/10.24432/C5N617",
+    "https://doi.org/10.1109/WD.2019.8734210"
+  ],
+  "license": "CC BY 4.0 وفق صفحة UCI.",
+  "download_status": "مكتمل: نُزّل وفُك الأرشيف الرسمي؛ فُحص PDF وCSV الأربعة؛ 1,000 سجل لكل ملف. Execution Time المرصود في المجموعة المفحوصة نحو 0.093–20.789 ثانية وفق النتائج المقدمة.",
+  "inspection_status": "غير متحقق منه",
+  "verification_notes": []
+}

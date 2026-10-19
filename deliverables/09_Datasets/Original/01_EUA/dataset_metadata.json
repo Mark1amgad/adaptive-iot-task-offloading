@@ -1,0 +1,20 @@
+{
+  "dataset_name": "EUA Dataset — Edge Users Allocation",
+  "institution": "أستراليا؛ ملفات على مستوى البلاد وأخرى لـMelbourne CBD وMelbourne metropolitan. Swinburne Edge / Swinburne University of Technology؛ مصادر المواقع ACMA وAPNIC وIP-API.",
+  "country_or_region": "غير متحقق منه",
+  "collection_period": "فترة موحدة غير متحقق منها. README ينسب ملف كتل IP الأسترالية إلى APNIC بتاريخ 08/05/2018؛ اصطلاح التاريخ وتاريخ بقية الملفات غير مثبتين. ليست سلسلة زمنية.",
+  "publication_year": "الورقة الأصلية 2018؛ أنشئ مستودع GitHub في 2018-06-05؛ سجل IEEE DataPort منفصل أنشئ في 2026-02-13.",
+  "data_collection_method": "إحداثيات محطات الاتصالات من سجل تراخيص الراديو ACMA بوصفها مواقع حافة افتراضية؛ كتل IP من APNIC وعناوين مختارة أُسندت إلى مواقع تقريبية بواسطة IP-API؛ مواقع إضافية مولدة بانتظام حول المواقع المستخرجة. نطاقات التغطية العشوائية 450–750 م والسعات/الأحمال في الورقة افتراضات/تجارب مولدة، لا قياسات فعلية لهذه المتغيرات.",
+  "data_types": "غير متحقق منه",
+  "original_url": "https://github.com/PhuLai/eua-dataset",
+  "download_url": "غير متحقق منه",
+  "paper_title": [],
+  "paper_doi": [
+    "https://doi.org/10.1007/978-3-030-03596-9_15",
+    "https://doi.org/10.1007/978-3-030-33702-5_8"
+  ],
+  "license": "المستودع يعلن MIT؛ README يوضح أن بيانات ACMA مملوكة لـACMA ويلزم الالتزام بقواعدها. شروط APNIC/IP-API غير محسومة من MIT وحده.",
+  "download_status": "التنزيل العام متحقق جزئيًا: نُزّلت وفُحصت 3 CSV فقط: site-optus-melbCBD.csv وusers-melbcbd-generated.csv وusers-aus.csv. لم يُنزّل المستودع كاملًا ولا الملفات الكبيرة أو خرائط HTML.",
+  "inspection_status": "غير متحقق منه",
+  "verification_notes": []
+}

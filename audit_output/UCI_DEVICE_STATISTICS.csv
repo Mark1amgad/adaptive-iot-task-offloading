@@ -1,0 +1,5 @@
+file,environment_inferred_from_filename,metric,count,mean,median,stddev,min,p25,p75,p95,max,units,missing,duplicate_rows
+MacBookPro1.csv,MacBookPro1,Execution Time,1000,0.1081534534,0.1074373722,0.007636875407,0.09291887283,0.1036193371,0.1115930676,0.1178728342,0.226392746,seconds per local documentation; verify against official PDF,0,0
+MacBookPro2.csv,MacBookPro2,Execution Time,1000,0.3482916541,0.3069785833,0.09227901481,0.2685930729,0.3053584695,0.3976003528,0.4875399709,1.607155323,seconds per local documentation; verify against official PDF,0,0
+RasberryPi.csv,RasberryPi,Execution Time,1000,1.016930801,1.017480612,0.1292433089,0.8511631489,0.9338339567,1.037090182,1.166437304,3.167850971,seconds per local documentation; verify against official PDF,0,0
+VM.csv,VM,Execution Time,1000,0.4268136818,0.4117746353,0.646625659,0.166891098,0.3982815742,0.4266543984,0.4477659464,20.78938699,seconds per local documentation; verify against official PDF,0,0
