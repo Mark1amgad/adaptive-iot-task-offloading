@@ -7,6 +7,7 @@ with [TEAM_GUIDE.md](TEAM_GUIDE.md), [TASK_TRACKER.md](TASK_TRACKER.md), and
 [FILE_INDEX.md](FILE_INDEX.md).
 
 - Shared research materials: [shared/](shared/)
+- Canonical audited research library: [research/](research/), including the classified reference index and workspace inventory
 - Member workspaces: [team-work/](team-work/)
 - Final project package: [deliverables/](deliverables/)
 - Experiments and results: [experiments/](experiments/) and [results/](results/)
@@ -174,6 +175,15 @@ adaptive-iot-task-offloading/
 │   ├── experiment-plan.md
 │   ├── team-responsibilities.md
 │   └── decisions/            # Design decision log
+├── research/                 # Audited canonical research-library index and copies
+│   ├── references/           # Core, supporting, conference, excluded, and unverified papers
+│   ├── literature_review/    # Extractions and comparative analysis
+│   ├── datasets/             # Dataset documentation and provenance notes
+│   ├── methodology/          # Research method records as added
+│   ├── experiments/          # Research experiment organization as added
+│   ├── proposals/
+│   ├── reports/
+│   └── meeting_notes/
 ├── simulator/                # Java / iFogSim simulation area (Ayoub)
 ├── rl-agent/                 # Planned Python agent area
 ├── integration/              # Java <-> Python protocol and examples
