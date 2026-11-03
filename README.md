@@ -1,5 +1,22 @@
 # Adaptive AI-Based Task Offloading in IoT Edge-Cloud Networks Under Dynamic Conditions
 
+## Shared Workspace
+
+This repository is the shared workspace for the five-person research team. Start
+with [TEAM_GUIDE.md](TEAM_GUIDE.md), [TASK_TRACKER.md](TASK_TRACKER.md), and
+[FILE_INDEX.md](FILE_INDEX.md).
+
+- Shared research materials: [shared/](shared/)
+- Member workspaces: [team-work/](team-work/)
+- Final project package: [deliverables/](deliverables/)
+- Experiments and results: [experiments/](experiments/) and [results/](results/)
+- Existing implementation artifacts: [deliverables/08_RL_Model/](deliverables/08_RL_Model/)
+  and [deliverables/10_iFogSim_Simulation/](deliverables/10_iFogSim_Simulation/)
+
+The repository currently contains both planned project areas and preserved
+implementation/audit artifacts. These navigation paths do not replace or move
+executable code or historical evidence.
+
 A university research project investigating whether an **adaptive AI-based policy**
 can select between **Local**, **Edge**, and **Cloud** execution for IoT tasks under
 changing network and resource conditions.
@@ -8,7 +25,7 @@ changing network and resource conditions.
 > and the *planned* system. Where a capability has not yet been implemented or
 > experimentally validated, it is explicitly marked as **planned** or **pending**.
 > No benchmark results, performance improvements, or research findings are claimed
-> here. See [Current Implementation Status](#current-implementation-status).
+> here. See [Current Implementation Status](#13-current-implementation-status).
 
 ---
 
@@ -50,7 +67,7 @@ metrics compared with **static placement policies**?
 The following is the **intended** end-to-end design. It is **not** a claim that the
 whole workflow is currently operational.
 
-```
+```text
 Task Arrival
     ↓
 State Observation
@@ -142,7 +159,7 @@ Details, workload control, seeds, and repeated-run methodology are in
 
 ## 10. Repository Structure
 
-```
+```text
 adaptive-iot-task-offloading/
 ├── README.md
 ├── CONTRIBUTING.md
@@ -158,7 +175,7 @@ adaptive-iot-task-offloading/
 │   ├── team-responsibilities.md
 │   └── decisions/            # Design decision log
 ├── simulator/                # Java / iFogSim simulation area (Ayoub)
-├── rl-agent/                 # Python Q-Learning agent area (Ibrahim)
+├── rl-agent/                 # Planned Python agent area
 ├── integration/              # Java <-> Python protocol and examples
 │   ├── protocol/             # Draft message schema(s)
 │   └── examples/
@@ -171,11 +188,13 @@ adaptive-iot-task-offloading/
 
 | Member | Focus |
 | --- | --- |
-| **Mark** | Repository management, project coordination, documentation, integration |
-| **Ayoub** | iFogSim simulation, Java implementation, task execution, dynamic offloading, measurement collection, simulator-side integration |
-| **Ibrahim** | Python Q-Learning agent, state/action/reward implementation, training logic, agent-side testing |
+| **Mark** | Research coordination, objective, final analysis, documentation, integration |
+| **Omar** | Literature extraction and comparison tables |
+| **Mostafa** | Dataset research, source collection, and dataset inventory |
+| **Abdo** | Dataset engineering, validation, provenance, and benchmark dataset |
+| **Ayoub** | Model development, simulator integration, and experiments |
 
-Shared interface decisions require agreement between Ayoub and Ibrahim.
+Shared interface decisions require agreement between the simulator and model owners.
 See [`docs/team-responsibilities.md`](docs/team-responsibilities.md).
 
 ## 12. Setup Prerequisites
@@ -221,7 +240,7 @@ template for changes.
   limited; the agent, simulator customization, integration, and experiments are
   **pending**.
 - The **integration protocol is a draft**. Field names, units, and discretization
-  are provisional until Ayoub and Ibrahim agree on them.
+  are provisional until the relevant simulator and model owners agree on them.
 - **No novelty claim is asserted as fact.** The stated research gap is a
   **hypothesis** to be validated through a literature review.
 - Reward weights, thresholds, and state discretization boundaries are **not
