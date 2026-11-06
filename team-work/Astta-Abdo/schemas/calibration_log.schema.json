@@ -1,0 +1,117 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "additionalProperties": false,
+  "title": "Prediction calibration audit row",
+  "description": "Schema only. Actual completion and residual exist only after simulator execution; evaluation_regime_id is analysis metadata and must never enter policy observations.",
+  "required": [
+    "run_id",
+    "task_id",
+    "policy_id",
+    "candidate_site_id",
+    "candidate_action",
+    "offload_fraction",
+    "partition_model_id",
+    "predicted_completion_time_ms",
+    "actual_completion_time_ms",
+    "prediction_residual_ms",
+    "residual_window_size",
+    "quantile_level",
+    "calibrated_margin_ms",
+    "conservative_completion_estimate_ms",
+    "remaining_deadline_slack_ms",
+    "feasible_at_decision",
+    "evaluation_regime_id"
+  ],
+  "properties": {
+    "run_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "task_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "policy_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "candidate_site_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "candidate_action": {
+      "enum": [
+        "LOCAL",
+        "EDGE_FULL",
+        "CLOUD_FULL",
+        "EDGE_PARTIAL_25",
+        "EDGE_PARTIAL_50",
+        "EDGE_PARTIAL_75",
+        "CLOUD_PARTIAL_25",
+        "CLOUD_PARTIAL_50",
+        "CLOUD_PARTIAL_75"
+      ]
+    },
+    "offload_fraction": {
+      "enum": [
+        0,
+        0.25,
+        0.5,
+        0.75,
+        1
+      ]
+    },
+    "partition_model_id": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "predicted_completion_time_ms": {
+      "type": "number",
+      "minimum": 0
+    },
+    "actual_completion_time_ms": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "minimum": 0
+    },
+    "prediction_residual_ms": {
+      "type": [
+        "number",
+        "null"
+      ]
+    },
+    "residual_window_size": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "quantile_level": {
+      "type": "number",
+      "exclusiveMinimum": 0,
+      "exclusiveMaximum": 1
+    },
+    "calibrated_margin_ms": {
+      "type": "number"
+    },
+    "conservative_completion_estimate_ms": {
+      "type": "number",
+      "minimum": 0
+    },
+    "remaining_deadline_slack_ms": {
+      "type": "number"
+    },
+    "feasible_at_decision": {
+      "type": "boolean"
+    },
+    "evaluation_regime_id": {
+      "type": [
+        "string",
+        "null"
+      ]
+    }
+  }
+}

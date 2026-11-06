@@ -1,0 +1,209 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "additionalProperties": false,
+  "title": "Synthetic task input record",
+  "description": "Generated before policy action. CSV blank fields serialize to JSON null. No policy decisions or execution outcomes.",
+  "required": [
+    "task_id",
+    "run_id",
+    "seed",
+    "scenario_id",
+    "workload_profile_id",
+    "source_device_id",
+    "application_profile",
+    "urgency_class",
+    "arrival_time_ms",
+    "input_size_bytes",
+    "output_size_bytes",
+    "required_mi",
+    "splittability",
+    "partition_model_id",
+    "partition_overhead_ms",
+    "merge_overhead_ms",
+    "input_partition_model",
+    "output_partition_model",
+    "relative_deadline_ms",
+    "absolute_deadline_ms",
+    "units_version",
+    "config_hash",
+    "generator_version"
+  ],
+  "properties": {
+    "task_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "run_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "seed": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "scenario_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "workload_profile_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "source_device_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "application_profile": {
+      "type": "string",
+      "minLength": 1
+    },
+    "urgency_class": {
+      "enum": [
+        "CRITICAL",
+        "TIME_SENSITIVE",
+        "DELAY_TOLERANT"
+      ]
+    },
+    "arrival_time_ms": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "input_size_bytes": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "output_size_bytes": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "required_mi": {
+      "type": "number",
+      "exclusiveMinimum": 0
+    },
+    "splittability": {
+      "enum": [
+        "INDIVISIBLE",
+        "DATA_PARALLEL_DIVISIBLE"
+      ]
+    },
+    "partition_model_id": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "partition_overhead_ms": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "minimum": 0
+    },
+    "merge_overhead_ms": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "minimum": 0
+    },
+    "input_partition_model": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "output_partition_model": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "relative_deadline_ms": {
+      "type": "integer",
+      "exclusiveMinimum": 0
+    },
+    "absolute_deadline_ms": {
+      "type": "integer",
+      "exclusiveMinimum": 0
+    },
+    "units_version": {
+      "const": "SI-ms-bytes-MI-v1"
+    },
+    "config_hash": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "generator_version": {
+      "type": "string",
+      "minLength": 1
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "splittability": {
+            "const": "INDIVISIBLE"
+          }
+        },
+        "required": [
+          "splittability"
+        ]
+      },
+      "then": {
+        "properties": {
+          "partition_model_id": {
+            "type": "null"
+          },
+          "partition_overhead_ms": {
+            "type": "null"
+          },
+          "merge_overhead_ms": {
+            "type": "null"
+          },
+          "input_partition_model": {
+            "type": "null"
+          },
+          "output_partition_model": {
+            "type": "null"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "splittability": {
+            "const": "DATA_PARALLEL_DIVISIBLE"
+          }
+        },
+        "required": [
+          "splittability"
+        ]
+      },
+      "then": {
+        "properties": {
+          "partition_model_id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "partition_overhead_ms": {
+            "type": "number",
+            "minimum": 0
+          },
+          "merge_overhead_ms": {
+            "type": "number",
+            "minimum": 0
+          },
+          "input_partition_model": {
+            "const": "PROPORTIONAL_TO_COMPUTE_ALPHA"
+          },
+          "output_partition_model": {
+            "const": "PROPORTIONAL_TO_COMPUTE_ALPHA"
+          }
+        }
+      }
+    }
+  ]
+}

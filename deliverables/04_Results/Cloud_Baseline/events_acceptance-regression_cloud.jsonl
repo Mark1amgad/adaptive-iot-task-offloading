@@ -1,2 +1,0 @@
-{"ts":1791918478.37,"level":"warning","event":"placeholder_thresholds","features":["task_mi","deadline_ms"]}
-{"ts":1791918478.581,"level":"info","event":"decision","task_id":"acceptance-regression_cloud:task:1","state":27,"action":"Cloud","mode":"baseline"}

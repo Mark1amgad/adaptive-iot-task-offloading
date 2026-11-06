@@ -1,2 +1,0 @@
-{"ts":1791917364.729,"level":"warning","event":"placeholder_thresholds","features":["task_mi","deadline_ms"]}
-{"ts":1791917364.869,"level":"info","event":"decision","task_id":"rl-ifogsim-regression-local:task:1","state":27,"action":"Local","mode":"baseline"}

@@ -1,0 +1,221 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "additionalProperties": false,
+  "title": "Simulator decision-time candidate observation row",
+  "description": "Schema only. Produced by simulator adapter before action execution. Every nullable measurement is null when not truly observable/modelled. Must not contain actual completion, outcome labels, future regime metadata or test labels.",
+  "required": [
+    "run_id",
+    "task_id",
+    "policy_id",
+    "decision_time_ms",
+    "candidate_tier",
+    "candidate_site_id",
+    "candidate_action",
+    "offload_fraction",
+    "local_fraction",
+    "remote_tier",
+    "local_site_id",
+    "remote_site_id",
+    "partition_model_id",
+    "cpu_capacity_mips",
+    "cpu_utilization_fraction",
+    "available_cpu_capacity_mips",
+    "queue_length_tasks",
+    "estimated_queue_wait_ms",
+    "link_bandwidth_value",
+    "link_bandwidth_unit",
+    "link_delay_ms",
+    "predicted_transfer_time_ms",
+    "predicted_execution_time_ms",
+    "predicted_end_to_end_time_ms",
+    "calibration_margin_ms",
+    "conservative_completion_estimate_ms",
+    "remaining_deadline_slack_ms",
+    "feasible_at_decision"
+  ],
+  "properties": {
+    "run_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "task_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "policy_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "decision_time_ms": {
+      "type": "number",
+      "minimum": 0
+    },
+    "candidate_tier": {
+      "enum": [
+        "LOCAL",
+        "EDGE",
+        "CLOUD"
+      ]
+    },
+    "candidate_site_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "candidate_action": {
+      "enum": [
+        "LOCAL",
+        "EDGE_FULL",
+        "CLOUD_FULL",
+        "EDGE_PARTIAL_25",
+        "EDGE_PARTIAL_50",
+        "EDGE_PARTIAL_75",
+        "CLOUD_PARTIAL_25",
+        "CLOUD_PARTIAL_50",
+        "CLOUD_PARTIAL_75"
+      ]
+    },
+    "offload_fraction": {
+      "enum": [
+        0,
+        0.25,
+        0.5,
+        0.75,
+        1
+      ]
+    },
+    "local_fraction": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1
+    },
+    "remote_tier": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "enum": [
+        "EDGE",
+        "CLOUD",
+        null
+      ]
+    },
+    "local_site_id": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "remote_site_id": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "partition_model_id": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "cpu_capacity_mips": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "exclusiveMinimum": 0
+    },
+    "cpu_utilization_fraction": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "minimum": 0,
+      "maximum": 1
+    },
+    "available_cpu_capacity_mips": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "minimum": 0
+    },
+    "queue_length_tasks": {
+      "type": [
+        "integer",
+        "null"
+      ],
+      "minimum": 0
+    },
+    "estimated_queue_wait_ms": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "minimum": 0
+    },
+    "link_bandwidth_value": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "exclusiveMinimum": 0
+    },
+    "link_bandwidth_unit": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "link_delay_ms": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "minimum": 0
+    },
+    "predicted_transfer_time_ms": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "minimum": 0
+    },
+    "predicted_execution_time_ms": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "minimum": 0
+    },
+    "predicted_end_to_end_time_ms": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "minimum": 0
+    },
+    "calibration_margin_ms": {
+      "type": [
+        "number",
+        "null"
+      ]
+    },
+    "conservative_completion_estimate_ms": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "minimum": 0
+    },
+    "remaining_deadline_slack_ms": {
+      "type": [
+        "number",
+        "null"
+      ]
+    },
+    "feasible_at_decision": {
+      "type": "boolean"
+    }
+  }
+}

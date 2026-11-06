@@ -1,0 +1,193 @@
+spec_version: "1.1.0"
+config_status: PROPOSED_UNTIL_MARK_APPROVAL
+split_strategy:
+  strategy_id: disjoint_scenario_family_and_seed_bands_v2
+  method: disjoint_scenario_family_and_seed_bands
+  train_families: [stable, bursty]
+  validation_families: [network_bandwidth, network_wan_delay, edge_capacity]
+  test_families: [task_mix_shift, repeated_aba, combined_stress, unseen_topology]
+  seed_bands: {train: [1, 60], validation: [61, 80], test: [81, 120]}
+  paired_seed_plan:
+    minimum_paired_seeds_per_principal_scenario: 20
+    preferred_paired_seeds_per_principal_scenario: 30
+    status: PLANNED_NOT_RUN
+  note: >-
+    Both scenario-family and seed-band constraints are mandatory. For the all-core
+    CLI, --seed-count N deterministically uses the first N seeds in the relevant
+    band's interval for each scenario. Never randomly split rows from one run.
+
+# The V2 target layout is not yet demonstrated in the checked-in one-task prototype.
+topology_profiles:
+  v2_target_4iot_2edge_1cloud:
+    topology_id: v2_target_4iot_2edge_1cloud
+    status: PROPOSED_PENDING_AYOUB_VERIFICATION
+    source_devices: [iot-01, iot-02, iot-03, iot-04]
+    tier_counts: {LOCAL: 4, EDGE: 2, CLOUD: 1}
+    capacity_mips: BLOCKED_NOT_SUPPLIED_FOR_V2_TARGET
+    note: "Target specification only; not asserted to be implemented in current simulator source."
+
+scenarios:
+  stable_steady:
+    family: stable
+    scenario_family: stable
+    arrival_process: {type: poisson, rate_tasks_per_second: 0.5}
+    network_profile: nominal_reference_v1
+    edge_capacity_profile: nominal_reference_v1
+    task_mix_profile: balanced_v1
+    topology_id: v2_target_4iot_2edge_1cloud
+    regimes: [{regime_id: A, start_fraction: 0.0, end_fraction: 1.0, condition_profile_id: nominal_reference_v1}]
+    status: PROPOSED
+  bursty_on_off:
+    family: bursty
+    scenario_family: bursty
+    arrival_process: {type: on_off, on_rate_tasks_per_second: 2.0, off_rate_tasks_per_second: 0.15, on_duration_ms: 5000, off_duration_ms: 10000, initial_state: "on"}
+    network_profile: nominal_reference_v1
+    edge_capacity_profile: nominal_reference_v1
+    task_mix_profile: balanced_v1
+    topology_id: v2_target_4iot_2edge_1cloud
+    regimes: [{regime_id: A, start_fraction: 0.0, end_fraction: 1.0, condition_profile_id: nominal_reference_v1}]
+    status: PROPOSED
+  reduced_bandwidth:
+    family: network_bandwidth
+    scenario_family: network_bandwidth_stress
+    arrival_process: {type: poisson, rate_tasks_per_second: 0.5}
+    network_profile: reduced_bandwidth_B_v1
+    edge_capacity_profile: nominal_reference_v1
+    task_mix_profile: balanced_v1
+    topology_id: v2_target_4iot_2edge_1cloud
+    regimes: [{regime_id: B, start_fraction: 0.0, end_fraction: 1.0, condition_profile_id: reduced_bandwidth_B_v1}]
+    status: PROPOSED
+  increased_wan_delay:
+    family: network_wan_delay
+    scenario_family: network_wan_delay_stress
+    arrival_process: {type: poisson, rate_tasks_per_second: 0.5}
+    network_profile: increased_wan_delay_B_v1
+    edge_capacity_profile: nominal_reference_v1
+    task_mix_profile: balanced_v1
+    topology_id: v2_target_4iot_2edge_1cloud
+    regimes: [{regime_id: B, start_fraction: 0.0, end_fraction: 1.0, condition_profile_id: increased_wan_delay_B_v1}]
+    status: PROPOSED
+  reduced_edge_capacity:
+    family: edge_capacity
+    scenario_family: edge_capacity_stress
+    arrival_process: {type: poisson, rate_tasks_per_second: 0.5}
+    network_profile: nominal_reference_v1
+    edge_capacity_profile: reduced_edge_capacity_B_v1
+    task_mix_profile: balanced_v1
+    topology_id: v2_target_4iot_2edge_1cloud
+    regimes: [{regime_id: B, start_fraction: 0.0, end_fraction: 1.0, condition_profile_id: reduced_edge_capacity_B_v1}]
+    status: PROPOSED
+  task_size_compute_shift:
+    family: task_mix_shift
+    scenario_family: task_size_compute_shift
+    arrival_process: {type: poisson, rate_tasks_per_second: 0.5}
+    network_profile: nominal_reference_v1
+    edge_capacity_profile: nominal_reference_v1
+    task_mix_profile: task_size_compute_A_B_v1
+    topology_id: v2_target_4iot_2edge_1cloud
+    regimes: [{regime_id: A, start_fraction: 0.0, end_fraction: 0.5, condition_profile_id: nominal_reference_v1}, {regime_id: B, start_fraction: 0.5, end_fraction: 1.0, condition_profile_id: heavy_shift_B_v1}]
+    status: PROPOSED
+  repeated_a_b_a:
+    family: repeated_aba
+    scenario_family: repeated_network_shift
+    arrival_process: {type: poisson, rate_tasks_per_second: 0.5}
+    network_profile: repeated_aba_bandwidth_v1
+    edge_capacity_profile: nominal_reference_v1
+    task_mix_profile: balanced_v1
+    topology_id: v2_target_4iot_2edge_1cloud
+    regimes: [{regime_id: A, start_fraction: 0.0, end_fraction: 0.3333333333, condition_profile_id: nominal_reference_v1}, {regime_id: B, start_fraction: 0.3333333333, end_fraction: 0.6666666667, condition_profile_id: reduced_bandwidth_B_v1}, {regime_id: A, start_fraction: 0.6666666667, end_fraction: 1.0, condition_profile_id: nominal_reference_v1}]
+    status: PROPOSED
+  repeated_aba_task_mix:
+    family: repeated_aba
+    scenario_family: repeated_workload_shift
+    arrival_process: {type: poisson, rate_tasks_per_second: 0.5}
+    network_profile: nominal_reference_v1
+    edge_capacity_profile: nominal_reference_v1
+    task_mix_profile: repeated_aba_task_mix_v1
+    topology_id: v2_target_4iot_2edge_1cloud
+    regimes: [{regime_id: A, start_fraction: 0.0, end_fraction: 0.3333333333, condition_profile_id: balanced_v1}, {regime_id: B, start_fraction: 0.3333333333, end_fraction: 0.6666666667, condition_profile_id: heavy_shift_B_v1}, {regime_id: A, start_fraction: 0.6666666667, end_fraction: 1.0, condition_profile_id: balanced_v1}]
+    status: PROPOSED
+  combined_stress_optional:
+    family: combined_stress
+    scenario_family: combined_stress_optional
+    arrival_process: {type: on_off, on_rate_tasks_per_second: 2.0, off_rate_tasks_per_second: 0.15, on_duration_ms: 5000, off_duration_ms: 10000, initial_state: "on"}
+    network_profile: reduced_bandwidth_B_v1
+    edge_capacity_profile: reduced_edge_capacity_B_v1
+    task_mix_profile: task_size_compute_A_B_v1
+    topology_id: v2_target_4iot_2edge_1cloud
+    regimes: [{regime_id: STRESS, start_fraction: 0.0, end_fraction: 1.0, condition_profile_id: combined_stress_optional}
+    ]
+    status: PROPOSED_OPTIONAL
+  unseen_topology_optional:
+    family: unseen_topology
+    scenario_family: unseen_topology_optional
+    arrival_process: {type: poisson, rate_tasks_per_second: 0.5}
+    network_profile: nominal_reference_v1
+    edge_capacity_profile: unseen_capacity_BLOCKED_v1
+    task_mix_profile: balanced_v1
+    topology_id: unseen_topology_not_instantiated
+    regimes: [{regime_id: UNSEEN, start_fraction: 0.0, end_fraction: 1.0, condition_profile_id: unseen_capacity_BLOCKED_v1}]
+    status: BLOCKED_TOPOLOGY_NOT_VERIFIED
+
+network_profiles:
+  nominal_reference_v1:
+    local_edge_uplink_delay_ms: 2
+    edge_cloud_uplink_delay_ms: 45
+    bandwidth_scale: 1.0
+    bandwidth_unit_status: BLOCKED_RAW_UNIT_UNKNOWN
+    downlink_delay_status: BLOCKED_NOT_SPECIFIED
+    status: APPROVED_AS_REFERENCE_CONFIG_ONLY
+  reduced_bandwidth_B_v1:
+    bandwidth_scale: 0.5
+    local_edge_uplink_delay_ms: 2
+    edge_cloud_uplink_delay_ms: 45
+    bandwidth_unit_status: BLOCKED_RAW_UNIT_UNKNOWN
+    status: PROPOSED_FACTOR_LEVEL_ONLY
+  increased_wan_delay_B_v1:
+    bandwidth_scale: 1.0
+    local_edge_uplink_delay_ms: 2
+    edge_cloud_uplink_delay_ms: 90
+    bandwidth_unit_status: BLOCKED_RAW_UNIT_UNKNOWN
+    status: PROPOSED_FACTOR_LEVEL_ONLY
+  repeated_aba_bandwidth_v1:
+    regimes:
+      - {from_fraction: 0.0, to_fraction: 0.3333333333, bandwidth_scale: 1.0}
+      - {from_fraction: 0.3333333333, to_fraction: 0.6666666667, bandwidth_scale: 0.5}
+      - {from_fraction: 0.6666666667, to_fraction: 1.0, bandwidth_scale: 1.0}
+    fixed_uplink_delay_ms: {local_edge: 2, edge_cloud: 45}
+    bandwidth_unit_status: BLOCKED_RAW_UNIT_UNKNOWN
+    status: PROPOSED
+
+edge_capacity_profiles:
+  nominal_reference_v1:
+    capacity_scale: 1.0
+    baseline_edge_mips_reference: 2800
+    status: APPROVED_AS_SINGLE_EDGE_PROTOTYPE_REFERENCE_ONLY
+  reduced_edge_capacity_B_v1:
+    capacity_scale: 0.5
+    baseline_edge_mips_reference: 2800
+    status: PROPOSED_FACTOR_LEVEL_ONLY
+  unseen_capacity_BLOCKED_v1:
+    capacity_scale: 0.75
+    baseline_edge_mips_reference: null
+    status: BLOCKED_TARGET_TOPOLOGY_AND_CAPACITY_NOT_VERIFIED
+
+# A/B profiles intentionally change characteristics only; regime IDs remain manifest-only.
+task_mix_profiles:
+  balanced_v1:
+    profile_weights: {SENSOR_INFERENCE: 0.50, VIDEO_FRAME_BATCH: 0.25, PARALLEL_SENSOR_AGGREGATION: 0.25}
+    status: PROPOSED
+  heavy_shift_B_v1:
+    profile_weights: {SENSOR_INFERENCE: 0.20, BULK_VIDEO_FRAME_BATCH: 0.40, LARGE_PARALLEL_SENSOR_AGGREGATION: 0.40}
+    status: PROPOSED
+  task_size_compute_A_B_v1:
+    regimes:
+      - {from_fraction: 0.0, to_fraction: 0.5, weights: {SENSOR_INFERENCE: 0.50, VIDEO_FRAME_BATCH: 0.25, PARALLEL_SENSOR_AGGREGATION: 0.25}}
+      - {from_fraction: 0.5, to_fraction: 1.0, weights: {SENSOR_INFERENCE: 0.20, BULK_VIDEO_FRAME_BATCH: 0.40, LARGE_PARALLEL_SENSOR_AGGREGATION: 0.40}}
+    status: PROPOSED
+  repeated_aba_task_mix_v1:
+    regimes:
+      - {from_fraction: 0.0, to_fraction: 0.3333333333, weights: {SENSOR_INFERENCE: 0.50, VIDEO_FRAME_BATCH: 0.25, PARALLEL_SENSOR_AGGREGATION: 0.25}}
+      - {from_fraction: 0.3333333333, to_fraction: 0.6666666667, weights: {SENSOR_INFERENCE: 0.20, BULK_VIDEO_FRAME_BATCH: 0.40, LARGE_PARALLEL_SENSOR_AGGREGATION: 0.40}}
+      - {from_fraction: 0.6666666667, to_fraction: 1.0, weights: {SENSOR_INFERENCE: 0.50, VIDEO_FRAME_BATCH: 0.25, PARALLEL_SENSOR_AGGREGATION: 0.25}}
+    status: PROPOSED

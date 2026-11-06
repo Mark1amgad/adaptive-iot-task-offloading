@@ -1,0 +1,259 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "additionalProperties": false,
+  "title": "Simulator-measured final task outcome",
+  "description": "Schema only; never populated by workload generator. completion_time_ms is final joined completion for partial work. Energy is deliberately omitted until Ayoub verifies per-task energy attribution and units.",
+  "required": [
+    "run_id",
+    "task_id",
+    "policy_id",
+    "arrival_time_ms",
+    "action_type",
+    "offload_fraction",
+    "local_fraction",
+    "remote_tier",
+    "full_execution_site_id",
+    "local_execution_site_id",
+    "remote_execution_site_id",
+    "full_execution_start_ms",
+    "full_execution_end_ms",
+    "local_branch_start_ms",
+    "local_branch_end_ms",
+    "remote_input_transfer_start_ms",
+    "remote_input_transfer_end_ms",
+    "remote_branch_start_ms",
+    "remote_branch_end_ms",
+    "partition_start_ms",
+    "partition_end_ms",
+    "merge_start_ms",
+    "merge_end_ms",
+    "result_transfer_start_ms",
+    "result_transfer_end_ms",
+    "completion_time_ms",
+    "end_to_end_latency_ms",
+    "final_status",
+    "deadline_met",
+    "unresolved_at_horizon",
+    "failure_or_unresolved_reason",
+    "observed_until_ms"
+  ],
+  "properties": {
+    "run_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "task_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "policy_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "action_type": {
+      "enum": [
+        "LOCAL",
+        "EDGE_FULL",
+        "CLOUD_FULL",
+        "EDGE_PARTIAL_25",
+        "EDGE_PARTIAL_50",
+        "EDGE_PARTIAL_75",
+        "CLOUD_PARTIAL_25",
+        "CLOUD_PARTIAL_50",
+        "CLOUD_PARTIAL_75"
+      ]
+    },
+    "offload_fraction": {
+      "enum": [
+        0,
+        0.25,
+        0.5,
+        0.75,
+        1
+      ]
+    },
+    "local_fraction": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1
+    },
+    "remote_tier": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "enum": [
+        "EDGE",
+        "CLOUD",
+        null
+      ]
+    },
+    "full_execution_site_id": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "local_execution_site_id": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "remote_execution_site_id": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "full_execution_start_ms": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "minimum": 0
+    },
+    "full_execution_end_ms": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "minimum": 0
+    },
+    "local_branch_start_ms": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "minimum": 0
+    },
+    "local_branch_end_ms": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "minimum": 0
+    },
+    "remote_input_transfer_start_ms": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "minimum": 0
+    },
+    "remote_input_transfer_end_ms": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "minimum": 0
+    },
+    "remote_branch_start_ms": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "minimum": 0
+    },
+    "remote_branch_end_ms": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "minimum": 0
+    },
+    "partition_start_ms": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "minimum": 0
+    },
+    "partition_end_ms": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "minimum": 0
+    },
+    "merge_start_ms": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "minimum": 0
+    },
+    "merge_end_ms": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "minimum": 0
+    },
+    "result_transfer_start_ms": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "minimum": 0
+    },
+    "result_transfer_end_ms": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "minimum": 0
+    },
+    "completion_time_ms": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "minimum": 0
+    },
+    "end_to_end_latency_ms": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "minimum": 0
+    },
+    "final_status": {
+      "enum": [
+        "ON_TIME",
+        "LATE",
+        "FAILED",
+        "UNRESOLVED_AT_HORIZON"
+      ]
+    },
+    "deadline_met": {
+      "type": [
+        "boolean",
+        "null"
+      ]
+    },
+    "unresolved_at_horizon": {
+      "type": "boolean"
+    },
+    "failure_or_unresolved_reason": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "arrival_time_ms": {
+      "type": "number",
+      "minimum": 0,
+      "description": "Copied exactly from the generated task input."
+    },
+    "observed_until_ms": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "minimum": 0,
+      "description": "Simulator observation horizon when status is unresolved."
+    }
+  }
+}

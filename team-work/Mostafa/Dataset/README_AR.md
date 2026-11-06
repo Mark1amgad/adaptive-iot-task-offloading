@@ -15,3 +15,6 @@ ToN_IoT وCICIoT2023 وUNSW-IoTraffic وBot-IoT وUNSW-NB15 لم تُنزّل ب
 ## قاعدة الأمانة
 
 لا تُعامل حركة الشبكة كمهام حوسبة، ولا CPU المضيف كمتطلب CPU لمهمة، ولا `Execution Time` كـnetwork delay منفصل.
+
+
+ملاحظة تحقق 5 نوفمبر 2026: تم التأكد من سلامة الصياغة النحوية لثلاثة سكريبتات تحليل (`compare_datasets.py`, `dataset_quality_report.py`, `inspect_dataset.py`). هذا فحص Syntax فقط وليس إعادة تنفيذ كاملة لكل تحليلات البيانات.

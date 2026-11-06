@@ -1,0 +1,95 @@
+TASKS    data/dev/stable_steady__seed_0007_tasks.csv  sha256=8ce873a47e59059ad53d0fc24ff1fc97e20b87b66c6d3abb520b07be2862bb25
+MANIFEST data/dev/stable_steady__seed_0007_scenario_manifest.csv  sha256=78f6237b1bb92a3492aaaf21e02226cdee7d48706b0914261c9a59a193b4d5b4
+TASKS    data/dev/bursty_on_off__seed_0007_tasks.csv  sha256=8a15e8bbad9c1845deac01c7fec738f297b1210e9ee539f23e804ac3247d05db
+MANIFEST data/dev/bursty_on_off__seed_0007_scenario_manifest.csv  sha256=af48a94c59336a0b7031b08794590b933ec8fd7514bfdddf9ac894c098d7e4d6
+TASKS    data/dev/reduced_bandwidth__seed_0061_tasks.csv  sha256=2b1f9fb6b077eb921171ecdb52322da4ed382e4e441636d6ec1001e6f77465bf
+MANIFEST data/dev/reduced_bandwidth__seed_0061_scenario_manifest.csv  sha256=138bb500712fd33ab1cb16af86f6f2aa488bc1e07a7affad56fc65ce90715a90
+TASKS    data/dev/increased_wan_delay__seed_0061_tasks.csv  sha256=abd20e64f8a28e1dbaed1554cfdec12a7277d7d36c45614fcfaa10bb62b86a58
+MANIFEST data/dev/increased_wan_delay__seed_0061_scenario_manifest.csv  sha256=f5a4492df8774e528178b1b2d480c9bb27a6291fa0b4ae20cdcca9ba58de2419
+TASKS    data/dev/reduced_edge_capacity__seed_0061_tasks.csv  sha256=c98fe3b86dd94156273cf0632c122b5fb8e473f2f93a92a05fe2d72ce1997ac4
+MANIFEST data/dev/reduced_edge_capacity__seed_0061_scenario_manifest.csv  sha256=b95178f3c15cd6d62805b941a3ffe0ee6657eb091a537692e2c71d88de968be2
+TASKS    data/dev/task_size_compute_shift__seed_0081_tasks.csv  sha256=c0f21fa1ec536c2983d0a5c5284f89ddb151b202b33ea2f01ced6a098579ffa4
+MANIFEST data/dev/task_size_compute_shift__seed_0081_scenario_manifest.csv  sha256=ef1aa4747a178c5de940ab072ac91bf33505504cd2df65c534f48e7d50f3a672
+TASKS    data/dev/repeated_a_b_a__seed_0081_tasks.csv  sha256=e72e16be7cc7fa034df2ced2f38d13b9fc7d64064befa1fedbaa9dc6be0b1a54
+MANIFEST data/dev/repeated_a_b_a__seed_0081_scenario_manifest.csv  sha256=0cc101eb9ff2dca8c4ed1ea89ba585497cb87347d3c95fe297431a1b52274b35
+TASKS    data/dev/repeated_aba_task_mix__seed_0081_tasks.csv  sha256=f2d715edae01ddd0724e09448cd047516cd23e83f9e2eac7eebd05d384eb2b19
+MANIFEST data/dev/repeated_aba_task_mix__seed_0081_scenario_manifest.csv  sha256=e6cec595d30d3bc90e408541e040f0c40f283ca6d178db468ed2663cc8c3575b
+{
+  "config_hash": "68e2ba5ad5ab23fbbe32a418b81b14014791978eb3387a5aae3a7f6ed2641c64",
+  "files": [
+    {
+      "manifest_path": "data/dev/stable_steady__seed_0007_scenario_manifest.csv",
+      "manifest_sha256": "78f6237b1bb92a3492aaaf21e02226cdee7d48706b0914261c9a59a193b4d5b4",
+      "run_id": "stable_steady-seed-0007",
+      "scenario_id": "stable_steady",
+      "seed": 7,
+      "tasks_path": "data/dev/stable_steady__seed_0007_tasks.csv",
+      "tasks_sha256": "8ce873a47e59059ad53d0fc24ff1fc97e20b87b66c6d3abb520b07be2862bb25"
+    },
+    {
+      "manifest_path": "data/dev/bursty_on_off__seed_0007_scenario_manifest.csv",
+      "manifest_sha256": "af48a94c59336a0b7031b08794590b933ec8fd7514bfdddf9ac894c098d7e4d6",
+      "run_id": "bursty_on_off-seed-0007",
+      "scenario_id": "bursty_on_off",
+      "seed": 7,
+      "tasks_path": "data/dev/bursty_on_off__seed_0007_tasks.csv",
+      "tasks_sha256": "8a15e8bbad9c1845deac01c7fec738f297b1210e9ee539f23e804ac3247d05db"
+    },
+    {
+      "manifest_path": "data/dev/reduced_bandwidth__seed_0061_scenario_manifest.csv",
+      "manifest_sha256": "138bb500712fd33ab1cb16af86f6f2aa488bc1e07a7affad56fc65ce90715a90",
+      "run_id": "reduced_bandwidth-seed-0061",
+      "scenario_id": "reduced_bandwidth",
+      "seed": 61,
+      "tasks_path": "data/dev/reduced_bandwidth__seed_0061_tasks.csv",
+      "tasks_sha256": "2b1f9fb6b077eb921171ecdb52322da4ed382e4e441636d6ec1001e6f77465bf"
+    },
+    {
+      "manifest_path": "data/dev/increased_wan_delay__seed_0061_scenario_manifest.csv",
+      "manifest_sha256": "f5a4492df8774e528178b1b2d480c9bb27a6291fa0b4ae20cdcca9ba58de2419",
+      "run_id": "increased_wan_delay-seed-0061",
+      "scenario_id": "increased_wan_delay",
+      "seed": 61,
+      "tasks_path": "data/dev/increased_wan_delay__seed_0061_tasks.csv",
+      "tasks_sha256": "abd20e64f8a28e1dbaed1554cfdec12a7277d7d36c45614fcfaa10bb62b86a58"
+    },
+    {
+      "manifest_path": "data/dev/reduced_edge_capacity__seed_0061_scenario_manifest.csv",
+      "manifest_sha256": "b95178f3c15cd6d62805b941a3ffe0ee6657eb091a537692e2c71d88de968be2",
+      "run_id": "reduced_edge_capacity-seed-0061",
+      "scenario_id": "reduced_edge_capacity",
+      "seed": 61,
+      "tasks_path": "data/dev/reduced_edge_capacity__seed_0061_tasks.csv",
+      "tasks_sha256": "c98fe3b86dd94156273cf0632c122b5fb8e473f2f93a92a05fe2d72ce1997ac4"
+    },
+    {
+      "manifest_path": "data/dev/task_size_compute_shift__seed_0081_scenario_manifest.csv",
+      "manifest_sha256": "ef1aa4747a178c5de940ab072ac91bf33505504cd2df65c534f48e7d50f3a672",
+      "run_id": "task_size_compute_shift-seed-0081",
+      "scenario_id": "task_size_compute_shift",
+      "seed": 81,
+      "tasks_path": "data/dev/task_size_compute_shift__seed_0081_tasks.csv",
+      "tasks_sha256": "c0f21fa1ec536c2983d0a5c5284f89ddb151b202b33ea2f01ced6a098579ffa4"
+    },
+    {
+      "manifest_path": "data/dev/repeated_a_b_a__seed_0081_scenario_manifest.csv",
+      "manifest_sha256": "0cc101eb9ff2dca8c4ed1ea89ba585497cb87347d3c95fe297431a1b52274b35",
+      "run_id": "repeated_a_b_a-seed-0081",
+      "scenario_id": "repeated_a_b_a",
+      "seed": 81,
+      "tasks_path": "data/dev/repeated_a_b_a__seed_0081_tasks.csv",
+      "tasks_sha256": "e72e16be7cc7fa034df2ced2f38d13b9fc7d64064befa1fedbaa9dc6be0b1a54"
+    },
+    {
+      "manifest_path": "data/dev/repeated_aba_task_mix__seed_0081_scenario_manifest.csv",
+      "manifest_sha256": "e6cec595d30d3bc90e408541e040f0c40f283ca6d178db468ed2663cc8c3575b",
+      "run_id": "repeated_aba_task_mix-seed-0081",
+      "scenario_id": "repeated_aba_task_mix",
+      "seed": 81,
+      "tasks_path": "data/dev/repeated_aba_task_mix__seed_0081_tasks.csv",
+      "tasks_sha256": "f2d715edae01ddd0724e09448cd047516cd23e83f9e2eac7eebd05d384eb2b19"
+    }
+  ],
+  "generator_version": "1.1.0",
+  "scope": "synthetic task inputs and scenario manifests only"
+}

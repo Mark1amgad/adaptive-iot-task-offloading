@@ -1,0 +1,136 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "additionalProperties": false,
+  "title": "Scenario manifest row",
+  "description": "Evaluation metadata. Regime timeline is not a policy observation. simulation horizon is not represented because generation has no execution outcomes.",
+  "required": [
+    "run_id",
+    "seed",
+    "scenario_id",
+    "scenario_family",
+    "scenario_status",
+    "workload_profile_id",
+    "arrival_process_type",
+    "arrival_process_parameters_json",
+    "task_count",
+    "generation_window_end_ms",
+    "regime_timeline_json",
+    "network_profile_id",
+    "network_profile_json",
+    "edge_capacity_profile_id",
+    "edge_capacity_profile_json",
+    "task_mix_profile_id",
+    "task_mix_profile_json",
+    "topology_id",
+    "dataset_split",
+    "split_strategy_id",
+    "paired_seed_plan_json",
+    "config_hash",
+    "generator_version",
+    "policy_replay_contract"
+  ],
+  "properties": {
+    "run_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "seed": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "scenario_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "scenario_family": {
+      "type": "string",
+      "minLength": 1
+    },
+    "scenario_status": {
+      "type": "string",
+      "minLength": 1
+    },
+    "workload_profile_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "arrival_process_type": {
+      "enum": [
+        "poisson",
+        "on_off"
+      ]
+    },
+    "arrival_process_parameters_json": {
+      "type": "string",
+      "minLength": 2
+    },
+    "task_count": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "generation_window_end_ms": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "regime_timeline_json": {
+      "type": "string",
+      "minLength": 2
+    },
+    "network_profile_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "network_profile_json": {
+      "type": "string",
+      "minLength": 2
+    },
+    "edge_capacity_profile_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "edge_capacity_profile_json": {
+      "type": "string",
+      "minLength": 2
+    },
+    "task_mix_profile_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "task_mix_profile_json": {
+      "type": "string",
+      "minLength": 2
+    },
+    "topology_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "dataset_split": {
+      "enum": [
+        "train",
+        "validation",
+        "test"
+      ]
+    },
+    "split_strategy_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "paired_seed_plan_json": {
+      "type": "string",
+      "minLength": 2
+    },
+    "config_hash": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "generator_version": {
+      "type": "string",
+      "minLength": 1
+    },
+    "policy_replay_contract": {
+      "type": "string",
+      "minLength": 1
+    }
+  }
+}

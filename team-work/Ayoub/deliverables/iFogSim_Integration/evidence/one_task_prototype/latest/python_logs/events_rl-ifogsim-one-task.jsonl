@@ -1,0 +1,10 @@
+{"ts":1791973679.176,"level":"warning","event":"placeholder_thresholds","features":["task_mi","deadline_ms"]}
+{"ts":1791973679.285,"level":"info","event":"decision","task_id":"rl-ifogsim-one-task:task:1","state":27,"action":"Local","mode":"explore"}
+{"ts":1791973877.946,"level":"warning","event":"placeholder_thresholds","features":["task_mi","deadline_ms"]}
+{"ts":1791973878.044,"level":"info","event":"decision","task_id":"rl-ifogsim-one-task:task:1","state":27,"action":"Local","mode":"explore"}
+{"ts":1791974701.669,"level":"warning","event":"placeholder_thresholds","features":["task_mi","deadline_ms"]}
+{"ts":1791974701.805,"level":"info","event":"decision","task_id":"rl-ifogsim-one-task:task:1","state":27,"action":"Local","mode":"explore"}
+{"ts":1791974837.076,"level":"warning","event":"placeholder_thresholds","features":["task_mi","deadline_ms"]}
+{"ts":1791974837.171,"level":"info","event":"decision","task_id":"rl-ifogsim-one-task:task:1","state":27,"action":"Local","mode":"explore"}
+{"ts":1791977021.459,"level":"warning","event":"placeholder_thresholds","features":["task_mi","deadline_ms"]}
+{"ts":1791977021.559,"level":"info","event":"decision","task_id":"rl-ifogsim-one-task:task:1","state":27,"action":"Local","mode":"explore"}

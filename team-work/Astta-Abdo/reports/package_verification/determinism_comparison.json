@@ -1,0 +1,98 @@
+[
+  {
+    "file": "bursty_on_off__seed_0007_scenario_manifest.csv",
+    "sha256_a": "af48a94c59336a0b7031b08794590b933ec8fd7514bfdddf9ac894c098d7e4d6",
+    "sha256_b": "af48a94c59336a0b7031b08794590b933ec8fd7514bfdddf9ac894c098d7e4d6",
+    "match": true
+  },
+  {
+    "file": "bursty_on_off__seed_0007_tasks.csv",
+    "sha256_a": "8a15e8bbad9c1845deac01c7fec738f297b1210e9ee539f23e804ac3247d05db",
+    "sha256_b": "8a15e8bbad9c1845deac01c7fec738f297b1210e9ee539f23e804ac3247d05db",
+    "match": true
+  },
+  {
+    "file": "increased_wan_delay__seed_0061_scenario_manifest.csv",
+    "sha256_a": "f5a4492df8774e528178b1b2d480c9bb27a6291fa0b4ae20cdcca9ba58de2419",
+    "sha256_b": "f5a4492df8774e528178b1b2d480c9bb27a6291fa0b4ae20cdcca9ba58de2419",
+    "match": true
+  },
+  {
+    "file": "increased_wan_delay__seed_0061_tasks.csv",
+    "sha256_a": "abd20e64f8a28e1dbaed1554cfdec12a7277d7d36c45614fcfaa10bb62b86a58",
+    "sha256_b": "abd20e64f8a28e1dbaed1554cfdec12a7277d7d36c45614fcfaa10bb62b86a58",
+    "match": true
+  },
+  {
+    "file": "reduced_bandwidth__seed_0061_scenario_manifest.csv",
+    "sha256_a": "138bb500712fd33ab1cb16af86f6f2aa488bc1e07a7affad56fc65ce90715a90",
+    "sha256_b": "138bb500712fd33ab1cb16af86f6f2aa488bc1e07a7affad56fc65ce90715a90",
+    "match": true
+  },
+  {
+    "file": "reduced_bandwidth__seed_0061_tasks.csv",
+    "sha256_a": "2b1f9fb6b077eb921171ecdb52322da4ed382e4e441636d6ec1001e6f77465bf",
+    "sha256_b": "2b1f9fb6b077eb921171ecdb52322da4ed382e4e441636d6ec1001e6f77465bf",
+    "match": true
+  },
+  {
+    "file": "reduced_edge_capacity__seed_0061_scenario_manifest.csv",
+    "sha256_a": "b95178f3c15cd6d62805b941a3ffe0ee6657eb091a537692e2c71d88de968be2",
+    "sha256_b": "b95178f3c15cd6d62805b941a3ffe0ee6657eb091a537692e2c71d88de968be2",
+    "match": true
+  },
+  {
+    "file": "reduced_edge_capacity__seed_0061_tasks.csv",
+    "sha256_a": "c98fe3b86dd94156273cf0632c122b5fb8e473f2f93a92a05fe2d72ce1997ac4",
+    "sha256_b": "c98fe3b86dd94156273cf0632c122b5fb8e473f2f93a92a05fe2d72ce1997ac4",
+    "match": true
+  },
+  {
+    "file": "repeated_a_b_a__seed_0081_scenario_manifest.csv",
+    "sha256_a": "0cc101eb9ff2dca8c4ed1ea89ba585497cb87347d3c95fe297431a1b52274b35",
+    "sha256_b": "0cc101eb9ff2dca8c4ed1ea89ba585497cb87347d3c95fe297431a1b52274b35",
+    "match": true
+  },
+  {
+    "file": "repeated_a_b_a__seed_0081_tasks.csv",
+    "sha256_a": "e72e16be7cc7fa034df2ced2f38d13b9fc7d64064befa1fedbaa9dc6be0b1a54",
+    "sha256_b": "e72e16be7cc7fa034df2ced2f38d13b9fc7d64064befa1fedbaa9dc6be0b1a54",
+    "match": true
+  },
+  {
+    "file": "repeated_aba_task_mix__seed_0081_scenario_manifest.csv",
+    "sha256_a": "e6cec595d30d3bc90e408541e040f0c40f283ca6d178db468ed2663cc8c3575b",
+    "sha256_b": "e6cec595d30d3bc90e408541e040f0c40f283ca6d178db468ed2663cc8c3575b",
+    "match": true
+  },
+  {
+    "file": "repeated_aba_task_mix__seed_0081_tasks.csv",
+    "sha256_a": "f2d715edae01ddd0724e09448cd047516cd23e83f9e2eac7eebd05d384eb2b19",
+    "sha256_b": "f2d715edae01ddd0724e09448cd047516cd23e83f9e2eac7eebd05d384eb2b19",
+    "match": true
+  },
+  {
+    "file": "stable_steady__seed_0007_scenario_manifest.csv",
+    "sha256_a": "78f6237b1bb92a3492aaaf21e02226cdee7d48706b0914261c9a59a193b4d5b4",
+    "sha256_b": "78f6237b1bb92a3492aaaf21e02226cdee7d48706b0914261c9a59a193b4d5b4",
+    "match": true
+  },
+  {
+    "file": "stable_steady__seed_0007_tasks.csv",
+    "sha256_a": "8ce873a47e59059ad53d0fc24ff1fc97e20b87b66c6d3abb520b07be2862bb25",
+    "sha256_b": "8ce873a47e59059ad53d0fc24ff1fc97e20b87b66c6d3abb520b07be2862bb25",
+    "match": true
+  },
+  {
+    "file": "task_size_compute_shift__seed_0081_scenario_manifest.csv",
+    "sha256_a": "ef1aa4747a178c5de940ab072ac91bf33505504cd2df65c534f48e7d50f3a672",
+    "sha256_b": "ef1aa4747a178c5de940ab072ac91bf33505504cd2df65c534f48e7d50f3a672",
+    "match": true
+  },
+  {
+    "file": "task_size_compute_shift__seed_0081_tasks.csv",
+    "sha256_a": "c0f21fa1ec536c2983d0a5c5284f89ddb151b202b33ea2f01ced6a098579ffa4",
+    "sha256_b": "c0f21fa1ec536c2983d0a5c5284f89ddb151b202b33ea2f01ced6a098579ffa4",
+    "match": true
+  }
+]

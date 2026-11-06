@@ -1,29 +1,19 @@
-# Team Workspaces
+# Team Contributions
 
-This directory contains the five named member workspaces. It is for drafts,
-working notes, research material, dataset work, and deliverables submitted for
-review. Shared approved material belongs in [../shared/](../shared/), not in a
-second copy under a member directory.
+Ownership below was confirmed directly by Mark on 5 November 2026. Attribution is based on the sender/creator, not inferred from filenames.
 
-Each member directory has the same workflow folders:
+- **Mark:** root research specification V2, supervisor brief, methodology draft, Research Gap v29, literature comparison, project PowerPoint decks, and `ABDO_DATASET_HANDOFF_PACKAGE.zip` (assembled by Mark as a handoff).
+- **Ayoub:** iFogSim-main RL archives, simulator/model work, readiness and technical audits (Arabic and English), baselines, metrics map, reproducibility plan, and topology GUI.
+- **Omar:** audited six-paper/eight-paper extraction workbooks, eight-paper screening workbook, Member2 v26 iFogSim project/results bundle, experiment plan, and analysis utility.
+- **Mostafa:** bilingual dataset inventory package, dataset feasibility review, and eight-candidate dataset research workspace.
+- **Abdo:** ECW/SMD technical audits, task-offloading feature coverage, dataset suitability/integration assessment, `marks.zip`, and final workload dataset package.
 
-```text
-drafts/       unfinished work and exploratory material
-research/     papers, notes, and analysis owned by the member
-datasets/     dataset-specific work and references
-deliverables/ completed submissions awaiting or after review
-notes/        decisions, questions, and handover notes
-```
+## Canonical member folders
 
-Existing files remain where they were unless their ownership and purpose are
-reviewed. See [../TEAM_GUIDE.md](../TEAM_GUIDE.md) for the review workflow.
+- Mark: `Mark/`
+- Ayoub: `Ayoub/`
+- Omar: `Omar/`
+- Mostafa: `Mostafa/`
+- Abdo: `Astta-Abdo/`
 
-## Workflow
-
-1. Work on your own Git branch.
-2. Put draft work in your named folder here when it is useful for review.
-3. Use the small metadata convention in deliverable notes: Owner, Status, Last Updated, Related Paper, Related Dataset, and Dependencies.
-4. Open a Pull Request and describe what changed, how to test it, and what remains incomplete.
-5. After approval, link or copy the final document into the appropriate shared folder; do not move executable source directories as part of this workflow.
-
-Do not upload secrets, credentials, private data, or fabricated experimental results.
+Each member folder retains authored work and received source packages. Exact duplicate documents were removed where a canonical copy exists; indexes point to the canonical location.

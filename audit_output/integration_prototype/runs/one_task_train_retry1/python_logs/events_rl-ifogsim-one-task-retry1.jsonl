@@ -1,2 +1,0 @@
-{"ts":1791917085.425,"level":"warning","event":"placeholder_thresholds","features":["task_mi","deadline_ms"]}
-{"ts":1791917085.565,"level":"warning","event":"protocol_error","code":"invalid_json","message":"not valid JSON: Expecting value: line 1 column 223 (char 222)","task_id":null}

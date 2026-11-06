@@ -1,1 +1,0 @@
-{"protocol_version":"1.0","type":"action","task_id":"t-000123","action_id":1,"action":"Edge","model_version":"q1-3f9a1c2e-u417","state_index":21,"mode":"exploit","epsilon":0.12,"q_values":[-0.8,-0.31,-0.52]}

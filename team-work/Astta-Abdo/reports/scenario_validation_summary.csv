@@ -1,0 +1,9 @@
+scenario_id,seed,task_count,indivisible_count,divisible_count,validation_status,replay_status
+stable_steady,7,48,22,26,PASS,PASS
+bursty_on_off,7,48,22,26,PASS,PASS
+reduced_bandwidth,61,48,24,24,PASS,PASS
+increased_wan_delay,61,48,24,24,PASS,PASS
+reduced_edge_capacity,61,48,24,24,PASS,PASS
+task_size_compute_shift,81,48,17,31,PASS,PASS
+repeated_a_b_a,81,48,20,28,PASS,PASS
+repeated_aba_task_mix,81,48,18,30,PASS,PASS

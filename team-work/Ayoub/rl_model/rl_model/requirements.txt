@@ -1,4 +1,0 @@
-# Runtime: standard library only (no third-party packages needed to run the agent/server).
-# Test/dev:
-pytest>=8
-jsonschema>=4        # validates examples/ against schemas/ in the test-suite

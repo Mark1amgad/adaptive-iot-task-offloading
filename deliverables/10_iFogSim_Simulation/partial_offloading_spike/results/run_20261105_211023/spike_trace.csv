@@ -1,0 +1,13 @@
+event,detail
+"configuration","task_mi=10000;input_bytes=12000;output_bytes=1000;local_share=0.4;edge_share=0.6;merge_overhead_ms=2.0;local_mips=1000.0;edge_mips=2800.0;local_edge_latency_ms=45.0;merge_overhead_type=fixed_simulated_delay_not_cpu_execution"
+"task_created","task_id=spike-task-001;creation_time_ms=5.0;total_mi=10000;branch_count=2"
+"branch_created","task_id=spike-task-001;branch=local;actual_tuple_id=1;mi=4000;input_bytes=4800;output_bytes=400;sim_time_ms=5.0"
+"branch_created","task_id=spike-task-001;branch=edge;actual_tuple_id=2;mi=6000;input_bytes=7200;output_bytes=600;sim_time_ms=5.0"
+"branch_execution_start","task_id=spike-task-001;branch=local;node=local;module=local_worker;mi=4000;sim_time_ms=5.0"
+"branch_transfer","task_id=spike-task-001;branch=edge;node=local;direction=uplink;bytes=7200;actual_tuple_id=2;sim_time_ms=5.0"
+"branch_result_arrival","task_id=spike-task-001;branch=local;actual_tuple_id=1;sim_time_ms=10.01"
+"branch_execution_start","task_id=spike-task-001;branch=edge;node=edge;module=edge_worker;mi=6000;sim_time_ms=50.72"
+"branch_transfer","task_id=spike-task-001;branch=edge;node=edge;direction=downlink;bytes=600;actual_tuple_id=2;sim_time_ms=52.87285714285714"
+"branch_result_arrival","task_id=spike-task-001;branch=edge;actual_tuple_id=2;sim_time_ms=98.93285714285715"
+"merge_started","task_id=spike-task-001;sim_time_ms=98.93285714285715;reason=both_branch_results_arrived"
+"task_completed","task_id=spike-task-001;status=completed;latency_ms=95.93285714285715;merge_overhead_ms=2.0;bandwidth_bytes=7800;branch_result_skew_ms=88.92285714285714"

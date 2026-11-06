@@ -1,0 +1,5 @@
+Independent regeneration check: PASS
+config_hash: 68e2ba5ad5ab23fbbe32a418b81b14014791978eb3387a5aae3a7f6ed2641c64
+scenario pairs compared: 8
+All eight task CSV SHA-256 values matched byte-for-byte across two independent output directories.
+All eight manifest CSV SHA-256 values matched byte-for-byte across two independent output directories.

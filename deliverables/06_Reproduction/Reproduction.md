@@ -1,39 +1,39 @@
 # Reproduction
 
-## Prerequisites
+## Requirements
 
-Run from the repository root on Windows PowerShell. The existing runner expects:
+The retained runners are Windows PowerShell scripts and use:
 
-- JDK 25 at `C:\Program Files\Eclipse Adoptium\jdk-25.0.3.9-hotspot`.
-- External iFogSim at `C:\Users\DELL\OneDrive\Desktop\Research\iFogSim`.
-- Python executable at `C:\Users\DELL\AppData\Roaming\uv\python\cpython-3.15.0b1-windows-x86_64-none\python.exe`.
-- The teammate-owned RL service at `team-work\Ayoub\rl_model\rl_model`.
+- JDK 25 (the original workstation used Eclipse Adoptium JDK 25.0.3).
+- External iFogSim source at sibling folder `Research/iFogSim`.
+- Python compatible with the model package under [`08_RL_Model/`](../08_RL_Model/).
+- The model package and dependencies preserved in this repository.
 
-Override runner parameters if the local paths differ.
+Paths can be overridden in the runner when the local installation differs.
 
-## Standard Demonstration
+## Run the one-task integration acceptance suite
 
-```powershell
-& .\deliverables\06_Reproduction\run_acceptance.ps1
-```
-
-This compiles the copied experiment source into a fresh isolated output directory, runs one real Python train case and deterministic Local/Edge/Cloud baseline cases, validates the generated JSONL, and writes a policy comparison. It refuses to reuse an existing output directory.
-
-## Focused Error and Deadline Cases
+From the repository root:
 
 ```powershell
-& .\deliverables\06_Reproduction\run_acceptance.ps1 -RunErrorTests
+& .\deliverables\10_iFogSim_Simulation\Simulation_Source\run_acceptance.ps1
 ```
 
-This also exercises the experiment-owned pre-send timeout and malformed-response fallback boundary and a zero-deadline completed-task case. These fallback tests are not mid-flight Python timeouts: no observation is sent, so no Python decision becomes pending.
+The runner compiles the experiment-owned Java source into an isolated output directory, runs the retained train/baseline cases, and validates the resulting JSONL traces.
 
-## Evidence-Only Validation
-
-The copied utilities can validate or summarize an existing run without running Java:
+To include the response-boundary fallback and deadline cases:
 
 ```powershell
-& python .\deliverables\03_Source_Code\validate_integration.py --root .\audit_output\integration_prototype\runs\acceptance_20261013_220748
-& python .\deliverables\03_Source_Code\compare_policies.py --root .\audit_output\integration_prototype\runs\acceptance_20261013_220748
+& .\deliverables\10_iFogSim_Simulation\Simulation_Source\run_acceptance.ps1 -RunErrorTests
 ```
 
-The deliverables package is not self-contained. It depends on the original repository, external iFogSim tree, JDK, Python environment, and teammate-owned RL service.
+The timeout/malformed fallback tests inject errors before an observation is sent. They do not demonstrate a true mid-flight timeout after Python has accepted a pending task.
+
+## Validate or summarize the retained evidence without rerunning Java
+
+```powershell
+python .\deliverables\10_iFogSim_Simulation\Simulation_Source\validate_integration.py --root .\audit_output\integration_prototype\runs\acceptance_20261013_220748
+python .\deliverables\04_Results\compare_policies.py --root .\audit_output\integration_prototype\runs\acceptance_20261013_220748
+```
+
+The retained results are one-task integration measurements, not a multi-task benchmark or evidence of adaptive-policy superiority. The package depends on the external iFogSim tree and a local JDK/Python environment; it is not fully self-contained.

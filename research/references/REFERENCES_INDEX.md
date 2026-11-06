@@ -1,6 +1,6 @@
 # References Index
 
-Audit date: 2026-11-03. Classification is based on PDF first-page text and embedded metadata, with the local review documents used only as corroborating project context. Local copies are preserved in this repository; originals remain in the external `References/` folder.
+Audit date: 2026-11-03. Classification is based on PDF first-page text and embedded metadata, with local review documents used only as corroborating project context. Repository copies are now canonical; the external duplicate References folder was removed after SHA-256 verification on 2026-11-06.
 
 ## Counts
 
@@ -17,7 +17,7 @@ Audit date: 2026-11-03. Classification is based on PDF first-page text and embed
 | ID | Title | Year | Venue | Type | DOI | Local file | Use |
 | --- | --- | ---: | --- | --- | --- | --- | --- |
 | CORE-01 | Forecast-driven task offloading for reliable and adaptive mobile edge computing | 2026 | Journal of Network and Computer Applications, 251, 104494 | Journal | [10.1016/j.jnca.2026.104494](https://doi.org/10.1016/j.jnca.2026.104494) | [PDF](01_Core_Journal_Papers/Forecast-driven%20task%20offloading%20for%20reliable%20and%20adaptive%20mobile%20edge%20computing.pdf) | Forecast-aware adaptive offloading baseline. |
-| CORE-02 | Chance constraint-based dependent task offloading for multi-access edge computing under uncertainty | 2026 | Applied Soft Computing, 201, 115710 | Journal | [10.1016/j.asoc.2026.115710](https://doi.org/10.1016/j.asoc.2026.115710) | [PDF](01_Core_Journal_Papers/Chance%20constraint-based%20dependent%20task%20offloading%20for%20multi-access%20edge%20computing%20under%20uncertainty.pdf) | Uncertainty and dependent-task comparison. |
+| CORE-02 | Chance constraint-based dependent task offloading for multi-access edge computing under uncertainty | 2026 | Applied Soft Computing, 201, 115710 | Journal | [10.1016/j.asoc.2026.115710](https://doi.org/10.1016/j.asoc.2026.115710) | [PDF](01_Core_Journal_Papers/Chance%20constraint-based%20dependent%20task%20offloading%20for%20multi-access%20edge%20computin.pdf) | Uncertainty and dependent-task comparison. |
 | CORE-03 | RELTO: A reliability-oriented DRL approach with context-aware adaptive reward weighting for multi-objective task offloading in MEC | 2026 | Ad Hoc Networks, 181, 104065 | Journal | [10.1016/j.adhoc.2025.104065](https://doi.org/10.1016/j.adhoc.2025.104065) | [PDF](01_Core_Journal_Papers/RELTO.pdf) | Reliability-aware adaptive reward method. |
 | CORE-04 | ESFMTO: A reliable task offloading strategy based on edge server failure model in IIoT | 2025 | Ad Hoc Networks, 176, 103887 | Journal | [10.1016/j.adhoc.2025.103887](https://doi.org/10.1016/j.adhoc.2025.103887) | [PDF](01_Core_Journal_Papers/ESFMTO.pdf) | Failure-aware IIoT offloading. |
 | CORE-05 | Quality of Experience and Reliability-Aware Task Offloading and Scheduling for Multi-User Mobile-Edge Computing Systems | 2025 | IEEE Transactions on Services Computing, 18(3), 1683 onward | Journal | [10.1109/TSC.2025.3552338](https://doi.org/10.1109/TSC.2025.3552338) | [PDF](01_Core_Journal_Papers/Quality-of-Experience-and-Reliability-Aware-Task-Offloading-and-Scheduling-for-Multi-User.pdf) | Multi-user QoE and reliability comparison. |
@@ -53,7 +53,7 @@ Audit date: 2026-11-03. Classification is based on PDF first-page text and embed
 
 ## Duplicates and versions
 
-- No exact SHA-256 duplicates were found among the 14 PDFs and 3 DOCX files in the external `References` folder.
+- At intake, no exact SHA-256 duplicates were found among the 14 PDFs and 3 DOCX files supplied in References; the external duplicate folder was removed after verifying canonical repository copies.
 - The HAL copy of CONF-02 is a repository/deposit version and is not counted as a second paper version. Its publication metadata needs publisher confirmation.
 - The project review documents contain bibliographic claims not represented by local PDFs. Those claims are recorded as pending, not duplicated papers.
 
@@ -63,13 +63,13 @@ Audit date: 2026-11-03. Classification is based on PDF first-page text and embed
 | --- | --- | --- |
 | `Research_Gap_Download_v29/Research_Gap_Report_v29.docx` | Copied; original and ZIP archive preserved | [Research gap report](../literature_review/research_gaps/Research_Gap_Report_v29.docx) |
 | `Research_Gap_Download_v29/Research_Gap_Excel_v29.xlsx` | Copied; original and ZIP archive preserved | [Research gap matrix](../literature_review/research_gaps/Research_Gap_Excel_v29.xlsx) |
-| `Proposed_Methodology_Experimental_Plan-1.docx` | Copied as a draft methodology record; original preserved | [Proposed methodology plan](../../deliverables/02_Methodology/Proposed_Methodology_Experimental_Plan-1.docx) |
-| `Member3_iFogSim2_Simulator_Technical_Audit.docx` and `_EN.docx` | Copied as bilingual audit evidence; originals preserved | [Arabic audit](../../audit_output/Member3_iFogSim2_Simulator_Technical_Audit.docx), [English audit](../../audit_output/Member3_iFogSim2_Simulator_Technical_Audit_EN.docx) |
-| External `rl_model/rl_model/src`, schemas, tests, and configuration | Kept external; executable files are hash-equivalent to `deliverables/08_RL_Model/` | [Canonical RL model](../../deliverables/08_RL_Model/) |
-| External `rl_model/rl_model/docs/*.md` | Copied; originals preserved | [RL model documentation](../../deliverables/08_RL_Model/docs/) |
+| Proposed_Methodology_Experimental_Plan-1.docx | Mark-authored methodology draft retained once in his member workspace | Proposed methodology plan: ../../team-work/Mark/deliverables/Proposed_Methodology_Experimental_Plan-1.docx |
+| Member3_iFogSim2_Simulator_Technical_Audit.docx and _EN.docx | Ayoub-authored bilingual simulator audit, retained in his research workspace | Arabic: ../../team-work/Ayoub/research/simulator_technical_audit/Member3_iFogSim2_Simulator_Technical_Audit.docx; English: ../../team-work/Ayoub/research/simulator_technical_audit/Member3_iFogSim2_Simulator_Technical_Audit_EN.docx |
+| External rl_model source, schemas, tests, and configuration | External duplicate removed after hash verification; one canonical package remains | ../../deliverables/08_RL_Model/ |
+| External rl_model documentation | Retained in the canonical model package; redundant external folder removed | ../../deliverables/08_RL_Model/docs/ |
 | External `iFogSim/results/` DCNS/VRGame workbooks and reports | Kept external and documented; no equivalent adaptive offloading copy was found, and generated/legacy outputs are not duplicated | [Canonical adaptive evidence](../../audit_output/), [simulation deliverables](../../deliverables/10_iFogSim_Simulation/) |
 | External iFogSim `output/`, source trees, and generated build artifacts | Kept in external simulator workspace; not copied | [Repository simulation records](../../deliverables/10_iFogSim_Simulation/) |
-| `Research_Gap_Download_v29.zip`, `iFogSim-main-rl.zip`, and `iFogSim_Project_and_Experiment_Results_All_in_One (1).zip` | Kept as recoverable external archives; not unpacked or duplicated | Documented in [WORKSPACE_AUDIT_REPORT.md](../../WORKSPACE_AUDIT_REPORT.md) |
+| Research_Gap_Download_v29.zip, iFogSim-main-rl.zip, and iFogSim_Project_and_Experiment_Results_All_in_One (1).zip | Original archives retained under Mark, Ayoub, and Omar member folders; extracted canonical documents/results are stored beside each member | ../../audit_output/WORKSPACE_IMPORT_LOG_2026-11-06.md |
 
 ## Research documents copied with the library
 

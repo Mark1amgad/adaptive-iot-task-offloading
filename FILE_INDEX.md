@@ -1,50 +1,21 @@
-# File Index
+# Project Index
 
-This index points to existing sources of truth; it does not duplicate them.
+- [Research specification V2](MARK_RESEARCH_SPECIFICATION_V2.md) — controlling research definition.
+- [Task tracker](TASK_TRACKER.md) — current work, owners, blockers, and evidence.
+- [Team contributions](team-work/README.md) — confirmed authorship and member folders.
+- [Architecture](docs/ARCHITECTURE.md) — concise system boundary and implementation status.
+- [Research papers](research/references/REFERENCES_INDEX.md) — classified paper library.
+- [Dataset research](research/datasets/README.md) — inventories, source evidence, and member-owned assessments.
+- [Python model](deliverables/08_RL_Model/README.md) — implementation, tests, and protocol.
+- [iFogSim integration](deliverables/10_iFogSim_Simulation/Simulation_Source/FINAL_STATUS.md) — integration evidence and limitations.
+- [Partial-execution spike](deliverables/10_iFogSim_Simulation/partial_offloading_spike/README.md) — Local+Edge feasibility experiment.
+- [Reproduction](deliverables/06_Reproduction/Reproduction.md) — run instructions.
+- [Audit evidence](audit_output/) — selected validation and historical records.
 
-## Start here
+## Member workspaces
 
-- Project homepage: [README.md](README.md)
-- Collaboration workflow: [TEAM_GUIDE.md](TEAM_GUIDE.md)
-- Current tasks: [TASK_TRACKER.md](TASK_TRACKER.md)
-- Existing contribution rules: [CONTRIBUTING.md](CONTRIBUTING.md)
-
-## Shared workspace
-
-- Shared research library: [shared/Research/](shared/Research/)
-- Shared dataset metadata: [shared/Datasets/](shared/Datasets/)
-- Shared project records: [shared/Project_Documentation/](shared/Project_Documentation/)
-- Final shared deliverables: [shared/Final_Deliverables/](shared/Final_Deliverables/)
-
-## Research design
-
-- [docs/research-overview.md](docs/research-overview.md)
-- [docs/system-architecture.md](docs/system-architecture.md)
-- [docs/state-action-reward.md](docs/state-action-reward.md)
-- [docs/experiment-plan.md](docs/experiment-plan.md)
-- [docs/team-responsibilities.md](docs/team-responsibilities.md)
-
-## Implementation and evidence
-
-- Python model: [deliverables/08_RL_Model/](deliverables/08_RL_Model/)
-- iFogSim evidence: [deliverables/10_iFogSim_Simulation/](deliverables/10_iFogSim_Simulation/)
-- Integration protocol: [integration/](integration/)
-- Reproduction instructions: [deliverables/06_Reproduction/Reproduction.md](deliverables/06_Reproduction/Reproduction.md)
-- Audit evidence: [audit_output/](audit_output/)
-- Experiment results: [results/](results/)
-
-## Existing personal workspaces
-
-- [team-work/Mark/](team-work/Mark/)
-- [team-work/Omar/](team-work/Omar/)
-- [team-work/Mostafa/](team-work/Mostafa/)
-- [team-work/Astta-Abdo/](team-work/Astta-Abdo/)
-- [team-work/Ayoub/](team-work/Ayoub/)
-
-## Known duplicate candidates
-
-The same SHA-256 was observed for sampled files in `team-work/Mostafa/Dataset/`
-and `deliverables/09_Datasets/Original/`: `MASTER_DATASET_COMPARISON.xlsx`,
-`DATASET_RESEARCH_REPORT_AR.pdf`, and the UCI ZIP archive. Both copies are
-preserved. The deliverables copy is the current shared-reference candidate;
-consolidation requires team approval.
+- [Mark](team-work/Mark/)
+- [Ayoub](team-work/Ayoub/)
+- [Omar](team-work/Omar/)
+- [Mostafa](team-work/Mostafa/)
+- [Abdo](team-work/Astta-Abdo/)

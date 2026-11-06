@@ -1,0 +1,14 @@
+﻿Task-level feature,ECW,SMD,Needed for task-level experiment,Interpretation / admissible derivation / risk
+Task input size,Not available,Not available,Must be simulated/generated,"ECW bandwidth is server upload workload, not bytes per offloaded task. Network byte traces elsewhere need task boundary linkage."
+Required CPU cycles,Not available,Not available,Must be simulated/generated,"ECW cpu_num is hardware core count, not per-task compute demand; SMD channel semantics anonymized."
+Task arrival time,Not available,Not available,Must be simulated/generated,"ECW hourly time bins are measurement times, not task arrivals. Traffic intensity can inform a separate calibrated generator only."
+Task deadline,Not available,Not available,Must be simulated/generated,Deadline is an application QoS requirement; need scenario-specific supported distribution.
+Task dependencies (if applicable),Not available,Not available,Must be simulated/generated,Neither source contains task DAG; document independent-task choice or generate DAG only if needed.
+Local / Edge / Cloud execution options,Not available,Not available,Must be simulated/generated,"These are topology/actions configured in simulator, not observed in ECW/SMD."
+Network conditions / transmission characteristics,Available directly,Not available,Must be simulated/generated,ECW has normalized upload-bandwidth *workload* and static bandwidth/loss-related fields; not measured end-to-end per-task latency or per-link capacity. No valid direct physical Mbps conversion without scaler.
+Edge / Cloud CPU and memory availability,Available directly,Not available,Must be simulated/generated,"ECW has normalized static cpu_num and memory_size, but not time-varying available CPU/memory capacity or Cloud state; cannot infer instantaneous free capacity."
+Server utilization and queue length,Derivable with a defensible method,Not available,Must be simulated/generated,ECW normalized bandwidth utilization may be used as link-load proxy if denominator/scaling verified; it is NOT CPU utilization. SMD channels are unnamed and raw queue labels are absent.
+Failure or anomaly indicators,Not available,Available directly,Derivable with a defensible method,"SMD labels directly indicate anomalies only. A generated failure hazard is a modeled proxy, not observed outage; validity must be documented."
+Actual execution latency,Not available,Not available,Must be simulated/generated,"Simulated task outcomes measured within iFogSim2 are simulated executions, not data-source measured latency."
+Energy consumption,Not available,Not available,Must be simulated/generated,Only report simulated energy if per-task attribution is validated; current methodology records energy null.
+Task completion outcome / deadline met,Not available,Not available,Must be simulated/generated,Compute from simulated task terminal event and configured deadline; cannot label as real measured outcome.

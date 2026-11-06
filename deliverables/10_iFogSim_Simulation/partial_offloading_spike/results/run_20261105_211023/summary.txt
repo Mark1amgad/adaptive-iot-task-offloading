@@ -1,0 +1,16 @@
+status=PASS
+task_id=spike-task-001
+task_mi=10000
+local_mi=4000
+edge_mi=6000
+mi_conservation=10000
+branch_count=2
+branch_result_count=2
+branch_result_skew_ms=88.92285714285714
+merge_start_ms=98.93285714285715
+merge_end_ms=100.93285714285715
+merge_overhead_ms=2.0
+end_to_end_latency_ms=95.93285714285715
+counted_transfer_bytes=7800
+transfer_count=2
+merge_overhead_type=fixed_simulated_delay_not_cpu_execution

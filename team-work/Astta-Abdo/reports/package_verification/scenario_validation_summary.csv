@@ -1,0 +1,9 @@
+scenario_id,validation_status,task_rows,runs,indivisible,data_parallel_divisible,critical,time_sensitive,delay_tolerant,errors
+bursty_on_off__seed_0007,PASS,48,1,22,26,15,18,15,0
+increased_wan_delay__seed_0061,PASS,48,1,24,24,11,26,11,0
+reduced_bandwidth__seed_0061,PASS,48,1,24,24,11,26,11,0
+reduced_edge_capacity__seed_0061,PASS,48,1,24,24,11,26,11,0
+repeated_a_b_a__seed_0081,PASS,48,1,20,28,8,22,18,0
+repeated_aba_task_mix__seed_0081,PASS,48,1,18,30,8,25,15,0
+stable_steady__seed_0007,PASS,48,1,22,26,15,18,15,0
+task_size_compute_shift__seed_0081,PASS,48,1,17,31,9,26,13,0

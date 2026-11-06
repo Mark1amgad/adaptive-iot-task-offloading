@@ -1,0 +1,41 @@
+{
+  "package_revision": "1.1.1",
+  "generator_version": "1.1.0",
+  "schema_files": [
+    "calibration_log.schema.json",
+    "decision_contexts.schema.json",
+    "decisions.schema.json",
+    "scenario_manifest.schema.json",
+    "task_outcomes.schema.json",
+    "tasks.schema.json"
+  ],
+  "schema_count": 6,
+  "development_scenario_count": 8,
+  "per_scenario_validation_pass_count": 8,
+  "per_scenario_validation_error_count": 0,
+  "determinism_csv_pair_count": 16,
+  "determinism_all_match": true,
+  "schema_only_templates": [
+    {
+      "file": "calibration_log.csv",
+      "columns": 17,
+      "data_rows": 0
+    },
+    {
+      "file": "decision_contexts.csv",
+      "columns": 28,
+      "data_rows": 0
+    },
+    {
+      "file": "decisions.csv",
+      "columns": 18,
+      "data_rows": 0
+    },
+    {
+      "file": "task_outcomes.csv",
+      "columns": 32,
+      "data_rows": 0
+    }
+  ],
+  "simulator_outcomes_generated": false
+}

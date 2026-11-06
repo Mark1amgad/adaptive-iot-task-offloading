@@ -1,0 +1,195 @@
+spec_version: "1.1.0"
+config_status: PROPOSED_UNTIL_MARK_APPROVAL
+units_version: SI-ms-bytes-MI-v1
+units:
+  arrival_time: ms
+  relative_deadline: ms
+  absolute_deadline: ms
+  input_size: bytes
+  output_size: bytes
+  compute_demand: MI
+  partition_overhead: ms
+  merge_overhead: ms
+  arrival_rate: tasks_per_second
+  compute_capacity: MIPS
+  link_delay: ms
+  bandwidth: NOT_LOCKED_UNIT_PENDING_AYOUB
+
+# Existing prototype evidence, recorded for calibration context only. The values
+# below do not imply the V2 target topology is implemented.
+topology_references:
+  current_verified_prototype_v1:
+    status: APPROVED_AS_EXISTING_IMPLEMENTATION_REFERENCE
+    source: deliverables/10_iFogSim_Simulation/Topology/Topology_Description.md
+    device_counts: {local_executor: 1, edge_executor: 1, cloud_executor: 1}
+    devices:
+      local: {mips: 1000, ram_mb: 2000, uplink_bandwidth_raw: 10000, downlink_bandwidth_raw: 10000}
+      edge: {mips: 2800, ram_mb: 4000, uplink_bandwidth_raw: 10000, downlink_bandwidth_raw: 10000, uplink_latency_ms: 45}
+      cloud: {mips: 44800, ram_mb: 40000, uplink_bandwidth_raw: 100000, downlink_bandwidth_raw: 100000}
+    local_to_edge_uplink_latency_ms: 2
+    edge_to_cloud_uplink_latency_ms: 45
+    bandwidth_unit_status: BLOCKED_NOT_EXPLICITLY_DOCUMENTED
+    downlink_latency_status: BLOCKED_NOT_EXPLICITLY_SPECIFIED
+    scope_note: >-
+      This is the currently documented one-local/one-edge/one-cloud prototype.
+      The numeric bandwidth values are retained as raw configured values only;
+      they must not be labelled bytes/s or bits/s until Ayoub confirms the iFogSim
+      bandwidth unit semantics and the transfer-time conversion.
+  v2_target_topology:
+    status: PROPOSED_PENDING_AYOUB_VERIFICATION
+    device_counts: {iot_devices: 4, edge_nodes: 2, cloud_nodes: 1}
+    capacity_by_device: BLOCKED_NOT_SUPPLIED
+    mapping_note: >-
+      The V2 specification describes 4 IoT devices, 2 Edge nodes and 1 Cloud node.
+      The current checked-in topology evidence above instantiates only one local,
+      one edge and one cloud executor. Four source IDs below are workload identities,
+      not proof that four distinct IoT FogDevices currently exist.
+
+source_devices:
+  - iot-01
+  - iot-02
+  - iot-03
+  - iot-04
+source_device_mapping_status: PROPOSED_PENDING_AYOUB_MAPPING
+
+# Probabilities are design assumptions. Profile-specific urgency mixtures are
+# stable across all regime changes; deadline distributions depend on urgency only.
+urgency_classes:
+  CRITICAL:
+    probability: 0.20
+    relative_deadline_ms: {distribution: uniform_integer, min: 200, max: 800}
+    status: PROPOSED
+    rationale: >-
+      Illustrative development bracket only. The prototype's one-task reference
+      case used a 500 ms configured deadline; no per-profile service-time envelope
+      exists to calibrate this range for the V2 target topology.
+  TIME_SENSITIVE:
+    probability: 0.50
+    relative_deadline_ms: {distribution: uniform_integer, min: 800, max: 3000}
+    status: PROPOSED
+    rationale: >-
+      Illustrative development bracket only; must be recalibrated from nominal
+      local/edge/cloud service-time distributions and queueing under the target topology.
+  DELAY_TOLERANT:
+    probability: 0.30
+    relative_deadline_ms: {distribution: uniform_integer, min: 3000, max: 10000}
+    status: PROPOSED
+    rationale: >-
+      Illustrative development bracket only; must be calibrated before benchmark
+      generation and frozen before test evaluation.
+
+# These workload values intentionally retain the supplied development/smoke ranges.
+# They are NOT approved benchmark ranges and are not inferred from ECW or SMD.
+application_profiles:
+  SENSOR_INFERENCE:
+    description: "Synthetic indivisible sensor/inference request; full placement only."
+    splittability: INDIVISIBLE
+    urgency_weights: {CRITICAL: 0.20, TIME_SENSITIVE: 0.50, DELAY_TOLERANT: 0.30}
+    required_mi: {distribution: choice, values: [200, 1000, 4000]}
+    input_size_bytes: {distribution: choice, values: [2000, 10000, 50000]}
+    output_size_bytes: {distribution: choice, values: [256, 1024, 2048]}
+    numeric_status: PROPOSED_SMOKE_ONLY
+    output_size_status: PROPOSED_SYNTHETIC_GENERATION_RULE
+
+  VIDEO_FRAME_BATCH:
+    description: "Synthetic independent frame batch; explicitly data-parallel."
+    splittability: DATA_PARALLEL_DIVISIBLE
+    urgency_weights: {CRITICAL: 0.25, TIME_SENSITIVE: 0.50, DELAY_TOLERANT: 0.25}
+    required_mi: {distribution: choice, values: [1000, 4000]}
+    input_size_bytes: {distribution: choice, values: [10000, 50000]}
+    output_size_bytes: {distribution: choice, values: [1024, 2048, 4096]}
+    numeric_status: PROPOSED_SMOKE_ONLY
+    output_size_status: PROPOSED_SYNTHETIC_GENERATION_RULE
+    partition:
+      partition_model_id: proportional_independent_frames_v1
+      input_partition_model: PROPORTIONAL_TO_COMPUTE_ALPHA
+      output_partition_model: PROPORTIONAL_TO_COMPUTE_ALPHA
+      partition_overhead_ms: 5
+      merge_overhead_ms: 5
+      overhead_status: PROPOSED_NOT_SIMULATOR_VERIFIED
+      partial_overheads_apply_only_when: "0 < offload_fraction < 1"
+      assumption: >-
+        Independent frames/batches with no cross-partition dependency; input and
+        output bytes are proportional to compute fraction alpha for this synthetic
+        profile only.
+
+  PARALLEL_SENSOR_AGGREGATION:
+    description: "Synthetic independent sensor-window shards; explicitly data-parallel."
+    splittability: DATA_PARALLEL_DIVISIBLE
+    urgency_weights: {CRITICAL: 0.15, TIME_SENSITIVE: 0.50, DELAY_TOLERANT: 0.35}
+    required_mi: {distribution: choice, values: [1000, 4000]}
+    input_size_bytes: {distribution: choice, values: [2000, 10000, 50000]}
+    output_size_bytes: {distribution: choice, values: [256, 1024, 2048]}
+    numeric_status: PROPOSED_SMOKE_ONLY
+    output_size_status: PROPOSED_SYNTHETIC_GENERATION_RULE
+    partition:
+      partition_model_id: proportional_independent_sensor_windows_v1
+      input_partition_model: PROPORTIONAL_TO_COMPUTE_ALPHA
+      output_partition_model: PROPORTIONAL_TO_COMPUTE_ALPHA
+      partition_overhead_ms: 3
+      merge_overhead_ms: 4
+      overhead_status: PROPOSED_NOT_SIMULATOR_VERIFIED
+      partial_overheads_apply_only_when: "0 < offload_fraction < 1"
+      assumption: >-
+        Independent window shards with no cross-shard dependency; proportional
+        byte partitioning is a declared synthetic assumption for this profile only.
+
+  BULK_VIDEO_FRAME_BATCH:
+    description: "Larger synthetic independent frame batches used only in shifted mix B."
+    splittability: DATA_PARALLEL_DIVISIBLE
+    urgency_weights: {CRITICAL: 0.25, TIME_SENSITIVE: 0.50, DELAY_TOLERANT: 0.25}
+    required_mi: {distribution: choice, values: [4000, 8000, 16000]}
+    input_size_bytes: {distribution: choice, values: [50000, 100000, 250000]}
+    output_size_bytes: {distribution: choice, values: [2048, 4096, 8192]}
+    numeric_status: PROPOSED_SHIFT_SMOKE_ONLY
+    output_size_status: PROPOSED_SYNTHETIC_GENERATION_RULE
+    partition:
+      partition_model_id: proportional_bulk_independent_frames_v1
+      input_partition_model: PROPORTIONAL_TO_COMPUTE_ALPHA
+      output_partition_model: PROPORTIONAL_TO_COMPUTE_ALPHA
+      partition_overhead_ms: 5
+      merge_overhead_ms: 5
+      overhead_status: PROPOSED_NOT_SIMULATOR_VERIFIED
+      partial_overheads_apply_only_when: "0 < offload_fraction < 1"
+      assumption: "Independent frame batches only; proportional data/compute split is a synthetic assumption."
+
+  LARGE_PARALLEL_SENSOR_AGGREGATION:
+    description: "Larger independent sensor-window shards used only in shifted mix B."
+    splittability: DATA_PARALLEL_DIVISIBLE
+    urgency_weights: {CRITICAL: 0.15, TIME_SENSITIVE: 0.50, DELAY_TOLERANT: 0.35}
+    required_mi: {distribution: choice, values: [4000, 8000, 16000]}
+    input_size_bytes: {distribution: choice, values: [10000, 50000, 100000]}
+    output_size_bytes: {distribution: choice, values: [1024, 2048, 4096]}
+    numeric_status: PROPOSED_SHIFT_SMOKE_ONLY
+    output_size_status: PROPOSED_SYNTHETIC_GENERATION_RULE
+    partition:
+      partition_model_id: proportional_large_sensor_windows_v1
+      input_partition_model: PROPORTIONAL_TO_COMPUTE_ALPHA
+      output_partition_model: PROPORTIONAL_TO_COMPUTE_ALPHA
+      partition_overhead_ms: 3
+      merge_overhead_ms: 4
+      overhead_status: PROPOSED_NOT_SIMULATOR_VERIFIED
+      partial_overheads_apply_only_when: "0 < offload_fraction < 1"
+      assumption: "Independent large window shards only; proportional data/compute split is a synthetic assumption."
+
+mix_profiles:
+  balanced_v1:
+    application_profile_weights:
+      SENSOR_INFERENCE: 0.50
+      VIDEO_FRAME_BATCH: 0.25
+      PARALLEL_SENSOR_AGGREGATION: 0.25
+    resulting_divisibility_assumption: {indivisible: 0.50, divisible: 0.50}
+    status: PROPOSED
+    rationale: >-
+      Balanced development assumption: half indivisible and half divisible, with
+      divisibility assigned only to independent frame/window profiles.
+  heavy_shift_B_v1:
+    application_profile_weights:
+      SENSOR_INFERENCE: 0.20
+      BULK_VIDEO_FRAME_BATCH: 0.40
+      LARGE_PARALLEL_SENSOR_AGGREGATION: 0.40
+    resulting_divisibility_assumption: {indivisible: 0.20, divisible: 0.80}
+    status: PROPOSED
+    rationale: >-
+      Deliberate held-out load shift toward larger independent data-parallel batches;
+      it is a synthetic stress assumption, not a measured application workload frequency.

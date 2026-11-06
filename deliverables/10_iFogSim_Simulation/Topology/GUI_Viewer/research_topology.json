@@ -1,0 +1,46 @@
+{
+  "nodes": [
+    {
+      "name": "CLOUD\n44,800 MIPS\nRAM: 40,000 MB\nBW: 100,000",
+      "ratePerMips": 0.0,
+      "downBw": 100000,
+      "level": 0,
+      "upBw": 100000,
+      "ram": 40000,
+      "mips": 44800,
+      "type": "FOG_DEVICE"
+    },
+    {
+      "name": "EDGE\n2,800 MIPS\nRAM: 4,000 MB\nBW: 10,000",
+      "ratePerMips": 0.0,
+      "downBw": 10000,
+      "level": 1,
+      "upBw": 10000,
+      "ram": 4000,
+      "mips": 2800,
+      "type": "FOG_DEVICE"
+    },
+    {
+      "name": "LOCAL\n1,000 MIPS\nRAM: 2,000 MB\nBW: 10,000",
+      "ratePerMips": 0.0,
+      "downBw": 10000,
+      "level": 2,
+      "upBw": 10000,
+      "ram": 2000,
+      "mips": 1000,
+      "type": "FOG_DEVICE"
+    }
+  ],
+  "links": [
+    {
+      "latency": 45.0,
+      "source": "EDGE\n2,800 MIPS\nRAM: 4,000 MB\nBW: 10,000",
+      "destination": "CLOUD\n44,800 MIPS\nRAM: 40,000 MB\nBW: 100,000"
+    },
+    {
+      "latency": 2.0,
+      "source": "LOCAL\n1,000 MIPS\nRAM: 2,000 MB\nBW: 10,000",
+      "destination": "EDGE\n2,800 MIPS\nRAM: 4,000 MB\nBW: 10,000"
+    }
+  ]
+}

@@ -1,29 +1,30 @@
-# Task Tracker
+# Task Tracker — Evidence-Based Status
 
-Repository organization was completed on 2026-11-03. The research workstream
-starts on 2026-11-04 with collection and verification of the agreed full-text
-papers. Statuses below describe the handoff at the end of the organization
-phase; they do not imply that research tasks have already been completed.
+Last reviewed: 2026-11-06.
 
-Statuses: `Not Started`, `In Progress`, `Under Review`, `Approved`, and
-`Blocked`. Update this table through a pull request.
+A document, archive, or prototype is not proof that a benchmark task is complete. Status reflects the evidence currently present.
 
-| Task | Owner | Status | Deliverable Location | Dependencies | Last Updated |
-| --- | --- | --- | --- | --- | --- |
-| Retrieve and verify the agreed full-text journal papers and the ICC 2026 comparison paper | Omar (Mark reviews the corpus) | Not Started | `team-work/Omar/research/` and `shared/Research/Approved_Papers/` / `Comparison_Papers/` | Confirmed reference list and metadata | 2026-11-03 |
-| Extract each paper's model, formulation, experiments, numerical results, datasets, and limitations with page/section citations | Omar | Not Started | `team-work/Omar/deliverables/` and `shared/Research/Paper_Extractions/` | Verified full-text papers | 2026-11-03 |
-| Inventory datasets and data sources actually used by the selected papers, including older datasets | Mostafa | Not Started | `team-work/Mostafa/deliverables/` and `shared/Datasets/Dataset_Inventory/` | Full-text papers and source/license checks | 2026-11-03 |
-| Validate, clean, and harmonize selected data; document schema, units, missing fields, and provenance | Abdo | Blocked | `team-work/Astta-Abdo/deliverables/` and `shared/Datasets/Processed_Data/` | Mostafa's inventory, approved objective, and schema | 2026-11-03 |
-| Finalize the real-world use case, research objective, formulation, contributions, and evaluation metrics | Mark | Not Started | `team-work/Mark/deliverables/` and `shared/Project_Documentation/Research_Objective/` | Core paper extraction and comparison with the ICC 2026 paper | 2026-11-03 |
-| Approve the canonical simulator/model protocol and measurement semantics | Mark, Ayoub | Blocked | `docs/decisions/` and `shared/Project_Documentation/Decisions/` | Objective, state/action/reward, units, and failure/deadline semantics | 2026-11-03 |
-| Integrate the approved benchmark and run controlled experiments with baselines, multiple seeds, logs, and checkpoints | Ayoub | Blocked | `team-work/Ayoub/deliverables/`, `experiments/`, and `results/` | Approved objective, protocol, metrics, and benchmark dataset | 2026-11-03 |
+| Workstream | Owner | Status | Evidence present | Remaining work |
+|---|---|---|---|---|
+| Paper retrieval and bibliographic verification | Omar; Mark reviews corpus | In progress | Classified reference library and IEEE review | Confirm corpus coverage and full citation metadata |
+| Literature extraction and screening | Omar | Under review | Audited six-paper/eight-paper workbooks and eight-paper screening workbook | Review accuracy, citation traceability, and corpus consistency |
+| Dataset inventory and feasibility | Mostafa | Under review | Eight-candidate workspace, bilingual inventory, feasibility review | Verify sources/licences and confirm raw data actually available |
+| Workload generator and validation package | Abdo | Under review | Generator, schemas, profiles, validation, provenance, and final workload package | Approve benchmark settings and calibrate against simulator |
+| Research objective, formulation, metrics | Mark | Under review | Specification V2, supervisor brief, methodology, research-gap material | Obtain supervisor/team approval and reconcile prior art |
+| Simulator/model protocol and measurement semantics | Mark and Ayoub; others consulted | Blocked for final benchmark | Readiness/technical audits, metrics map, one-task integration evidence | Approve units, task lifecycle, action legality, failure/deadline semantics |
+| iFogSim integration and experiments | Ayoub | In progress | Java/Python one-task acceptance suite, partial-execution spike, source archives | Multi-task registry, workload integration, paired multi-seed evaluation |
+| Results analysis and reporting | Omar; Mark | In progress | Analyzer, Member2 v26 bundle, one-task traces | Validate provenance/schema and analyze current controlled runs |
 
 ## Experiment gate
 
-Ayoub must not start final comparative experiments until Mark has approved
-the research objective and metrics, and the team has approved the protocol and
-benchmark dataset. Existing prototype work may be inspected, but provisional
-configurations must not be presented as final research results.
+The retained one-task acceptance suite verifies a narrow integration path. The Local+Edge partial-execution spike is a feasibility check. Neither is a completed multi-task benchmark or evidence of adaptive-policy superiority. Final comparative claims require approved task semantics, metrics, workloads, repeated seeds, and an independent evaluation phase.
 
-The dates above record the organization-phase handoff, not dates on which
-research findings were produced.
+## Member workspaces
+
+- Mark: `team-work/Mark/`
+- Ayoub: `team-work/Ayoub/`
+- Omar: `team-work/Omar/`
+- Mostafa: `team-work/Mostafa/`
+- Abdo: `team-work/Astta-Abdo/`
+
+File-level ownership was confirmed directly by Mark on 2026-11-05.

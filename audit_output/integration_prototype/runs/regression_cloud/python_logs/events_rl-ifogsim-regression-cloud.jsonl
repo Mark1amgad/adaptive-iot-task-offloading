@@ -1,2 +1,0 @@
-{"ts":1791917366.475,"level":"warning","event":"placeholder_thresholds","features":["task_mi","deadline_ms"]}
-{"ts":1791917366.609,"level":"info","event":"decision","task_id":"rl-ifogsim-regression-cloud:task:1","state":27,"action":"Cloud","mode":"baseline"}

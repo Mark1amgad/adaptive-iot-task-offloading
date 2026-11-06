@@ -1,0 +1,131 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "additionalProperties": false,
+  "title": "Policy decision record",
+  "description": "Schema only. Requested action and chosen sites are logged by adapter/policy. One partial action contains Local plus exactly one remote tier.",
+  "required": [
+    "run_id",
+    "task_id",
+    "policy_id",
+    "decision_time_ms",
+    "requested_action",
+    "offload_fraction",
+    "local_fraction",
+    "remote_tier",
+    "partition_model_id",
+    "selected_local_site_id",
+    "selected_remote_site_id",
+    "feasible_action_set_json",
+    "selected_action_feasible",
+    "fallback_used",
+    "fallback_reason",
+    "decision_wall_clock_ms",
+    "model_version",
+    "decision_reason"
+  ],
+  "properties": {
+    "run_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "task_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "policy_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "decision_time_ms": {
+      "type": "number",
+      "minimum": 0
+    },
+    "requested_action": {
+      "enum": [
+        "LOCAL",
+        "EDGE_FULL",
+        "CLOUD_FULL",
+        "EDGE_PARTIAL_25",
+        "EDGE_PARTIAL_50",
+        "EDGE_PARTIAL_75",
+        "CLOUD_PARTIAL_25",
+        "CLOUD_PARTIAL_50",
+        "CLOUD_PARTIAL_75"
+      ]
+    },
+    "offload_fraction": {
+      "enum": [
+        0,
+        0.25,
+        0.5,
+        0.75,
+        1
+      ]
+    },
+    "local_fraction": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1
+    },
+    "remote_tier": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "enum": [
+        "EDGE",
+        "CLOUD",
+        null
+      ]
+    },
+    "partition_model_id": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "selected_local_site_id": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "selected_remote_site_id": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "feasible_action_set_json": {
+      "type": "string",
+      "minLength": 2
+    },
+    "selected_action_feasible": {
+      "type": "boolean"
+    },
+    "fallback_used": {
+      "type": "boolean"
+    },
+    "fallback_reason": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "decision_wall_clock_ms": {
+      "type": "number",
+      "minimum": 0
+    },
+    "model_version": {
+      "type": "string",
+      "minLength": 1
+    },
+    "decision_reason": {
+      "type": [
+        "string",
+        "null"
+      ]
+    }
+  }
+}
