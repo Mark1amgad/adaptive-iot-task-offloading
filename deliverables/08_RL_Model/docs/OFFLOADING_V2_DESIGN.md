@@ -69,3 +69,18 @@ Protocol v1 and its legacy three-action Q-table are unchanged. A coordinated v2 
 7. tests proving old models are rejected, not remapped.
 
 The existing three-action model must not be padded, truncated, or silently reused.
+
+
+## Implemented v2 engine boundary (2026-11-15)
+
+The nine-action catalogue now has an isolated v2 learner, strict JSONL protocol parser, model persistence, configuration loader, and server entrypoint. See [PROTOCOL_V2.md](PROTOCOL_V2.md).
+
+The v2 state configuration currently uses seven features and 972 provisional states:
+- task MI, WAN latency, Local utilization, Edge utilization, Cloud utilization, deadline, splittability
+- 9 actions × 972 states = 8,748 Q-values
+
+The Local/Cloud utilization and splittability bins are provisional. Partition/merge overheads are passed as task constraints and are not yet Q-state features. This is a deliberate sparsity trade-off, not a claim that overhead variation is irrelevant.
+
+The v2 parser independently derives the feasible action mask from task constraints and checks that the simulator-advertised mask matches exactly. It also checks that the numeric splittability state feature agrees with the categorical workload declaration.
+
+**Integration status:** Python v2 is implemented and tested in isolation. Java/iFogSim has not yet been migrated to emit the v2 observation contract or execute the v2 action semantics. No simulator performance claims can be made from this Python-only milestone.

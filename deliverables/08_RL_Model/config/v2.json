@@ -1,0 +1,173 @@
+{
+  "_comment": "Protocol v2 candidate configuration. All new utilization/splittability thresholds are provisional and must be calibrated from iFogSim traces before scientific evaluation.",
+  "state": {
+    "features": [
+      {
+        "name": "task_mi",
+        "unit": "MI",
+        "thresholds": [
+          1000,
+          4000
+        ],
+        "labels": [
+          "small",
+          "medium",
+          "large"
+        ],
+        "min_value": 0,
+        "max_value": null,
+        "source": "Workload task compute demand before placement",
+        "timing": "task creation",
+        "status": "placeholder"
+      },
+      {
+        "name": "wan_latency_ms",
+        "unit": "ms",
+        "thresholds": [
+          20,
+          80
+        ],
+        "labels": [
+          "low",
+          "medium",
+          "high"
+        ],
+        "min_value": 0,
+        "max_value": null,
+        "source": "Configured or measured source-to-cloud path latency",
+        "timing": "latest value at decision time; staleness must be logged",
+        "status": "from_design_doc"
+      },
+      {
+        "name": "local_utilization",
+        "unit": "fraction 0..1",
+        "thresholds": [
+          0.4,
+          0.8
+        ],
+        "labels": [
+          "low",
+          "medium",
+          "high"
+        ],
+        "min_value": 0,
+        "max_value": 1,
+        "source": "Originating IoT device CPU utilization",
+        "timing": "sampled before task placement",
+        "status": "placeholder"
+      },
+      {
+        "name": "edge_utilization",
+        "unit": "fraction 0..1",
+        "thresholds": [
+          0.4,
+          0.8
+        ],
+        "labels": [
+          "low",
+          "medium",
+          "high"
+        ],
+        "min_value": 0,
+        "max_value": 1,
+        "source": "Selected feasible Edge node CPU utilization",
+        "timing": "sampled before task placement",
+        "status": "from_design_doc"
+      },
+      {
+        "name": "cloud_utilization",
+        "unit": "fraction 0..1",
+        "thresholds": [
+          0.4,
+          0.8
+        ],
+        "labels": [
+          "low",
+          "medium",
+          "high"
+        ],
+        "min_value": 0,
+        "max_value": 1,
+        "source": "Selected Cloud node CPU utilization",
+        "timing": "sampled before task placement",
+        "status": "placeholder"
+      },
+      {
+        "name": "deadline_ms",
+        "unit": "ms relative to task creation",
+        "thresholds": [
+          500
+        ],
+        "labels": [
+          "tight",
+          "relaxed"
+        ],
+        "min_value": 0,
+        "max_value": null,
+        "source": "Task workload deadline",
+        "timing": "known at task creation",
+        "status": "placeholder"
+      },
+      {
+        "name": "splittability",
+        "unit": "binary 0=indivisible, 1=data-parallel-divisible",
+        "thresholds": [
+          0.5
+        ],
+        "labels": [
+          "indivisible",
+          "divisible"
+        ],
+        "min_value": 0,
+        "max_value": 1,
+        "source": "Workload profile declaration; not inferred by the learner",
+        "timing": "known at task creation",
+        "status": "placeholder"
+      }
+    ]
+  },
+  "reward": {
+    "w_latency": 1,
+    "w_deadline": 2,
+    "w_cost": 0.5,
+    "latency_norm": "fixed",
+    "latency_ref_ms": 1000,
+    "latency_clip": 1,
+    "failure_penalty": 0,
+    "cost_terms": [
+      {
+        "metric": "bandwidth_bytes",
+        "weight": 0.5,
+        "ref_value": 1000000,
+        "required": true,
+        "status": "placeholder"
+      },
+      {
+        "metric": "energy_joules",
+        "weight": 0.5,
+        "ref_value": 10,
+        "required": false,
+        "status": "placeholder"
+      }
+    ]
+  },
+  "agent": {
+    "alpha": 0.1,
+    "epsilon_start": 0.3,
+    "epsilon_end": 0.02,
+    "epsilon_decay_steps": 16000,
+    "q_init": 0,
+    "seed": 1,
+    "fallback_order": [
+      "EDGE_FULL",
+      "CLOUD_FULL",
+      "LOCAL",
+      "EDGE_PARTIAL_50",
+      "CLOUD_PARTIAL_50",
+      "EDGE_PARTIAL_25",
+      "EDGE_PARTIAL_75",
+      "CLOUD_PARTIAL_25",
+      "CLOUD_PARTIAL_75"
+    ]
+  }
+}

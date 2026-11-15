@@ -1,0 +1,23 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "rl_model/action/2.0",
+  "title": "Compound offloading action v2 (Python to Java)",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["protocol_version", "type", "task_id", "action_id", "action", "remote_tier", "remote_fraction", "local_fraction", "model_version", "mode", "epsilon"],
+  "properties": {
+    "protocol_version": {"const": "2.0"},
+    "type": {"const": "action"},
+    "task_id": {"type": "string", "minLength": 1, "maxLength": 128},
+    "action_id": {"type": "integer", "minimum": 0, "maximum": 8},
+    "action": {"enum": ["LOCAL", "EDGE_PARTIAL_25", "EDGE_PARTIAL_50", "EDGE_PARTIAL_75", "EDGE_FULL", "CLOUD_PARTIAL_25", "CLOUD_PARTIAL_50", "CLOUD_PARTIAL_75", "CLOUD_FULL"]},
+    "remote_tier": {"enum": ["EDGE", "CLOUD", null]},
+    "remote_fraction": {"type": "number", "minimum": 0, "maximum": 1},
+    "local_fraction": {"type": "number", "minimum": 0, "maximum": 1},
+    "model_version": {"type": "string", "minLength": 1},
+    "mode": {"enum": ["explore", "exploit", "greedy", "fallback", "baseline"]},
+    "epsilon": {"type": "number", "minimum": 0, "maximum": 1},
+    "state_index": {"type": "integer", "minimum": 0},
+    "q_values": {"type": "array", "minItems": 9, "maxItems": 9, "items": {"type": "number"}}
+  }
+}
