@@ -121,3 +121,12 @@ This is **action-path, training integration, and lifecycle acceptance**, not a p
 - The existing fixed 40/60 Local+Edge fixture remains separate from the v2 ratio-selected executor.
 
 No claim that RL outperforms fixed baselines is supported by these acceptance runs.
+
+
+## Parameterized overhead and deadline sensitivity
+
+The experiment now accepts `--partition-overhead-ms`, `--merge-overhead-ms`, `--deadline-ms`, `--wan-latency-ms`, and `--watchdog-ms`. The PowerShell runner exposes these as `-PartitionOverheadMs`, `-MergeOverheadMs`, `-DeadlineMs`, `-WanLatencyMs`, and `-WatchdogMs`. Values are recorded in the trace `config` record. The watchdog is an execution horizon, separate from the per-task deadline.
+
+A zero/nominal/high overhead sensitivity check passed with partition/merge values of 0/0 ms, 3/2 ms, and 10/10 ms. Each scenario covered all nine exact-action paths (two tasks each), a 30-task live learner integration episode, and the deliberate dropped-branch failure case. See `V2_OVERHEAD_SENSITIVITY.md` for commands, artifacts, and interpretation boundaries.
+
+These are engineering sensitivity runs, not empirical calibration or policy-performance evidence. The fixed-action cases have only two tasks per action; the 30-task episodes remain integration smoke tests.

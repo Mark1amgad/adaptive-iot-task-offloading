@@ -3,7 +3,12 @@ param(
     [string]$IFogSimRoot = 'C:\Users\DELL\OneDrive\Desktop\Research\iFogSim',
     [string]$PythonExe = 'C:\Users\DELL\AppData\Roaming\uv\python\cpython-3.15.0b1-windows-x86_64-none\python.exe',
     [string]$JdkHome = 'C:\Program Files\Eclipse Adoptium\jdk-25.0.3.9-hotspot',
-    [string]$RunRoot = ''
+    [string]$RunRoot = '',
+    [double]$DeadlineMs = 1000.0,
+    [double]$PartitionOverheadMs = 3.0,
+    [double]$MergeOverheadMs = 2.0,
+    [double]$WanLatencyMs = 45.0,
+    [double]$WatchdogMs = 1000.0
 )
 $ErrorActionPreference = 'Stop'
 $simulationSource = $PSScriptRoot
@@ -31,6 +36,8 @@ $classpath = "$jarRoot\*;$jarRoot\commons-math3-3.5\commons-math3-3.5.jar"
 & $javac -encoding UTF-8 -cp $classpath -sourcepath "$sourceRoot;$simulationSource" -d $classes $action $plan $contract $experiment
 if ($LASTEXITCODE -ne 0) { throw "javac failed: $LASTEXITCODE" }
 $javaClasspath = "$classes;$classpath"
+$scenarioArgs = @('--deadline-ms',"$DeadlineMs",'--partition-overhead-ms',"$PartitionOverheadMs",
+    '--merge-overhead-ms',"$MergeOverheadMs",'--wan-latency-ms',"$WanLatencyMs",'--watchdog-ms',"$WatchdogMs")
 & $java -cp $javaClasspath org.fog.test.perfeval.OffloadingActionV2ContractTest
 if ($LASTEXITCODE -ne 0) { throw "Java contract tests failed: $LASTEXITCODE" }
 $actions = @('LOCAL','EDGE_PARTIAL_25','EDGE_PARTIAL_50','EDGE_PARTIAL_75','EDGE_FULL',
@@ -41,6 +48,7 @@ foreach ($name in $actions) {
     $runArgs = @('-cp',$javaClasspath,'org.fog.test.perfeval.RlOffloadingV2PartialIntegrationExperiment',
         '--output',$output,'--python',$PythonExe,'--rl-root',$rlRoot,
         '--run-id',("v2-partial-" + $name.ToLower()),'--action',$name,'--tasks','2','--inter-arrival-ms','1')
+    $runArgs += $scenarioArgs
     & $java @runArgs
     if ($LASTEXITCODE -ne 0) { throw "iFogSim action case $name failed: $LASTEXITCODE" }
 }
@@ -49,6 +57,7 @@ New-Item -ItemType Directory -Force -Path $trainOutput | Out-Null
 $trainArgs = @('-cp',$javaClasspath,'org.fog.test.perfeval.RlOffloadingV2PartialIntegrationExperiment',
     '--output',$trainOutput,'--python',$PythonExe,'--rl-root',$rlRoot,
     '--run-id','v2-partial-learned-policy','--mode','train','--tasks','30','--inter-arrival-ms','1')
+$trainArgs += $scenarioArgs
 & $java @trainArgs
 if ($LASTEXITCODE -ne 0) { throw "iFogSim learned-policy training case failed: $LASTEXITCODE" }
 $faultOutput = Join-Path $RunRoot 'failure_drop_edge'
@@ -57,6 +66,7 @@ $faultArgs = @('-cp',$javaClasspath,'org.fog.test.perfeval.RlOffloadingV2Partial
     '--output',$faultOutput,'--python',$PythonExe,'--rl-root',$rlRoot,
     '--run-id','v2-partial-fault-drop-edge','--action','EDGE_PARTIAL_50',
     '--tasks','1','--drop-branch','edge')
+$faultArgs += $scenarioArgs
 & $java @faultArgs
 $faultExit = $LASTEXITCODE
 if ($faultExit -ne 2) { throw "Fault-injection case must fail closed with Java exit 2; received $faultExit" }

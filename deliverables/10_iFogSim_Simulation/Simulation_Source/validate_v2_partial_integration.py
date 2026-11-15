@@ -107,7 +107,7 @@ def validate_case(case_dir: Path, action: str, tasks_expected: int) -> dict:
             partition_done = one(rows, "partition_overhead_completed", task_id=task_id)
             if partition_start["sim_time_ms"] != decision["sim_time_ms"]:
                 raise AssertionError(f"{action}/{task_id}: partition overhead did not start at decision")
-            if partition_done["sim_time_ms"] - partition_start["sim_time_ms"] < cfg["partition_overhead_ms"]:
+            if (partition_done["sim_time_ms"] - partition_start["sim_time_ms"]) + 1e-9 < cfg["partition_overhead_ms"]:
                 raise AssertionError(f"{action}/{task_id}: partition overhead was not simulated")
             if min(r["sim_time_ms"] for r in task_branches) < partition_done["sim_time_ms"]:
                 raise AssertionError(f"{action}/{task_id}: branches emitted before partition overhead")
@@ -147,7 +147,7 @@ def validate_case(case_dir: Path, action: str, tasks_expected: int) -> dict:
                 raise AssertionError(f"{action}/{task_id}: merge barrier preceded a branch result")
             if merge_overhead_start["sim_time_ms"] != barrier["sim_time_ms"]:
                 raise AssertionError(f"{action}/{task_id}: merge overhead did not start at barrier")
-            if merge_overhead_done["sim_time_ms"] - merge_overhead_start["sim_time_ms"] < cfg["merge_overhead_ms"]:
+            if (merge_overhead_done["sim_time_ms"] - merge_overhead_start["sim_time_ms"]) + 1e-9 < cfg["merge_overhead_ms"]:
                 raise AssertionError(f"{action}/{task_id}: merge overhead was not simulated")
             if merge_created["sim_time_ms"] < merge_overhead_done["sim_time_ms"]:
                 raise AssertionError(f"{action}/{task_id}: merge tuple emitted before merge overhead")
@@ -245,7 +245,7 @@ def validate_training_case(case_dir: Path, tasks_expected: int) -> dict:
                 raise AssertionError(f"train_policy/{task_id}: output ratio mismatch")
             pstart = one(rows, "partition_overhead_started", task_id=task_id)
             pdone = one(rows, "partition_overhead_completed", task_id=task_id)
-            if pdone["sim_time_ms"] - pstart["sim_time_ms"] < cfg["partition_overhead_ms"]:
+            if (pdone["sim_time_ms"] - pstart["sim_time_ms"]) + 1e-9 < cfg["partition_overhead_ms"]:
                 raise AssertionError(f"train_policy/{task_id}: partition delay missing")
             if min(b["sim_time_ms"] for b in branches) < pdone["sim_time_ms"]:
                 raise AssertionError(f"train_policy/{task_id}: branches emitted before partition delay")
@@ -275,7 +275,7 @@ def validate_training_case(case_dir: Path, tasks_expected: int) -> dict:
             latest = max(r["sim_time_ms"] for r in results)
             if barrier["sim_time_ms"] < latest or ms["sim_time_ms"] != barrier["sim_time_ms"]:
                 raise AssertionError(f"train_policy/{task_id}: barrier timing mismatch")
-            if md["sim_time_ms"] - ms["sim_time_ms"] < cfg["merge_overhead_ms"] or mc["sim_time_ms"] < md["sim_time_ms"]:
+            if (md["sim_time_ms"] - ms["sim_time_ms"]) + 1e-9 < cfg["merge_overhead_ms"] or mc["sim_time_ms"] + 1e-9 < md["sim_time_ms"]:
                 raise AssertionError(f"train_policy/{task_id}: merge overhead missing")
             if me["sim_time_ms"] < mc["sim_time_ms"] or mr["sim_time_ms"] < me["sim_time_ms"]:
                 raise AssertionError(f"train_policy/{task_id}: merge execution/result timing mismatch")

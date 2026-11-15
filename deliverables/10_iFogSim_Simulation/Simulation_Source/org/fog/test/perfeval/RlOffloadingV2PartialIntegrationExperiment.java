@@ -68,10 +68,12 @@ public final class RlOffloadingV2PartialIntegrationExperiment {
     private static final long OUTPUT_BYTES = 1001L;
     private static final long MERGE_MI = 1200L;
     private static final long MERGE_OUTPUT_BYTES = 100L;
-    private static final double DEADLINE_MS = 1000.0;
-    private static final double PARTITION_OVERHEAD_MS = 3.0;
-    private static final double MERGE_OVERHEAD_MS = 2.0;
-    private static final double WAN_LATENCY_MS = 45.0;
+    // Per-process experiment parameters are loaded from CLI options before simulation.
+    // The runner launches one JVM per run, so these values cannot leak between scenarios.
+    private static double DEADLINE_MS = 1000.0;
+    private static double PARTITION_OVERHEAD_MS = 3.0;
+    private static double MERGE_OVERHEAD_MS = 2.0;
+    private static double WAN_LATENCY_MS = 45.0;
     private static final long AGENT_TIMEOUT_MS = 2000L;
     private static final String LOCAL_FULL = OffloadingActionV2ExecutionPlan.LOCAL_FULL_MODULE;
     private static final String EDGE_FULL = OffloadingActionV2ExecutionPlan.EDGE_FULL_MODULE;
@@ -85,6 +87,10 @@ public final class RlOffloadingV2PartialIntegrationExperiment {
     public static void main(String[] args) {
         try {
             Options options = Options.parse(args);
+            DEADLINE_MS = options.deadlineMs;
+            PARTITION_OVERHEAD_MS = options.partitionOverheadMs;
+            MERGE_OVERHEAD_MS = options.mergeOverheadMs;
+            WAN_LATENCY_MS = options.wanLatencyMs;
             Files.createDirectories(options.output);
             try (Trace trace = new Trace(options.output.resolve("partial_trace.jsonl"));
                  PythonAdapter python = PythonAdapter.start(options, trace)) {
@@ -136,6 +142,7 @@ public final class RlOffloadingV2PartialIntegrationExperiment {
                 "task_mi", TASK_MI, "input_bytes", INPUT_BYTES, "output_bytes", OUTPUT_BYTES,
                 "merge_mi", MERGE_MI, "merge_output_bytes", MERGE_OUTPUT_BYTES,
                 "partition_overhead_ms", PARTITION_OVERHEAD_MS, "merge_overhead_ms", MERGE_OVERHEAD_MS,
+                "deadline_ms", DEADLINE_MS, "watchdog_ms", options.watchdogMs,
                 "wan_latency_ms", WAN_LATENCY_MS, "created_at", Instant.now().toString()));
         new TaskEmitter("v2-partial-emitter", local, registry);
         CloudSim.startSimulation();
@@ -332,7 +339,11 @@ public final class RlOffloadingV2PartialIntegrationExperiment {
         TaskCoordinator(String name, TaskRegistry registry, InstrumentedFogDevice local) {
             super(name); this.registry = registry; this.local = local;
         }
-        @Override public void startEntity() { registry.trace.record("watchdog_scheduled", mapOf("deadline_sim_time_ms", 1000.0)); send(getId(), 1000.0, Events.WATCHDOG); }
+        @Override public void startEntity() {
+            double horizon = registry.options.watchdogMs;
+            registry.trace.record("watchdog_scheduled", mapOf("horizon_sim_time_ms", horizon));
+            send(getId(), horizon, Events.WATCHDOG);
+        }
         void acceptBranch(Tuple tuple) { sendNow(getId(), Events.BRANCH_RESULT, tuple); }
         void acceptMerge(Tuple tuple) { sendNow(getId(), Events.MERGE_RESULT, tuple); }
         @Override public void processEvent(SimEvent event) {
@@ -854,6 +865,12 @@ public final class RlOffloadingV2PartialIntegrationExperiment {
         OffloadingActionV2.Action action;
         int tasks = 2;
         double interArrivalMs = 1.0;
+        double deadlineMs = 1000.0;
+        double partitionOverheadMs = 3.0;
+        double mergeOverheadMs = 2.0;
+        double wanLatencyMs = 45.0;
+        double watchdogMs = 1000.0;
+
         static Options parse(String[] args) {
             Options o = new Options();
             Path cwd = new File(".").toPath().toAbsolutePath().normalize();
@@ -874,6 +891,11 @@ public final class RlOffloadingV2PartialIntegrationExperiment {
                 else if ("--drop-branch".equals(key)) o.dropBranch = value;
                 else if ("--tasks".equals(key)) o.tasks = Integer.parseInt(value);
                 else if ("--inter-arrival-ms".equals(key)) o.interArrivalMs = Double.parseDouble(value);
+                else if ("--deadline-ms".equals(key)) o.deadlineMs = Double.parseDouble(value);
+                else if ("--partition-overhead-ms".equals(key)) o.partitionOverheadMs = Double.parseDouble(value);
+                else if ("--merge-overhead-ms".equals(key)) o.mergeOverheadMs = Double.parseDouble(value);
+                else if ("--wan-latency-ms".equals(key)) o.wanLatencyMs = Double.parseDouble(value);
+                else if ("--watchdog-ms".equals(key)) o.watchdogMs = Double.parseDouble(value);
                 else throw new IllegalArgumentException("unknown option " + key);
             }
             if (!"baseline".equals(o.mode) && !"train".equals(o.mode))
@@ -884,6 +906,12 @@ public final class RlOffloadingV2PartialIntegrationExperiment {
                 throw new IllegalArgumentException("train mode selects actions from the learned policy; omit --action");
             if (o.tasks < 1 || o.tasks > 100 || !Double.isFinite(o.interArrivalMs) || o.interArrivalMs <= 0)
                 throw new IllegalArgumentException("tasks must be 1..100 and inter-arrival finite/positive");
+            if (!Double.isFinite(o.deadlineMs) || o.deadlineMs <= 0
+                    || !Double.isFinite(o.partitionOverheadMs) || o.partitionOverheadMs < 0
+                    || !Double.isFinite(o.mergeOverheadMs) || o.mergeOverheadMs < 0
+                    || !Double.isFinite(o.wanLatencyMs) || o.wanLatencyMs < 0
+                    || !Double.isFinite(o.watchdogMs) || o.watchdogMs <= 0)
+                throw new IllegalArgumentException("deadline/watchdog must be positive; overheads/WAN latency must be finite and non-negative");
             return o;
         }
     }
