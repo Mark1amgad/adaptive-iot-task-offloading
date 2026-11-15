@@ -81,7 +81,7 @@ For each held-out seed, all five policies received the same 60 workload rows, ar
 | Edge Full | 119.759 ms | 114.541 ms | 257.979 ms | 12/180 (6.7%) | 134,956 |
 | Cloud Full | 224.968 ms | 215.792 ms | 371.876 ms | 52/180 (28.9%) | 269,913 |
 | Random | 92.152 ms | 80.004 ms | 175.927 ms | 11/180 (6.1%) | 131,857 |
-| RL (frozen eval) | 60.065 ms | 54.291 ms | 128.601 ms | 3/180 (1.7%) | 105,556 |
+| Q-table + fallback (frozen) | 60.065 ms | 54.291 ms | 128.601 ms | 3/180 (1.7%) | 105,556 |
 
 ### What the comparison does and does not say
 
@@ -125,3 +125,21 @@ Multi-seed replay can be reproduced in one command with `run_v2_multiseed_holdou
 ```
 
 The script regenerates each held-out workload from its seed, runs Local/Edge/Cloud/Random/frozen-RL comparisons, and writes a combined `multi_seed_summary.json`.
+
+
+## Q-table coverage and fallback audit
+
+The saved seed-42 model was inspected directly, not inferred from the training log:
+
+| Coverage measure | Observed value |
+|---|---:|
+| Q-table entries (13,122 states × 9 actions) | 118,098 |
+| Training decisions / measured-outcome updates | 60 / 60 |
+| Unique states visited during training | 45 / 13,122 (0.343%) |
+| Unique state-action cells updated | 60 / 118,098 (0.0508%) |
+| Non-default Q cells | 60 |
+| Maximum visits to any one state-action cell | 1 |
+
+During the 180-task held-out evaluation, the frozen agent reported **108 fallback decisions and 72 greedy decisions**. All 108 fallback decisions selected `EDGE_FULL`, because that is first in the configured fallback order when feasible. The final action count was 114 `EDGE_FULL` selections, of which 108 came from fallback and only 6 from greedy selection.
+
+This changes the interpretation materially: the measured policy is a **fallback/greedy hybrid**, not a well-trained tabular RL policy. The 60 Q updates cover only 0.0508% of the state-action table, with no repeated sample for any updated cell. The aggregate latency/deadline results describe this hybrid implementation and must not be presented as proof that RL learned a superior offloading strategy. The next experiment must increase training episodes substantially, track state/action visitation, and compare learned decisions separately from fallback decisions.

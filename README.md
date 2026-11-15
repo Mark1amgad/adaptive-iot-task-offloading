@@ -24,13 +24,20 @@ Older generic Q-learning plans and draft schemas are not authoritative over Spec
 | `team-work/` | Actual contributions, received packages, and member-owned working material |
 | `audit_output/` | Focused validation evidence and historical audit records |
 
-## Verified status
+## Latest verified status (2026-11-15)
 
-- A one-task Java/Python/iFogSim integration acceptance suite has retained passing traces for its tested cases.
-- A Local+Edge partial-execution feasibility spike passed two reproducible runs.
-- These are **narrow integration/feasibility checks**, not a completed multi-task benchmark.
-- No claim that the adaptive method outperforms static baselines is established by these runs.
-- Multi-task behavior, broader workloads, and final comparative experiments remain open.
+- The isolated V2 Python protocol and Java/iFogSim integration execute all nine Local / Edge / Cloud full and partial actions.
+- Partial tasks execute two branches, synchronize at a two-result barrier, and create a real merge Cloudlet only after both results arrive. A dropped-branch fault test fails closed without false success.
+- Partition/merge overhead, deadline, WAN latency, and watchdog settings are configurable and traceable.
+- Deterministic variable workloads and paired policy evaluation are implemented. One 60-task training workload and three held-out 60-task workloads (180 paired tasks) were completed.
+- The held-out controller is a **sparse Q-table + fallback hybrid**: 108/180 decisions used the EDGE_FULL fallback. Results are descriptive and do not establish RL convergence or superiority.
+- Energy, real-workload calibration, multi-IoT/multi-Edge topology, and statistically supported generalization remain open.
+
+## Documentation and handoff
+
+- **Full chronological engineering log and commit-by-commit summary:** [docs/WORK_LOG_2026-11-15.md](docs/WORK_LOG_2026-11-15.md)
+- **Technical continuation notes, commands, limitations, and preservation rules:** [docs/RESEARCH_HANDOFF.md](docs/RESEARCH_HANDOFF.md)
+- **V2 variable-workload and paired evaluation evidence:** [V2_VARIABLE_WORKLOAD_ACCEPTANCE.md](deliverables/10_iFogSim_Simulation/Simulation_Source/V2_VARIABLE_WORKLOAD_ACCEPTANCE.md)
 
 ## Working rules
 

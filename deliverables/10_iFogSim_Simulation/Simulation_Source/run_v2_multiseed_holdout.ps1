@@ -21,7 +21,7 @@ if (-not $OutputRoot) { $OutputRoot = Join-Path $ProjectRoot ('audit_output\v2_m
 if (Test-Path $OutputRoot) { throw "Refusing to reuse existing output directory: $OutputRoot" }
 $workloadDir = Join-Path $OutputRoot 'workloads'
 New-Item -ItemType Directory -Force -Path $workloadDir | Out-Null
-$analysisArgs = @('--training-seed',"$TrainingSeed")
+$analysisArgs = @('--training-seed',"$TrainingSeed",'--training-model',$ModelIn)
 foreach ($seed in $EvaluationSeeds) {
     $workloadFile = Join-Path $workloadDir ("workload_seed$seed.jsonl")
     & $PythonExe $generator --seed $seed --tasks $TasksPerSeed --profile mixed --output $workloadFile

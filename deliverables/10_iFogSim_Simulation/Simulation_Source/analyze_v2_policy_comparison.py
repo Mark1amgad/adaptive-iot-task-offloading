@@ -69,7 +69,11 @@ def main() -> int:
         bandwidth = [float(t_by_seq[k]["bandwidth_bytes"]) for k in sorted(expected)]
         misses = sum(not bool(t_by_seq[k]["deadline_met"]) for k in expected)
         actions = {}
-        for decision in decisions: actions[decision["action"]] = actions.get(decision["action"], 0) + 1
+        modes = {}
+        for decision in decisions:
+            actions[decision["action"]] = actions.get(decision["action"], 0) + 1
+            mode = decision.get("mode", "unknown")
+            modes[mode] = modes.get(mode, 0) + 1
         action_counts[policy] = actions
         task_latency[policy] = {k: float(t_by_seq[k]["latency_ms"]) for k in expected}
         metrics[policy] = {
@@ -77,6 +81,7 @@ def main() -> int:
             "median_latency_ms": statistics.median(latencies), "p95_latency_ms": percentile(latencies, 0.95),
             "deadline_misses": misses, "deadline_miss_rate": misses / n,
             "mean_bandwidth_bytes": statistics.mean(bandwidth), "action_counts": actions,
+            "decision_modes": modes,
         }
         shutdown = one(trace, "shutdown_ack")
         if shutdown.get("orphaned_tasks") != 0 or shutdown.get("tasks_reported") != n:
