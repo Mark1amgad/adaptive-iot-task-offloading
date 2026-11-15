@@ -13,6 +13,7 @@ This folder contains experiment-owned Java integrations, isolated runners, and t
 - `validate_multi_task_partial.py` — validates task/branch/merge correlation, conservation, barrier order, and transfer attribution.
 - `tests/test_multi_task_partial_validator.py` — negative and positive validator tests using portable CSV fixtures in `tests/fixtures/multi_task_partial_4/`.
 - `MULTI_TASK_PARTIAL_ACCEPTANCE.md` — scope, acceptance evidence, metrics, and limitations.
+- `PARTIAL_ACTION_SPACE_INTEGRATION_AUDIT.md` — current RL/workload action-contract mismatch and versioned migration requirements.
 
 ## Scope warning
 The Python RL action schema remains Local / Edge / Cloud. The partial fixture is not connected to the learner and uses a fixed 40/60 Local/Edge split. It does not model actual merge-data construction or establish comparative performance.

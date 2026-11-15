@@ -18,7 +18,15 @@
 - All tasks in each run were created before the first terminal event.
 - 1-, 4-, and 8-task validator runs passed; 4- and 8-task trace and summary outputs were byte-identical across repeats.
 - Five standard-library validator tests passed, including rejection of duplicate results, cross-task tuple correlation, premature merge barrier, and invalid transfer attribution.
-- Evidence: `audit_output/multi_task_partial_verified_20261115_163000/`, `audit_output/multi_task_partial_8tasks_20261115_164000/`, and `audit_output/partial_single_regression_20261115_165000/`.
+- Evidence: `audit_output/multi_task_partial_release_20261115_170000/`, `audit_output/multi_task_partial_8tasks_20261115_164000/`, and `audit_output/partial_single_regression_20261115_165000/`.
+
+## RL partial-action integration audit — 2026-11-15
+
+- Audited the Python action map, tabular Q-table dimensions, action-mask parser, protocol schemas, baseline policy, fallback order, model persistence compatibility, and workload task schema.
+- The workload generator defines nine legal actions (Local; Edge partial 25/50/75; Edge full; Cloud partial 25/50/75; Cloud full) and gates partial actions on `DATA_PARALLEL_DIVISIBLE` profiles.
+- The current RL model still supports only three actions (Local / Edge / Cloud), with a 54-state table and three-column Q/visit tables. Persistence rejects any different action list or table shape; old models cannot be silently reused.
+- Current multi-task partial fixture uses fixed Local 40% / Edge 60% and is not one of the workload spec's candidate ratios. It remains mechanism-feasibility evidence only.
+- Wrote `PARTIAL_ACTION_SPACE_INTEGRATION_AUDIT.md`. No Python RL action, protocol, model, or schema files were changed pending approval of the nine-action contract and state-feature set.
 
 ## Remaining / not verified
 - The partial split remains a fixed 40/60 Local/Edge simulator fixture; it is not a general task partitioner.
