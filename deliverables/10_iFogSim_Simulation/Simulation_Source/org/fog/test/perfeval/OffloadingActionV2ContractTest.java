@@ -66,7 +66,7 @@ public final class OffloadingActionV2ContractTest {
         }
         check(checkedPlans == 9, "all nine action execution plans");
 
-        System.out.println("OffloadingActionV2ContractTest: PASS (42 checks; 9 execution plans)");
+        System.out.println("OffloadingActionV2ContractTest: PASS (56 checks; 9 execution plans)");
     }
 
     private static void check(boolean condition, String label) {

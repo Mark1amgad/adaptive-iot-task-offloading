@@ -34,7 +34,7 @@ It validates decision/execution correlation, terminal/outcome counts, protocol v
 ## Verified result
 
 Run output:
-`audit_output/v2_full_acceptance_20261115_154503`
+`audit_output/v2_full_acceptance_20261115_163210`
 
 | Case | Tasks | Verified routing |
 |---|---:|---|
@@ -44,7 +44,7 @@ Run output:
 | Cloud baseline | 2 | 2 CLOUD_FULL |
 | **Total** | **10** | **All task lifecycles reconciled** |
 
-The training model was saved as protocol 2.0 / format 2 with 972 states, nine action columns, and four measured-outcome updates. Python stderr was empty. Every run reported zero orphaned tasks. The Java action contract also passed its seven standalone checks.
+The training model was saved as protocol 2.0 / format 2 with 972 states, nine action columns, and four measured-outcome updates. Python stderr was empty. Every run reported zero orphaned tasks. The expanded Java action-plan contract passed 56 checks.
 
 ## Important limitations
 
@@ -54,6 +54,8 @@ This is an integration and lifecycle acceptance test, not a performance benchmar
 - The current simulator topology is the existing Local → Edge → Cloud chain, not proof of the proposed 4-IoT / 2-Edge / 1-Cloud target topology.
 - No claims about RL outperforming fixed baselines are supported by these smoke runs.
 
-## Next integration milestone
+## Subsequent milestone (completed)
 
-Connect the v2 decision response to the partial-task branch lifecycle. That requires action-driven Local/Edge and Local/Cloud branch creation at 25/50/75, ratio-correct branch input/output volumes, per-task branch barriers, merge execution, and task-level outcomes. The existing 40/60 Local+Edge feasibility fixture must remain labeled as a separate fixed-ratio mechanism test.
+The partial-action executor has since been implemented and accepted. See `V2_PARTIAL_EXECUTION_ACCEPTANCE.md` for the nine-action run, branch/merge lifecycle checks, overhead modeling, failure-path test, and current limitations.
+
+This document remains the historical full-placement-only acceptance record. Its indivisible-task experiment still does not execute partial actions. The fixed 40/60 Local+Edge feasibility fixture remains separate from the v2 ratio-selected executor.

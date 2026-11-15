@@ -78,16 +78,17 @@ Partition and merge overheads are carried as task constraints and execution meta
 - `edge`: EDGE_FULL
 - `cloud`: CLOUD_FULL
 - `random`: uniform random over the feasible mask
+- `local`, `edge_partial_25`, `edge_partial_50`, `edge_partial_75`, `edge_full`, `cloud_partial_25`, `cloud_partial_50`, `cloud_partial_75`, `cloud_full`: exact-action baselines for deterministic coverage of each catalogue entry
 
-A fixed baseline errors if its action is infeasible; it does not silently switch to another placement. This is intentional for fair baseline accounting.
-
-## Current scope and blockers
-
-The Python v2 engine and protocol are implemented and tested in isolation. The iFogSim Java adapter is not yet migrated to protocol v2 and does not yet produce these observations or execute all nine actions. Until that adapter and end-to-end acceptance tests exist, v2 is not an integrated simulator result and must not be used for performance claims.
-
+A fixed baseline errors if its action is infeasible; it does not silently switch to another placement. Exact-action baselines are used for executor acceptance, not as learned-policy performance comparisons.
 
 ## iFogSim integration status (2026-11-15)
 
-A separate Java v2 experiment now completes an end-to-end full-placement handshake and lifecycle against iFogSim. It sends indivisible tasks with the exact mask `[LOCAL, EDGE_FULL, CLOUD_FULL]`, validates the returned action ID/name/tier/fractions in Java, routes to the corresponding module, and reports measured outcomes. The 10-task acceptance suite (4-task training + 2 tasks per fixed baseline) passed. See [V2_FULL_PLACEMENT_ACCEPTANCE.md](../../10_iFogSim_Simulation/Simulation_Source/V2_FULL_PLACEMENT_ACCEPTANCE.md).
+Two separate end-to-end vertical slices now exist:
 
-This does **not** yet integrate partial execution. All nine action definitions and Python-side mask handling are implemented, but Java currently executes only the three full-placement choices in the end-to-end v2 experiment. Do not treat the current acceptance as evidence for Partial Offloading or as a benchmark comparison.
+1. **Full-placement training acceptance:** an indivisible-task experiment uses the exact mask `[LOCAL, EDGE_FULL, CLOUD_FULL]`, validates the Python response, routes to the corresponding worker, and returns measured outcomes. See [V2_FULL_PLACEMENT_ACCEPTANCE.md](../../10_iFogSim_Simulation/Simulation_Source/V2_FULL_PLACEMENT_ACCEPTANCE.md).
+2. **All-nine-action execution acceptance:** a divisible-task experiment runs all nine exact-action baselines through the live Python v2 server and iFogSim. It executes Local+Edge and Local+Cloud branches at 25/50/75, per-task barriers, merge Cloudlets, partition/merge delays, task outcomes, and watchdog-based failed-outcome reconciliation. The 18-task exact-action suite passed, followed by a 30-task training run with 30 measured-outcome updates and a saved model. See [V2_PARTIAL_EXECUTION_ACCEPTANCE.md](../../10_iFogSim_Simulation/Simulation_Source/V2_PARTIAL_EXECUTION_ACCEPTANCE.md).
+
+The simulator reports a task as failed if a required branch does not return before the watchdog horizon; it never fabricates a successful merge. Python acknowledges failed outcomes and shutdown verifies zero orphaned tasks.
+
+These are **integration/lifecycle acceptance tests**, not performance benchmarks. Exact-action baselines establish action-path coverage but do not establish policy convergence, generalization, or RL superiority. The current topology is Local → Edge → Cloud. Partition/merge overhead parameters remain provisional, and energy is not measured.

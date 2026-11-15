@@ -81,6 +81,44 @@ def test_v2_baseline_never_silently_uses_unavailable_action(tmp_path):
     result = send(s, observation())
     assert result["type"] == "error" and result["code"] == "baseline_unavailable"
 
+@pytest.mark.parametrize("action_id,action_name", [
+    (0, "local"), (1, "edge_partial_25"), (2, "edge_partial_50"),
+    (3, "edge_partial_75"), (4, "edge_full"),
+    (5, "cloud_partial_25"), (6, "cloud_partial_50"),
+    (7, "cloud_partial_75"), (8, "cloud_full"),
+])
+def test_v2_exact_action_baseline_selects_each_catalogue_action(tmp_path, action_id, action_name):
+    s = make_session(tmp_path, mode="baseline", policy=action_name)
+    send(s, hello("test"))
+    obs = observation()
+    obs["available_actions"] = list(range(9))
+    obs["task_constraints"]["cloud_available"] = True
+    decision = send(s, obs)
+    assert decision["type"] == "action"
+    assert decision["action_id"] == action_id
+    assert decision["action"] == action_name.upper()
+    ack = send(s, outcome("task-1", action_id))
+    assert ack["type"] == "outcome_ack" and not ack["updated"]
+    assert s.pending == {}
+
+
+def test_v2_failed_outcome_reconciles_pending_task_without_success_metrics(tmp_path):
+    s = make_session(tmp_path, mode="baseline", policy="edge_partial_50")
+    send(s, hello("test"))
+    obs = observation()
+    obs["available_actions"] = list(range(9))
+    obs["task_constraints"]["cloud_available"] = True
+    decision = send(s, obs)
+    failed = send(s, {
+        "protocol_version": "2.0", "type": "outcome", "task_id": "task-1",
+        "action_executed": decision["action_id"], "status": "failed",
+        "deadline_met": False, "failure_reason": "missing_remote_branch",
+        "resource_metrics": {"bandwidth_bytes": 6000},
+    })
+    assert failed["type"] == "outcome_ack"
+    assert failed["updated"] is False
+    assert s.pending == {}
+
 
 def test_v2_train_model_reloads_in_frozen_eval_mode(tmp_path):
     s = make_session(tmp_path)

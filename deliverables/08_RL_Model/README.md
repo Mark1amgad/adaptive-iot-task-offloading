@@ -42,4 +42,4 @@ python -m rl_model.server_v2 --mode train --config config/v2.json --model-out ar
 python -m rl_model.server_v2 --mode eval --config config/v2.json --model-in artifacts/model_v2.json
 ```
 
-The Java/iFogSim full-placement v2 acceptance runner is `../10_iFogSim_Simulation/Simulation_Source/run_v2_full_acceptance.ps1`. Partial-action Java execution remains the next integration milestone; the full-placement smoke test is not a partial-offloading benchmark.
+The Java/iFogSim v2 acceptance runners are `../10_iFogSim_Simulation/Simulation_Source/run_v2_full_acceptance.ps1` and `../10_iFogSim_Simulation/Simulation_Source/run_v2_partial_acceptance.ps1`. The latter executes all nine exact-action baselines (two overlapping tasks per action), including six ratio-specific partial paths and real merge Cloudlets, then runs a 30-task live learned-policy training episode. See `../10_iFogSim_Simulation/Simulation_Source/V2_PARTIAL_EXECUTION_ACCEPTANCE.md`. These are integration/lifecycle tests, not performance benchmarks or evidence of RL superiority.

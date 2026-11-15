@@ -39,8 +39,8 @@ class V2Session:
                  model_in: Optional[str] = None, model_out: str = "artifacts/model_v2.json"):
         if mode not in ("train", "eval", "baseline"):
             raise ValueError("mode must be train, eval, or baseline")
-        if mode == "baseline" and policy not in ("local", "edge", "cloud", "random"):
-            raise ValueError("baseline policy must be local, edge, cloud, or random")
+        if mode == "baseline" and policy not in ("random", "local", "edge", "cloud") + tuple(name.lower() for name in ACTION_NAMES):
+            raise ValueError("baseline policy must be local, edge, cloud, random, or one of the nine v2 action names")
         if mode == "eval" and not model_in:
             raise ValueError("eval mode requires --model-in")
         self.config, self.mode, self.policy = config, mode, policy
@@ -144,7 +144,7 @@ class V2Session:
             return self._error("invalid_observation", str(exc), tid)
         mask = obs["available_actions"]
         if self.mode == "baseline":
-            fixed = {"local": 0, "edge": 4, "cloud": 8}
+            fixed = {"local": 0, "edge": 4, "cloud": 8, **{name.lower(): index for index, name in enumerate(ACTION_NAMES)}}
             if self.policy == "random":
                 selected = self.agent.rng.choice(mask)
             else:
@@ -209,7 +209,7 @@ def main(argv: Optional[list[str]] = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--config", default="config/v2.json")
     parser.add_argument("--mode", choices=("train", "eval", "baseline"), required=True)
-    parser.add_argument("--policy", choices=("local", "edge", "cloud", "random"))
+    parser.add_argument("--policy", choices=("random", "local", "edge", "cloud") + tuple(name.lower() for name in ACTION_NAMES))
     parser.add_argument("--model-in")
     parser.add_argument("--model-out", default="artifacts/model_v2.json")
     args = parser.parse_args(argv)
