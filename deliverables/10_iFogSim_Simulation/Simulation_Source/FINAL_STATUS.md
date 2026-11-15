@@ -1,25 +1,26 @@
 # Integration status
 
-## Verified
+## Verified — 2026-11-15
 
-- `validate_integration.py` passes the retained real Python train trace and deterministic Local, Edge, and Cloud traces.
-- Each retained trace is valid JSONL and has one correlated task lifecycle: decision, task creation, execution, terminal result, outcome acknowledgement, and clean shutdown.
-- The retained byte totals are 0 bytes for Local, 14,000 for Edge, and 28,000 for Cloud. These are sums of the instrumented parent-child uplink/downlink rows only; Local's zero is therefore an intentional absence of counted transfers, not a missing measurement.
-- The train trace records `updated=true`, a saved model, `orphaned_tasks=0`, and Python exit code 0. Baseline traces record no model save and no learning update.
-- `run_acceptance.ps1` is the reproducible isolated runner. Its generated `exit_codes.json` records each Java case exit code.
-- The focused run `acceptance_20261013_220748` passed all seven cases with exit code 0: train, Local, Edge, Cloud, timeout fallback, malformed-response fallback, and zero-deadline.
-- Timeout and malformed-response fallback both selected Edge, recorded the injected reason, executed the Edge module, sent no `outcome`, reported `orphaned_tasks=0`, received `shutdown_ack`, and exited Python with code 0.
-- The zero-deadline case completed normally with measured latency `3.51 ms`, configured deadline `0 ms`, `deadline_met=false`, a valid completed outcome, and clean shutdown.
-- The validator now rejects duplicate decisions/outcomes, uncorrelated outcome sends, non-terminal normal outcomes, and non-boolean deadline flags.
-- The strengthened validator was rerun against the retained `acceptance_20261013_220748` artifacts: standard, timeout fallback, malformed fallback, and deadline suites all exited 0. No simulator rerun was needed because only validation logic and documentation changed in this follow-up.
-- `compare_policies.py` provides a reproducible one-task comparison artifact from existing traces: RL train chose Local with 3.51 ms and 0 bytes; deterministic Local matched 3.51 ms and 0 bytes; Edge measured 7.3028571428571425 ms and 14,000 bytes; Cloud measured 97.68580357142858 ms and 28,000 bytes. These are preliminary integration measurements, not a superiority result.
+- The experiment-owned Java integration now supports multiple overlapping full-placement tasks using one run-scoped registry: `tasksById` and `actualTupleId -> TaskRecord`.
+- Each task is correlated independently through decision, tuple creation, execution, transfer, terminal result, outcome acknowledgement, and final run shutdown.
+- Four-task runs passed in both baseline and training modes. The training run selected Local, Edge, Local, and Cloud within the same simulation, demonstrating multiple destinations in one run.
+- All four tasks were registered before the first terminal event. Each task received one outcome acknowledgement; the Python service was saved once after the four outcomes and shut down once with `orphaned_tasks=0`.
+- A second fixed-seed four-task training run produced an identical logical summary: actions, executing devices/modules, execution-admission times, latency, counted bytes, transfer counts, and deadline outcomes.
+- The final acceptance suite completed ten Java cases with exit code 0: single-task train, Local/Edge/Cloud regressions, four-task baseline overlap, four-task training, fixed-seed repeat, timeout fallback, malformed-response fallback, and zero-deadline.
+- The validator checks per-task task/tuple correlation, action-to-executor agreement, expected transfer bytes/counts, unique task IDs and tuple IDs, all outcome acknowledgements, one shutdown after all acknowledgements, zero Python orphans, and repeat-run logical determinism.
+- The four-task mixed-action training run measured simulated task latencies of 5.51 ms (Local), 7.302857 ms (Edge), 13.51 ms (Local), and 97.685804 ms (Cloud). Counted link bytes were 0, 14,000, 0, and 28,000 respectively. These are integration-fixture measurements, not calibrated benchmark results.
+- The acceptance runner now resolves the actual source, model, and validator locations and compiles to a fresh isolated output directory. It does not write to `iFogSim/out/production`.
+- The external iFogSim working tree was already dirty when this work began (488 status entries, including tracked compiled outputs and untracked experiment sources). Its status-entry count remained 488 after the acceptance runs; no reset, clean, checkout, or compilation into that tree was performed.
 
-## Not verified
+## Not verified / remaining work
 
-- The fault tests are safe adapter-boundary simulations, injected before observation transmission. A live Python action cannot be discarded and then shut down with zero orphans: the RL service retains an observation as pending until it receives an outcome. Sending that outcome for an invalid action would violate the fallback contract.
-- Task failure behavior remains unverified. The current experiment only has a successful result endpoint and does not add failure semantics to generic iFogSim behavior; no failure status or fabricated measurements were added.
-- Multi-task mode remains intentionally unsupported. The Java registry is a single-task record, terminal handling shuts down Python after that task, and shared tuple hooks are not yet keyed by a task-record map; adding a task count would risk duplicate shutdowns and cross-task byte attribution.
-- Native task failure remains deferred. The inspected iFogSim tuple path has no failure transition or failure result event; adding one would be experiment semantics rather than an observed simulator behavior.
-- Energy is intentionally sent as `null`; cumulative device energy is not a per-task measurement under the contract.
+- Partial offloading remains a separate feasibility spike. The Python action schema and learner still expose only Local / Edge / Cloud; the learner does not select a partial action.
+- Multi-task partial branch dispatch, branch-result barriers, merge tuple correlation, and mixed full/partial task acceptance remain unimplemented.
+- The target 4 IoT / 2 Edge / 1 Cloud topology is not implemented in this integration; the tested topology has one Local, one Edge, and one Cloud device.
+- Task failure, cancellation, and unresolved-at-horizon behavior remain undefined and unverified.
+- Per-task energy attribution is not implemented; `energy_joules` remains null.
+- Calibrated workloads, paired multi-seed benchmark runs, statistical analysis, and claims of policy superiority remain out of scope until the simulation model is calibrated and the benchmark protocol is completed.
+- The RL Python unit-test suite was not rerun in this session because the selected Python interpreter does not have `pytest` installed. The Java/Python integration acceptance suite and JSONL validator did run successfully.
 
-No claim above treats configured latency, task size, deadline, or static topology values as measured performance results.
+No claim above treats configured task size, topology, deadline, or workload parameters as calibrated real-world values.

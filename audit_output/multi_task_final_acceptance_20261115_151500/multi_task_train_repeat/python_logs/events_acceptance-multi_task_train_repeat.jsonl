@@ -1,0 +1,5 @@
+{"ts":1794746163.602,"level":"warning","event":"placeholder_thresholds","features":["task_mi","deadline_ms"]}
+{"ts":1794746163.765,"level":"info","event":"decision","task_id":"acceptance-multi_task_train_repeat:task:1","state":27,"action":"Local","mode":"explore"}
+{"ts":1794746163.785,"level":"info","event":"decision","task_id":"acceptance-multi_task_train_repeat:task:2","state":27,"action":"Edge","mode":"exploit"}
+{"ts":1794746163.789,"level":"info","event":"decision","task_id":"acceptance-multi_task_train_repeat:task:3","state":27,"action":"Local","mode":"explore"}
+{"ts":1794746163.8,"level":"info","event":"decision","task_id":"acceptance-multi_task_train_repeat:task:4","state":27,"action":"Cloud","mode":"exploit"}

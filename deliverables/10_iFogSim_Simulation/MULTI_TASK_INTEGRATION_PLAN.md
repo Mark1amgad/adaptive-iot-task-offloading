@@ -1,13 +1,13 @@
 # Multi-Task Lifecycle Integration Plan
 
-**Status:** implementation design for review; not yet implemented or simulator-validated  
+**Status:** phase 1 (multi-task full placement) implemented and simulator-validated on 2026-11-15; partial-action integration and several invariant fault-injection cases remain pending
 **Base revision:** `fe91665` on `main`  
 **Working branch:** `work/multi-task-lifecycle`  
 **Scope:** extend the accepted one-task Java/iFogSim2 + Python integration to multiple overlapping tasks without cross-task attribution, duplicate terminal outcomes, or premature shutdown.
 
 ## 1. Why this is the next gate
 
-The accepted integration prototype currently owns one mutable task record and shuts down the Python service after that task reaches its terminal endpoint. The partial-offloading spike separately demonstrates two correlated branches plus a real merge Cloudlet, but it also owns one task record and terminates the simulation after that task completes.
+Before this gate, the accepted integration prototype owned one mutable task record and shut down the Python service after its first task reached the terminal endpoint. The partial-offloading spike separately demonstrates two correlated branches plus a real merge Cloudlet, but it remains a one-task feasibility fixture. Phase 1 now addresses the full-placement lifecycle; multi-task partial merging remains open.
 
 Neither prototype can be made multi-task-safe by adding a task count. The required change is to make task identity and lifecycle explicit at every event boundary.
 
@@ -187,14 +187,14 @@ For every accepted run, assert:
 
 ## 9. Implementation sequence
 
-1. Audit the Python server protocol for pending-task cardinality, outcome matching, and save/shutdown semantics.
-2. Add pure Java registry/state-transition logic with unit-testable methods, without changing simulator event behavior yet.
-3. Add tuple-to-branch correlation and branch-scoped measurements to the instrumented simulator.
-4. Add multi-task emitter and full-placement path first; validate overlapping tasks.
-5. After full multi-task acceptance passes, add partial dispatch, branch barrier, and per-task merge correlation using simulator-owned test fixtures first; connect learner-selected partial actions only after the action protocol is versioned and validated.
-6. Add one run-level completion coordinator and one shutdown.
-7. Extend the JSONL validator and acceptance runner for cases A-I.
-8. Only after acceptance passes, connect generated workload files and proceed to benchmark calibration.
+1. **Done:** audited the Python server; pending decisions are keyed by task ID and outcomes are matched by task ID.
+2. **Done for the experiment path:** added a run-scoped Java task registry. A separate pure-Java unit-test suite for the registry is not yet present.
+3. **Done for full placement:** tuple correlation and per-task transfer/execution accounting are keyed by actual tuple ID. Partial branch references are still pending.
+4. **Done:** four overlapping tasks were tested, including a training run that selected Local, Edge, Local, and Cloud in one simulation.
+5. **Pending:** partial dispatch, branch barrier, and per-task merge correlation; learner-selected partial actions require a versioned action contract.
+6. **Done:** one run-level completion coordinator saves once (training mode), sends one shutdown, and terminates only after all task outcomes are acknowledged.
+7. **Done for current scope:** acceptance runner and validator cover one-task regressions, multi-task overlap, mixed-tier decisions, fixed-seed repeatability, fallback, and deadline behavior. Duplicate branch/terminal and unknown-correlation fault injection remain pending.
+8. **Pending:** connect calibrated generated workloads and proceed to benchmark calibration.
 
 Keep the one-task acceptance suite as regression coverage throughout. Preserve existing evidence and write each new run into a fresh output directory.
 
@@ -209,13 +209,21 @@ Keep the one-task acceptance suite as regression coverage throughout. Preserve e
 
 ## 11. Current blockers and handoff requirements
 
-The connected desktop device was offline during this design pass, so no local source files were edited and no Java compilation or iFogSim run was performed.
+The MARK desktop was reconnected and the implementation was performed on branch `work/multi-task-lifecycle`.
 
-Before implementing against the local workspace, reconnect the MARK desktop and verify:
+Verified on 2026-11-15:
 
-- Current working-tree status and branch; preserve any uncommitted changes.
-- The exact current accepted experiment source and Python model/server revision.
-- Whether the local repository has commits beyond base `fe91665`.
-- The external iFogSim working tree state; do not clean, reset, checkout, or compile into its tracked `out/production` folder.
+- Java compiled successfully with JDK 25 into a fresh `audit_output` run directory.
+- The full acceptance runner passed ten Java cases with exit code 0: four single-task route/train cases, four-task baseline overlap, four-task training, a fixed-seed training repeat, timeout fallback, malformed-response fallback, and deadline miss.
+- The mixed-action four-task training run chose Local, Edge, Local, and Cloud. All four tasks were registered before the first terminal event; all four outcomes were acknowledged; training was saved once; shutdown was acknowledged once with zero orphans.
+- The fixed-seed repeat produced the same logical task summary.
+- The external iFogSim working tree had 488 status entries before and after this work. It was not reset, cleaned, checked out, or compiled into.
 
-This document is a design contract, not evidence that multi-task support has been implemented.
+Remaining gates:
+
+- Extend the same lifecycle model to partial tasks, branch result barriers, merge tuple correlation, and mixed full/partial runs.
+- Add fault-injection acceptance cases for duplicate terminal/result events and unknown task/tuple correlations.
+- Implement and audit the target 4 IoT / 2 Edge / 1 Cloud topology.
+- Calibrate workload assumptions before benchmark-scale experiments.
+
+This is evidence for multi-task **full-placement** support only; it is not evidence that multi-task partial offloading or benchmark claims are complete.
