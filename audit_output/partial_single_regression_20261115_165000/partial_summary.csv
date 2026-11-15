@@ -1,0 +1,2 @@
+task_id,creation_ms,local_result_ms,edge_result_ms,merge_start_ms,merge_end_ms,latency_ms,branch_skew_ms,bandwidth_bytes,transfer_count,local_tuple_id,edge_tuple_id,merge_tuple_id
+"partial-task-001",5.0,10.01,98.93285714285715,98.93285714285715,101.14285714285715,96.14285714285715,88.92285714285714,7800,2,1,2,5

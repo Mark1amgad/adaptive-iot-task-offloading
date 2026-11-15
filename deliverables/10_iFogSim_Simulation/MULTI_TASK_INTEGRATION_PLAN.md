@@ -1,13 +1,13 @@
 # Multi-Task Lifecycle Integration Plan
 
-**Status:** phase 1 (multi-task full placement) implemented and simulator-validated on 2026-11-15; partial-action integration and several invariant fault-injection cases remain pending
+**Status:** multi-task full placement and a separate multi-task Local+Edge partial fixture implemented and simulator-validated on 2026-11-15; RL-selected partial actions and mixed full/partial integration remain pending
 **Base revision:** `fe91665` on `main`  
 **Working branch:** `work/multi-task-lifecycle`  
 **Scope:** extend the accepted one-task Java/iFogSim2 + Python integration to multiple overlapping tasks without cross-task attribution, duplicate terminal outcomes, or premature shutdown.
 
 ## 1. Why this is the next gate
 
-Before this gate, the accepted integration prototype owned one mutable task record and shut down the Python service after its first task reached the terminal endpoint. The partial-offloading spike separately demonstrates two correlated branches plus a real merge Cloudlet, but it remains a one-task feasibility fixture. Phase 1 now addresses the full-placement lifecycle; multi-task partial merging remains open.
+Before this gate, the accepted integration prototype owned one mutable task record and shut down the Python service after its first task reached the terminal endpoint. The original partial-offloading spike demonstrated two correlated branches plus a real merge Cloudlet for one task. A separate multi-task partial fixture now extends that mechanism to independently correlated task registries, branch barriers, and merge Cloudlets. Neither fixture changes the Python learner's Local / Edge / Cloud action space.
 
 Neither prototype can be made multi-task-safe by adding a task count. The required change is to make task identity and lifecycle explicit at every event boundary.
 
@@ -164,12 +164,12 @@ The first implementation should pass these deterministic cases before workload-s
 |---|---|---|
 | A | 1 full Local task | One decision, one branch, one terminal, one outcome ack |
 | B | 2 full tasks with overlapping execution | Two independent records; no cross-attribution; two outcomes |
-| C | 2 partial tasks with interleaved branch results | Each merge waits for its own branches; no cross-task merge |
-| D | 1 full + 1 partial task | Full task terminalizes directly; partial task merges once |
+| C | 2+ partial tasks with interleaved branch results | **PASS in simulator-owned 1/4/8-task fixture:** each merge waits for its own branches; no cross-task tuple mapping |
+| D | 1 full + 1 partial task | Pending: connect full-placement and partial fixture in one run-level coordinator |
 | E | 3 tasks with different selected destinations | Per-task transfer/execution accounting matches tuple ownership |
-| F | Duplicate branch result injected | Run fails with duplicate-result invariant; no second merge |
-| G | Duplicate terminal event injected | Run fails with duplicate-terminal invariant; no duplicate outcome |
-| H | Unknown task/tuple correlation | Run fails with explicit correlation error |
+| F | Duplicate branch result in corrupted trace | **PASS at validator layer:** corrupted trace rejected; simulator runtime fault injection pending |
+| G | Duplicate terminal event injected | Pending runtime fault-injection test |
+| H | Unknown task/tuple correlation | **PASS at validator layer:** unknown/wrong tuple attribution rejected; simulator runtime fault injection pending |
 | I | All tasks complete in different orders | Python shutdown occurs once, after all outcomes are acknowledged |
 | J | One task remains pending at horizon | No false success; pending task IDs are reported and status is handled under the declared horizon contract |
 
@@ -189,11 +189,11 @@ For every accepted run, assert:
 
 1. **Done:** audited the Python server; pending decisions are keyed by task ID and outcomes are matched by task ID.
 2. **Done for the experiment path:** added a run-scoped Java task registry. A separate pure-Java unit-test suite for the registry is not yet present.
-3. **Done for full placement:** tuple correlation and per-task transfer/execution accounting are keyed by actual tuple ID. Partial branch references are still pending.
+3. **Done for full placement and isolated partial fixture:** full-placement tuple correlation is task-scoped; partial branch and merge tuples are indexed by actual tuple ID and map back to their owning TaskRecord.
 4. **Done:** four overlapping tasks were tested, including a training run that selected Local, Edge, Local, and Cloud in one simulation.
-5. **Pending:** partial dispatch, branch barrier, and per-task merge correlation; learner-selected partial actions require a versioned action contract.
+5. **Done for simulator-owned fixture:** four- and eight-task Local+Edge partial runs passed with independent branch barriers and real merge Cloudlets. **Pending:** mixed full/partial execution in one run and learner-selected Partial actions, which require a versioned action contract.
 6. **Done:** one run-level completion coordinator saves once (training mode), sends one shutdown, and terminates only after all task outcomes are acknowledged.
-7. **Done for current scope:** acceptance runner and validator cover one-task regressions, multi-task overlap, mixed-tier decisions, fixed-seed repeatability, fallback, and deadline behavior. Duplicate branch/terminal and unknown-correlation fault injection remain pending.
+7. **Done for current scope:** full-placement acceptance covers regressions, multi-task overlap, mixed-tier decisions, repeatability, fallback, and deadline behavior. Partial acceptance covers 1/4/8 tasks, repeat-run byte identity, tuple/barrier/transfer invariants, plus five validator unit tests that reject duplicate branch results, cross-task tuple correlation, premature barriers, and invalid transfer attribution. Runtime fault injection for duplicate terminal events remains pending.
 8. **Pending:** connect calibrated generated workloads and proceed to benchmark calibration.
 
 Keep the one-task acceptance suite as regression coverage throughout. Preserve existing evidence and write each new run into a fresh output directory.
@@ -217,13 +217,16 @@ Verified on 2026-11-15:
 - The full acceptance runner passed ten Java cases with exit code 0: four single-task route/train cases, four-task baseline overlap, four-task training, a fixed-seed training repeat, timeout fallback, malformed-response fallback, and deadline miss.
 - The mixed-action four-task training run chose Local, Edge, Local, and Cloud. All four tasks were registered before the first terminal event; all four outcomes were acknowledged; training was saved once; shutdown was acknowledged once with zero orphans.
 - The fixed-seed repeat produced the same logical task summary.
+- A separate multi-task Local+Edge partial fixture passed one-task regression, four-task overlap, and eight-task overlap. It registered 12 tuple IDs for four tasks and 24 for eight tasks; every task had two branch results, its own merge barrier, one real merge Cloudlet, and one terminal event.
+- Four-task and eight-task partial runs were repeated with byte-identical trace and summary CSVs. Five validator unit tests passed, including four negative cases.
 - The external iFogSim working tree had 488 status entries before and after this work. It was not reset, cleaned, checked out, or compiled into.
 
 Remaining gates:
 
-- Extend the same lifecycle model to partial tasks, branch result barriers, merge tuple correlation, and mixed full/partial runs.
-- Add fault-injection acceptance cases for duplicate terminal/result events and unknown task/tuple correlations.
+- Connect the partial branch/merge fixture to the run-level full-placement coordinator and define mixed full/partial task semantics.
+- Extend learner protocol and action legality only after partitionability constraints and a versioned Partial action contract are specified.
+- Add runtime fault-injection cases for duplicate terminal events, duplicate merge results, and unknown task/tuple correlations; current negative tests exercise validator rejection of corrupted traces.
 - Implement and audit the target 4 IoT / 2 Edge / 1 Cloud topology.
 - Calibrate workload assumptions before benchmark-scale experiments.
 
-This is evidence for multi-task **full-placement** support only; it is not evidence that multi-task partial offloading or benchmark claims are complete.
+This is evidence for multi-task **full-placement** support and a separate multi-task **Local+Edge partial-feasibility fixture**. It is not evidence of RL-controlled partial offloading, mixed full/partial run support, general task divisibility, or benchmark performance superiority.

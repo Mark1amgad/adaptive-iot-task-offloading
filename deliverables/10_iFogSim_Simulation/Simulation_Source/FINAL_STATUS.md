@@ -2,25 +2,31 @@
 
 ## Verified — 2026-11-15
 
-- The experiment-owned Java integration now supports multiple overlapping full-placement tasks using one run-scoped registry: `tasksById` and `actualTupleId -> TaskRecord`.
-- Each task is correlated independently through decision, tuple creation, execution, transfer, terminal result, outcome acknowledgement, and final run shutdown.
-- Four-task runs passed in both baseline and training modes. The training run selected Local, Edge, Local, and Cloud within the same simulation, demonstrating multiple destinations in one run.
-- All four tasks were registered before the first terminal event. Each task received one outcome acknowledgement; the Python service was saved once after the four outcomes and shut down once with `orphaned_tasks=0`.
-- A second fixed-seed four-task training run produced an identical logical summary: actions, executing devices/modules, execution-admission times, latency, counted bytes, transfer counts, and deadline outcomes.
-- The final acceptance suite completed ten Java cases with exit code 0: single-task train, Local/Edge/Cloud regressions, four-task baseline overlap, four-task training, fixed-seed repeat, timeout fallback, malformed-response fallback, and zero-deadline.
-- The validator checks per-task task/tuple correlation, action-to-executor agreement, expected transfer bytes/counts, unique task IDs and tuple IDs, all outcome acknowledgements, one shutdown after all acknowledgements, zero Python orphans, and repeat-run logical determinism.
-- The four-task mixed-action training run measured simulated task latencies of 5.51 ms (Local), 7.302857 ms (Edge), 13.51 ms (Local), and 97.685804 ms (Cloud). Counted link bytes were 0, 14,000, 0, and 28,000 respectively. These are integration-fixture measurements, not calibrated benchmark results.
-- The acceptance runner now resolves the actual source, model, and validator locations and compiles to a fresh isolated output directory. It does not write to `iFogSim/out/production`.
-- The external iFogSim working tree was already dirty when this work began (488 status entries, including tracked compiled outputs and untracked experiment sources). Its status-entry count remained 488 after the acceptance runs; no reset, clean, checkout, or compilation into that tree was performed.
+### Multi-task full placement
+- Four overlapping tasks passed in baseline and training modes.
+- A mixed-action training run selected Local, Edge, Local, and Cloud.
+- Every task was independently correlated through task ID and actual tuple ID; all outcomes were acknowledged before one Python shutdown with zero orphaned tasks.
+- A fixed-seed repeat produced an identical logical task summary.
+- Ten Java acceptance cases passed: single-task training, Local/Edge/Cloud regressions, four-task baseline overlap, four-task training, fixed-seed repeat, timeout fallback, malformed-response fallback, and deadline miss.
+- Evidence: `audit_output/multi_task_final_acceptance_20261115_151500/`.
 
-## Not verified / remaining work
+### Multi-task partial offloading fixture
+- Added `MultiTaskPartialOffloadingSpike.java`: task-scoped Local/Edge branch registry, two-result barrier per task, unique merge tuple per task, real CloudSim merge Cloudlet, and one terminal state per task.
+- One-task regression, four-task overlap, and eight-task overlap passed.
+- Four-task run: 8 split branches, 4 merge Cloudlets, 12 unique registered tuple IDs.
+- Eight-task run: 16 split branches, 8 merge Cloudlets, 24 unique registered tuple IDs.
+- All tasks in each run were created before the first terminal event.
+- 1-, 4-, and 8-task validator runs passed; 4- and 8-task trace and summary outputs were byte-identical across repeats.
+- Five standard-library validator tests passed, including rejection of duplicate results, cross-task tuple correlation, premature merge barrier, and invalid transfer attribution.
+- Evidence: `audit_output/multi_task_partial_verified_20261115_163000/`, `audit_output/multi_task_partial_8tasks_20261115_164000/`, and `audit_output/partial_single_regression_20261115_165000/`.
 
-- Partial offloading remains a separate feasibility spike. The Python action schema and learner still expose only Local / Edge / Cloud; the learner does not select a partial action.
-- Multi-task partial branch dispatch, branch-result barriers, merge tuple correlation, and mixed full/partial task acceptance remain unimplemented.
-- The target 4 IoT / 2 Edge / 1 Cloud topology is not implemented in this integration; the tested topology has one Local, one Edge, and one Cloud device.
-- Task failure, cancellation, and unresolved-at-horizon behavior remain undefined and unverified.
-- Per-task energy attribution is not implemented; `energy_joules` remains null.
-- Calibrated workloads, paired multi-seed benchmark runs, statistical analysis, and claims of policy superiority remain out of scope until the simulation model is calibrated and the benchmark protocol is completed.
-- The RL Python unit-test suite was not rerun in this session because the selected Python interpreter does not have `pytest` installed. The Java/Python integration acceptance suite and JSONL validator did run successfully.
+## Remaining / not verified
+- The partial split remains a fixed 40/60 Local/Edge simulator fixture; it is not a general task partitioner.
+- Actual merge-data construction, copying, serialization, and semantic merge are not modeled; the merge Cloudlet receives an aggregate 1,000-byte input tuple.
+- Learner-selected Partial action, action-schema extension, legality mask, and RL integration are not implemented.
+- Local+Cloud partial execution is not implemented.
+- The target 4 IoT / 2 Edge / 1 Cloud topology is not implemented; tests use one Local, one Edge, and one Cloud device.
+- Task failure/cancellation/horizon semantics and per-task energy remain unimplemented.
+- Workload calibration, paired multi-seed benchmark results, statistical comparisons, and policy-superiority claims remain unverified.
 
-No claim above treats configured task size, topology, deadline, or workload parameters as calibrated real-world values.
+The current evidence establishes multi-task full-placement lifecycle correctness and multi-task Local+Edge partial-fixture lifecycle feasibility. It does not establish a complete RL-controlled partial-offloading system or calibrated performance advantage.

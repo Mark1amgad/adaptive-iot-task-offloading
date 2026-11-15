@@ -1,0 +1,8 @@
+﻿{
+    "task_count":  4,
+    "inter_arrival_ms":  1,
+    "primary_validator":  "PASS",
+    "repeat_validator":  "PASS",
+    "trace_byte_identical":  true,
+    "summary_byte_identical":  true
+}
