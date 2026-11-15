@@ -89,8 +89,9 @@ The Java simulation event loop is single-threaded, but the Python adapter is a s
 
 ### Dispatch
 
-- Full action: register one execution branch and its tuple mapping, then send it.
-- Partial action: validate that the task profile is divisible; register all required execution branches and tuple mappings before sending any branch; then dispatch the branches.
+- For the first multi-task milestone, keep the existing Python action set (Local/Edge/Cloud) and implement multiple concurrent full-placement tasks end-to-end.
+- Partial branch dispatch remains a separately tested simulator fixture until the Python action schema, action IDs, legal-action mask, and learner are explicitly extended to partial actions. Do not pretend the current Python agent can select partial actions.
+- Once the policy/action contract is extended, a partial action must validate that the task profile is divisible; register all required execution branches and tuple mappings before sending any branch; then dispatch the branches.
 - A partial task is limited to Local plus exactly one remote tier. Do not add multi-remote splitting in this milestone.
 - Use a task-specific split rule supplied by the workload profile. Do not assume MI and bytes can always be divided by the same ratio.
 
@@ -125,7 +126,7 @@ For full placement, the execution result endpoint can terminalize the task direc
 - Validate `orphaned_tasks == 0` and process exit status.
 - If the Python server only supports one pending task, first implement a sequential request/outcome handshake while keeping multiple simulator tasks in flight. A later task may wait for its decision turn; this is acceptable for a first correct multi-task milestone, provided decision waiting is included consistently in the declared timing model. Do not silently assume the current server supports multiple outstanding decisions.
 
-The Python server's actual pending-task semantics must be audited before coding the adapter changes. If its protocol cannot accept a second observation before the first outcome, preserve sequential request/outcome pairing and document the resulting control-plane serialization.
+Protocol audit result: `deliverables/08_RL_Model/src/rl_model/server.py` stores pending decisions in a dictionary keyed by task ID, rejects duplicate IDs, and accepts outcomes by matching task ID. The protocol documentation explicitly says several tasks may be pending concurrently. The Java adapter can remain synchronous request/response per message; it does not need concurrent I/O threads to support multiple in-flight simulator tasks. Preserve this existing protocol rather than introducing an unnecessary protocol redesign.
 
 ## 6. Termination rule
 
@@ -178,7 +179,7 @@ For every accepted run, assert:
 - Every task ID is unique.
 - Every execution tuple ID maps to exactly one branch.
 - Every branch has at most one execution admission and one result.
-- Every partial task has exactly the configured number of branch results before merge.
+- Every partial-fixture task has exactly the configured number of branch results before merge.
 - Every task has exactly one terminal event.
 - Every accepted decision has exactly one matching outcome acknowledgement.
 - No orphaned Python tasks remain at shutdown.
@@ -190,7 +191,7 @@ For every accepted run, assert:
 2. Add pure Java registry/state-transition logic with unit-testable methods, without changing simulator event behavior yet.
 3. Add tuple-to-branch correlation and branch-scoped measurements to the instrumented simulator.
 4. Add multi-task emitter and full-placement path first; validate overlapping tasks.
-5. Add partial dispatch, branch barrier, and per-task merge correlation.
+5. After full multi-task acceptance passes, add partial dispatch, branch barrier, and per-task merge correlation using simulator-owned test fixtures first; connect learner-selected partial actions only after the action protocol is versioned and validated.
 6. Add one run-level completion coordinator and one shutdown.
 7. Extend the JSONL validator and acceptance runner for cases A-I.
 8. Only after acceptance passes, connect generated workload files and proceed to benchmark calibration.
