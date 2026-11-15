@@ -21,6 +21,28 @@
         "status": "placeholder"
       },
       {
+        "name": "input_bytes",
+        "unit": "bytes",
+        "thresholds": [4096, 65536],
+        "labels": ["small", "medium", "large"],
+        "min_value": 0,
+        "max_value": null,
+        "source": "Task input payload size known before offloading",
+        "timing": "task creation",
+        "status": "placeholder"
+      },
+      {
+        "name": "output_bytes",
+        "unit": "bytes",
+        "thresholds": [1024, 4096],
+        "labels": ["small", "medium", "large"],
+        "min_value": 0,
+        "max_value": null,
+        "source": "Expected task output payload size known from workload profile",
+        "timing": "task creation",
+        "status": "placeholder"
+      },
+      {
         "name": "wan_latency_ms",
         "unit": "ms",
         "thresholds": [
@@ -96,11 +118,13 @@
         "name": "deadline_ms",
         "unit": "ms relative to task creation",
         "thresholds": [
-          500
+          180,
+          400
         ],
         "labels": [
-          "tight",
-          "relaxed"
+          "critical",
+          "high",
+          "normal"
         ],
         "min_value": 0,
         "max_value": null,

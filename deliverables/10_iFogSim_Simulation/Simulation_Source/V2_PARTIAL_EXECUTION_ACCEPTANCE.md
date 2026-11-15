@@ -130,3 +130,10 @@ The experiment now accepts `--partition-overhead-ms`, `--merge-overhead-ms`, `--
 A zero/nominal/high overhead sensitivity check passed with partition/merge values of 0/0 ms, 3/2 ms, and 10/10 ms. Each scenario covered all nine exact-action paths (two tasks each), a 30-task live learner integration episode, and the deliberate dropped-branch failure case. See `V2_OVERHEAD_SENSITIVITY.md` for commands, artifacts, and interpretation boundaries.
 
 These are engineering sensitivity runs, not empirical calibration or policy-performance evidence. The fixed-action cases have only two tasks per action; the 30-task episodes remain integration smoke tests.
+
+
+## Variable workload and frozen policy evaluation
+
+The experiment now supports deterministic per-task workload JSONL via `--workload`, including variable compute MI, input/output sizes, per-task deadline/urgency, divisible/indivisible semantics, merge MI, and arrival gaps. The v2 state was expanded with input/output payload features (13,122 states; 118,098 Q values). Output sizes are implemented as profile-specific typed AppEdges on shared worker modules, preserving device module counts and capacities.
+
+A 60-task mixed seed-42 training run passed with 27 partial tasks, 33 full tasks, 27 merge Cloudlets, and 60 measured-outcome updates. The nine-feature state has 13,122 states and 118,098 Q-values; deadline bins at 180/400 ms align with the generator's three urgency ranges. Local, Edge, and Cloud utilization features use per-device observed utilization snapshots. Three separate held-out workloads (seeds 43–45) were each replayed through Local, Edge Full, Cloud Full, Random, and frozen RL evaluation, with all five policies completing all 60 tasks per seed (180 paired evaluation tasks total). The paired results and limitations are documented in `V2_VARIABLE_WORKLOAD_ACCEPTANCE.md`.

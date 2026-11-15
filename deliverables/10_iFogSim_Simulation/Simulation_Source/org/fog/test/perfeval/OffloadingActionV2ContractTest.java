@@ -62,11 +62,20 @@ public final class OffloadingActionV2ContractTest {
                 check(plan.branches.size() == 1 && !plan.requiresMerge, action.wireName + " full branch count");
                 check(plan.branches.get(0).mi == 10003L, action.wireName + " full MI");
             }
+            OffloadingActionV2ExecutionPlan profiled = OffloadingActionV2ExecutionPlan.create(
+                    action, 10003L, 12001L, 512L, 1200L, "o512");
+            check(profiled.branches.get(0).module.equals(plan.branches.get(0).module),
+                    action.wireName + " keeps one worker module across output profiles");
+            check(profiled.branches.get(0).tupleType.endsWith("_O512"),
+                    action.wireName + " typed input selects output profile");
+            if (action.isPartial())
+                check(profiled.branches.get(1).tupleType.endsWith("_O512"),
+                        action.wireName + " remote typed input selects output profile");
             checkedPlans++;
         }
         check(checkedPlans == 9, "all nine action execution plans");
 
-        System.out.println("OffloadingActionV2ContractTest: PASS (56 checks; 9 execution plans)");
+        System.out.println("OffloadingActionV2ContractTest: PASS (80 checks; 9 execution plans)");
     }
 
     private static void check(boolean condition, String label) {

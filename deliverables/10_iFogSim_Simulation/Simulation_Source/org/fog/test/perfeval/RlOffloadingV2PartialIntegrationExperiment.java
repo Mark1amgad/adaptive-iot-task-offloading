@@ -67,7 +67,8 @@ public final class RlOffloadingV2PartialIntegrationExperiment {
     private static final long INPUT_BYTES = 12001L;
     private static final long OUTPUT_BYTES = 1001L;
     private static final long MERGE_MI = 1200L;
-    private static final long MERGE_OUTPUT_BYTES = 100L;
+    private static final long MERGE_OUTPUT_BYTES = 64L;
+    private static final long[] OUTPUT_PROFILES = new long[] {512L, 1001L, 2048L, 8192L};
     // Per-process experiment parameters are loaded from CLI options before simulation.
     // The runner launches one JVM per run, so these values cannot leak between scenarios.
     private static double DEADLINE_MS = 1000.0;
@@ -137,14 +138,14 @@ public final class RlOffloadingV2PartialIntegrationExperiment {
 
         trace.record("config", mapOf("run_id", options.runId,
                 "task_count", options.tasks, "mode", options.mode,
-                "action_policy", options.action == null ? "learned_train" : options.action.wireName,
-                "inter_arrival_ms", options.interArrivalMs,
-                "task_mi", TASK_MI, "input_bytes", INPUT_BYTES, "output_bytes", OUTPUT_BYTES,
-                "merge_mi", MERGE_MI, "merge_output_bytes", MERGE_OUTPUT_BYTES,
+                "action_policy", options.action != null ? options.action.wireName : (options.policy != null ? options.policy : ("train".equals(options.mode) ? "learned_train" : "learned_eval")),
+                "workload_file", options.workloadFile == null ? "legacy_constant_profile" : options.workloadFile.toString(),
+                "inter_arrival_mode", options.workloadFile == null ? "fixed" : "per_task_seeded",
                 "partition_overhead_ms", PARTITION_OVERHEAD_MS, "merge_overhead_ms", MERGE_OVERHEAD_MS,
-                "deadline_ms", DEADLINE_MS, "watchdog_ms", options.watchdogMs,
-                "wan_latency_ms", WAN_LATENCY_MS, "created_at", Instant.now().toString()));
-        new TaskEmitter("v2-partial-emitter", local, registry);
+                "deadline_default_ms", DEADLINE_MS, "watchdog_ms", options.watchdogMs,
+                "wan_latency_ms", WAN_LATENCY_MS, "output_profiles_bytes", Arrays.toString(OUTPUT_PROFILES),
+                "created_at", Instant.now().toString()));
+        new TaskEmitter("v2-partial-emitter", local, edge, cloud, registry);
         CloudSim.startSimulation();
         CloudSim.stopSimulation();
 
@@ -164,22 +165,18 @@ public final class RlOffloadingV2PartialIntegrationExperiment {
 
     private static Application createApplication(int userId) {
         Application app = Application.createApplication(APP_ID, userId);
-        addWorker(app, LOCAL_FULL, "TASK_INPUT", "LOCAL_FULL_RESULT", OUTPUT_BYTES);
-        addWorker(app, EDGE_FULL, "TASK_INPUT", "EDGE_FULL_RESULT", OUTPUT_BYTES);
-        addWorker(app, CLOUD_FULL, "TASK_INPUT", "CLOUD_FULL_RESULT", OUTPUT_BYTES);
-
-        for (int remotePercent : new int[] {25, 50, 75}) {
-            long remoteOut = Math.round(OUTPUT_BYTES * remotePercent / 100.0);
-            long localOut = OUTPUT_BYTES - remoteOut;
-            String suffix = Integer.toString(remotePercent);
+        addWorker(app, LOCAL_FULL, "TASK_INPUT", "LOCAL_FULL_RESULT", -1, true);
+        addWorker(app, EDGE_FULL, "TASK_INPUT", "EDGE_FULL_RESULT", -1, true);
+        addWorker(app, CLOUD_FULL, "TASK_INPUT", "CLOUD_FULL_RESULT", -1, true);
+        for (int percent : new int[] {25, 50, 75}) {
+            String suffix = Integer.toString(percent);
             addWorker(app, "local_partial_" + suffix, "LOCAL_PARTIAL_INPUT",
-                    "LOCAL_PARTIAL_RESULT_" + suffix, localOut);
+                    "LOCAL_PARTIAL_RESULT_" + suffix, percent, true);
             addWorker(app, "edge_partial_" + suffix, "EDGE_PARTIAL_INPUT",
-                    "EDGE_PARTIAL_RESULT_" + suffix, remoteOut);
+                    "EDGE_PARTIAL_RESULT_" + suffix, percent, false);
             addWorker(app, "cloud_partial_" + suffix, "CLOUD_PARTIAL_INPUT",
-                    "CLOUD_PARTIAL_RESULT_" + suffix, remoteOut);
+                    "CLOUD_PARTIAL_RESULT_" + suffix, percent, false);
         }
-
         app.addAppModule(MERGE_MODULE, 64, 1000, 10000);
         app.addAppEdge(MERGE_MODULE, FINAL_ENDPOINT, 1, MERGE_OUTPUT_BYTES,
                 "MERGED_RESULT", Tuple.DOWN, AppEdge.ACTUATOR);
@@ -188,12 +185,24 @@ public final class RlOffloadingV2PartialIntegrationExperiment {
         return app;
     }
 
+    /** One module per tier/action; distinct typed edges carry each payload-size profile. */
     private static void addWorker(Application app, String module, String inputType,
-            String outputType, long outputBytes) {
+            String outputType, int remotePercent, boolean localBranch) {
         app.addAppModule(module, 64, 1000, 10000);
-        app.addAppEdge(module, BRANCH_ENDPOINT, 1, outputBytes,
-                outputType, Tuple.DOWN, AppEdge.ACTUATOR);
-        app.addTupleMapping(module, inputType, outputType, new FractionalSelectivity(1.0));
+        for (long totalOutput : OUTPUT_PROFILES) {
+            long branchOutput;
+            if (remotePercent < 0) branchOutput = totalOutput;
+            else {
+                long remoteOutput = Math.round(totalOutput * remotePercent / 100.0);
+                branchOutput = localBranch ? totalOutput - remoteOutput : remoteOutput;
+            }
+            String profile = tupleProfileSuffix(totalOutput);
+            String typedInput = inputType + profile;
+            String typedOutput = outputType + profile;
+            app.addAppEdge(module, BRANCH_ENDPOINT, 1, branchOutput,
+                    typedOutput, Tuple.DOWN, AppEdge.ACTUATOR);
+            app.addTupleMapping(module, typedInput, typedOutput, new FractionalSelectivity(1.0));
+        }
     }
 
     private static void mapModules(ModuleMapping mapping) {
@@ -207,6 +216,14 @@ public final class RlOffloadingV2PartialIntegrationExperiment {
             mapping.addModuleToDevice("edge_partial_" + suffix, "edge");
             mapping.addModuleToDevice("cloud_partial_" + suffix, "cloud");
         }
+    }
+
+    private static String tupleProfileSuffix(long bytes) {
+        return bytes == OUTPUT_BYTES ? "" : "_O" + bytes;
+    }
+
+    private static String outputProfile(long bytes) {
+        return bytes == OUTPUT_BYTES ? "" : "o" + bytes;
     }
 
     private static InstrumentedFogDevice createDevice(String name, long mips, int ram,
@@ -230,11 +247,12 @@ public final class RlOffloadingV2PartialIntegrationExperiment {
     }
 
     private static final class TaskEmitter extends SimEntity {
-        private final InstrumentedFogDevice local;
+        private final InstrumentedFogDevice local, edge, cloud;
         private final TaskRegistry registry;
         private int emitted;
-        TaskEmitter(String name, InstrumentedFogDevice local, TaskRegistry registry) {
-            super(name); this.local = local; this.registry = registry;
+        TaskEmitter(String name, InstrumentedFogDevice local, InstrumentedFogDevice edge,
+                InstrumentedFogDevice cloud, TaskRegistry registry) {
+            super(name); this.local = local; this.edge = edge; this.cloud = cloud; this.registry = registry;
         }
         @Override public void startEntity() { send(getId(), 5.0, Events.EMIT); }
         @Override public void processEvent(SimEvent event) {
@@ -246,7 +264,9 @@ public final class RlOffloadingV2PartialIntegrationExperiment {
             if (event.getTag() != Events.EMIT) throw new IllegalStateException("unexpected emitter event");
             if (emitted >= registry.options.tasks) throw new IllegalStateException("excess task emission");
             int sequence = ++emitted;
-            TaskRecord task = registry.decide(sequence, local.getObservedUtilization());
+            WorkloadTask workload = registry.options.workload.get(sequence - 1);
+            TaskRecord task = registry.decide(sequence, local.getObservedUtilization(),
+                    edge.getObservedUtilization(), cloud.getObservedUtilization(), workload);
             if (task.action.isPartial()) {
                 registry.trace.record("partition_overhead_started", mapOf("task_id", task.taskId,
                         "duration_ms", PARTITION_OVERHEAD_MS, "sim_time_ms", CloudSim.clock()));
@@ -254,7 +274,10 @@ public final class RlOffloadingV2PartialIntegrationExperiment {
             } else {
                 dispatchBranches(task);
             }
-            if (emitted < registry.options.tasks) send(getId(), registry.options.interArrivalMs, Events.EMIT);
+            if (emitted < registry.options.tasks) {
+                double nextGap = registry.options.workload.get(emitted).arrivalGapMs;
+                send(getId(), nextGap, Events.EMIT);
+            }
         }
         private void dispatchBranches(TaskRecord task) {
             if (task.action.isPartial())
@@ -393,12 +416,70 @@ public final class RlOffloadingV2PartialIntegrationExperiment {
         BranchRef(TaskRecord task, Branch branch) { this.task = task; this.branch = branch; }
     }
 
+    private static final class WorkloadTask {
+        final int sequence;
+        final long taskMi, inputBytes, outputBytes, mergeMi, mergeOutputBytes;
+        final double deadlineMs, arrivalGapMs;
+        final String urgencyClass, splittability, partitionModelId;
+        WorkloadTask(int sequence, long taskMi, long inputBytes, long outputBytes,
+                long mergeMi, long mergeOutputBytes, double deadlineMs, double arrivalGapMs,
+                String urgencyClass, String splittability, String partitionModelId) {
+            this.sequence = sequence; this.taskMi = taskMi; this.inputBytes = inputBytes;
+            this.outputBytes = outputBytes; this.mergeMi = mergeMi; this.mergeOutputBytes = mergeOutputBytes;
+            this.deadlineMs = deadlineMs; this.arrivalGapMs = arrivalGapMs;
+            this.urgencyClass = urgencyClass; this.splittability = splittability;
+            this.partitionModelId = partitionModelId;
+        }
+        boolean divisible() { return "DATA_PARALLEL_DIVISIBLE".equals(splittability); }
+        String outputProfile() { return outputBytes == OUTPUT_BYTES ? null : "o" + outputBytes; }
+        static WorkloadTask parse(String line, int expectedSequence) throws Exception {
+            Object parsed = new JSONParser().parse(line);
+            if (!(parsed instanceof JSONObject)) throw new IllegalArgumentException("workload row must be a JSON object");
+            JSONObject row = (JSONObject) parsed;
+            int sequence = (int) number(row.get("sequence"));
+            long taskMi = number(row.get("task_mi"));
+            long inputBytes = number(row.get("input_bytes"));
+            long outputBytes = number(row.get("output_bytes"));
+            long mergeMi = number(row.get("merge_mi"));
+            long mergeOutputBytes = number(row.get("merge_output_bytes"));
+            double deadline = decimal(row.get("deadline_ms"));
+            double gap = decimal(row.get("arrival_gap_ms"));
+            String urgency = String.valueOf(row.get("urgency_class"));
+            String split = String.valueOf(row.get("splittability"));
+            Object partitionValue = row.get("partition_model_id");
+            String partition = partitionValue == null ? null : String.valueOf(partitionValue);
+            if (sequence != expectedSequence || taskMi <= 0 || inputBytes <= 0 || deadline <= 0
+                    || gap < 0 || mergeOutputBytes <= 0 || !Double.isFinite(deadline) || !Double.isFinite(gap))
+                throw new IllegalArgumentException("invalid workload values at sequence " + expectedSequence);
+            if (outputBytes != 512 && outputBytes != OUTPUT_BYTES && outputBytes != 2048 && outputBytes != 8192)
+                throw new IllegalArgumentException("unsupported output_bytes at sequence " + sequence);
+            if (outputBytes != OUTPUT_BYTES && !("o" + outputBytes).equals(String.valueOf(row.get("output_profile"))))
+                throw new IllegalArgumentException("output_profile does not match output_bytes at sequence " + sequence);
+            if (!("critical".equals(urgency) || "high".equals(urgency) || "normal".equals(urgency)))
+                throw new IllegalArgumentException("invalid urgency_class at sequence " + sequence);
+            if (!("INDIVISIBLE".equals(split) || "DATA_PARALLEL_DIVISIBLE".equals(split)))
+                throw new IllegalArgumentException("invalid splittability at sequence " + sequence);
+            if ("INDIVISIBLE".equals(split) && (partition != null || mergeMi != 0))
+                throw new IllegalArgumentException("indivisible task must not declare partition/merge work");
+            if ("DATA_PARALLEL_DIVISIBLE".equals(split) && (partition == null || partition.isEmpty() || mergeMi <= 0))
+                throw new IllegalArgumentException("divisible task requires partition model and positive merge MI");
+            return new WorkloadTask(sequence, taskMi, inputBytes, outputBytes, mergeMi,
+                    mergeOutputBytes, deadline, gap, urgency, split, partition);
+        }
+    }
+
+    private static double decimal(Object value) {
+        if (!(value instanceof Number)) throw new IllegalArgumentException("expected numeric workload value: " + value);
+        return ((Number) value).doubleValue();
+    }
+
     private static final class TaskRecord {
         final String taskId;
         final int sequence;
         final double creationTime;
         final OffloadingActionV2.Action action;
         final OffloadingActionV2ExecutionPlan plan;
+        final WorkloadTask workload;
         final Map<String, Branch> branches = new LinkedHashMap<String, Branch>();
         int resultBranches;
         long bandwidthBytes;
@@ -407,9 +488,9 @@ public final class RlOffloadingV2PartialIntegrationExperiment {
         double terminalTime = Double.NaN, latency = Double.NaN;
         String failureReason;
         TaskRecord(String taskId, int sequence, double creationTime,
-                OffloadingActionV2.Action action, OffloadingActionV2ExecutionPlan plan) {
+                OffloadingActionV2.Action action, OffloadingActionV2ExecutionPlan plan, WorkloadTask workload) {
             this.taskId = taskId; this.sequence = sequence; this.creationTime = creationTime;
-            this.action = action; this.plan = plan;
+            this.action = action; this.plan = plan; this.workload = workload;
         }
     }
 
@@ -427,22 +508,30 @@ public final class RlOffloadingV2PartialIntegrationExperiment {
             this.options = options; this.trace = trace; this.python = python; this.userId = userId;
         }
 
-        TaskRecord decide(int sequence, double localUtil) {
+        TaskRecord decide(int sequence, double localUtil, double edgeUtil, double cloudUtil, WorkloadTask workload) {
             String taskId = options.runId + ":task:" + sequence;
             OffloadingActionV2ExecutionPlan plan = null;
             TaskRecord task;
             try {
-                Map<String, Object> features = mapOf("task_mi", TASK_MI, "wan_latency_ms", WAN_LATENCY_MS,
-                        "local_utilization", localUtil, "edge_utilization", 0.2,
-                        "cloud_utilization", 0.1, "deadline_ms", DEADLINE_MS, "splittability", 1);
+                Map<String, Object> features = mapOf("task_mi", workload.taskMi,
+                        "input_bytes", workload.inputBytes, "output_bytes", workload.outputBytes,
+                        "wan_latency_ms", WAN_LATENCY_MS, "local_utilization", localUtil,
+                        "edge_utilization", edgeUtil, "cloud_utilization", cloudUtil,
+                        "deadline_ms", workload.deadlineMs,
+                        "splittability", workload.divisible() ? 1 : 0);
                 List<Integer> mask = OffloadingActionV2.legalActionIds(
-                        "DATA_PARALLEL_DIVISIBLE", "data-parallel-v1", true, true, true);
+                        workload.splittability, workload.partitionModelId, true, true, true);
+                Map<String, Object> constraints = mapOf("splittability", workload.splittability,
+                        "local_available", true, "edge_available", true, "cloud_available", true,
+                        "urgency_class", workload.urgencyClass);
+                if (workload.divisible()) {
+                    constraints.put("partition_model_id", workload.partitionModelId);
+                    constraints.put("partition_overhead_ms", PARTITION_OVERHEAD_MS);
+                    constraints.put("merge_overhead_ms", MERGE_OVERHEAD_MS);
+                }
                 JSONObject response = python.request(mapOf("protocol_version", "2.0", "type", "observation",
                         "task_id", taskId, "features", features, "available_actions", mask,
-                        "task_constraints", mapOf("splittability", "DATA_PARALLEL_DIVISIBLE",
-                                "partition_model_id", "data-parallel-v1", "partition_overhead_ms", PARTITION_OVERHEAD_MS,
-                                "merge_overhead_ms", MERGE_OVERHEAD_MS, "local_available", true,
-                                "edge_available", true, "cloud_available", true),
+                        "task_constraints", constraints,
                         "sim_time_ms", CloudSim.clock()));
                 requireType(response, "action");
                 OffloadingActionV2.Action action = OffloadingActionV2.validateResponse(
@@ -450,14 +539,20 @@ public final class RlOffloadingV2PartialIntegrationExperiment {
                 if (options.action != null && action != options.action)
                     throw new IllegalStateException("Python fixed-action baseline selected "
                             + action.wireName + " but this run requires " + options.action.wireName);
-                plan = OffloadingActionV2ExecutionPlan.create(action, TASK_MI,
-                        INPUT_BYTES, OUTPUT_BYTES, MERGE_MI);
-                task = new TaskRecord(taskId, sequence, CloudSim.clock(), action, plan);
+                plan = OffloadingActionV2ExecutionPlan.create(action, workload.taskMi,
+                        workload.inputBytes, workload.outputBytes, workload.mergeMi, workload.outputProfile());
+                task = new TaskRecord(taskId, sequence, CloudSim.clock(), action, plan, workload);
                 if (tasks.putIfAbsent(taskId, task) != null) throw new IllegalStateException("duplicate task id");
                 acceptedDecisions++;
                 trace.record("decision", mapOf("task_id", taskId, "action", action.wireName,
                         "action_id", action.id, "model_version", response.get("model_version"),
-                        "mode", response.get("mode"), "sim_time_ms", CloudSim.clock()));
+                        "mode", response.get("mode"), "task_mi", workload.taskMi,
+                        "input_bytes", workload.inputBytes, "output_bytes", workload.outputBytes,
+                        "local_utilization", localUtil, "edge_utilization", edgeUtil,
+                        "cloud_utilization", cloudUtil, "deadline_ms", workload.deadlineMs,
+                        "urgency_class", workload.urgencyClass,
+                        "splittability", workload.splittability, "arrival_gap_ms", workload.arrivalGapMs,
+                        "sim_time_ms", CloudSim.clock()));
                 return task;
             } catch (Exception error) {
                 failed = true;
@@ -476,7 +571,8 @@ public final class RlOffloadingV2PartialIntegrationExperiment {
                 throw new IllegalStateException("duplicate tuple correlation " + branch.tupleId);
             trace.record("branch_created", mapOf("task_id", task.taskId, "branch", name,
                     "tuple_id", branch.tupleId, "tier", branch.tier, "module", branch.module,
-                    "mi", branch.mi, "input_bytes", branch.inputBytes, "output_bytes", branch.outputBytes,
+                    "tuple_type", spec.tupleType, "mi", branch.mi, "input_bytes", branch.inputBytes,
+                    "output_bytes", branch.outputBytes,
                     "sim_time_ms", CloudSim.clock()));
         }
 
@@ -521,7 +617,7 @@ public final class RlOffloadingV2PartialIntegrationExperiment {
                 throw new IllegalStateException("unexpected branch result for " + task.taskId);
             if (branch.executingNode == null || !Double.isNaN(branch.resultArrival))
                 throw new IllegalStateException("branch result without execution or duplicated");
-            String expectedType = outputType(branch.module);
+            String expectedType = outputType(branch.module, task.workload.outputBytes);
             if (!BRANCH_ENDPOINT.equals(tuple.getDestModuleName()) || !expectedType.equals(tuple.getTupleType()))
                 throw new IllegalStateException("branch result type/endpoint mismatch: " + tuple.getTupleType());
             branch.resultArrival = CloudSim.clock();
@@ -549,7 +645,7 @@ public final class RlOffloadingV2PartialIntegrationExperiment {
             if (!task.action.isPartial() || !task.mergeStarted || task.branches.containsKey("merge"))
                 throw new IllegalStateException("merge requested before barrier or twice");
             Tuple tuple = new Tuple(APP_ID, FogUtils.generateTupleId(), Tuple.UP,
-                    MERGE_MI, 1, OUTPUT_BYTES, MERGE_OUTPUT_BYTES,
+                    task.workload.mergeMi, 1, task.workload.outputBytes, task.workload.mergeOutputBytes,
                     new UtilizationModelFull(), new UtilizationModelFull(), new UtilizationModelFull());
             tuple.setUserId(userId);
             tuple.setTupleType("MERGE_INPUT");
@@ -557,12 +653,13 @@ public final class RlOffloadingV2PartialIntegrationExperiment {
             tuple.setDestModuleName(MERGE_MODULE);
             tuple.setActualTupleId(tuple.getCloudletId());
             Branch merge = new Branch("merge", MERGE_MODULE, "LOCAL", tuple.getActualTupleId(),
-                    MERGE_MI, OUTPUT_BYTES, MERGE_OUTPUT_BYTES);
+                    task.workload.mergeMi, task.workload.outputBytes, task.workload.mergeOutputBytes);
             task.branches.put("merge", merge);
             if (tupleOwners.putIfAbsent(merge.tupleId, new BranchRef(task, merge)) != null)
                 throw new IllegalStateException("duplicate merge tuple id");
             trace.record("merge_created", mapOf("task_id", task.taskId, "tuple_id", merge.tupleId,
-                    "mi", MERGE_MI, "input_bytes", OUTPUT_BYTES, "output_bytes", MERGE_OUTPUT_BYTES,
+                    "mi", task.workload.mergeMi, "input_bytes", task.workload.outputBytes,
+                    "output_bytes", task.workload.mergeOutputBytes,
                     "sim_time_ms", CloudSim.clock()));
             return tuple;
         }
@@ -591,7 +688,7 @@ public final class RlOffloadingV2PartialIntegrationExperiment {
             task.terminal = true;
             task.terminalTime = CloudSim.clock();
             task.latency = task.terminalTime - task.creationTime;
-            boolean deadlineMet = task.latency <= DEADLINE_MS;
+            boolean deadlineMet = task.latency <= task.workload.deadlineMs;
             double utilSum = 0.0;
             int utilCount = 0;
             for (Branch branch : task.branches.values()) {
@@ -599,7 +696,8 @@ public final class RlOffloadingV2PartialIntegrationExperiment {
             }
             double meanUtil = utilCount == 0 ? 0.0 : utilSum / utilCount;
             trace.record("task_terminal", mapOf("task_id", task.taskId, "action", task.action.wireName,
-                    "latency_ms", task.latency, "deadline_met", deadlineMet,
+                    "latency_ms", task.latency, "deadline_ms", task.workload.deadlineMs,
+                    "urgency_class", task.workload.urgencyClass, "deadline_met", deadlineMet,
                     "bandwidth_bytes", task.bandwidthBytes, "transfer_count", task.transferCount,
                     "sim_time_ms", task.terminalTime));
             try {
@@ -713,7 +811,7 @@ public final class RlOffloadingV2PartialIntegrationExperiment {
                         throw new IllegalStateException("tuple attribution error " + branch.tupleId);
                     if (!"merge".equals(branch.name)) { mi += branch.mi; in += branch.inputBytes; out += branch.outputBytes; }
                 }
-                if (mi != TASK_MI || in != INPUT_BYTES || out != OUTPUT_BYTES)
+                if (mi != task.workload.taskMi || in != task.workload.inputBytes || out != task.workload.outputBytes)
                     throw new IllegalStateException("partition conservation failed for " + task.taskId);
                 if (task.action.isPartial()) {
                     Branch local = task.branches.get("local");
@@ -721,7 +819,7 @@ public final class RlOffloadingV2PartialIntegrationExperiment {
                     Branch merge = task.branches.get("merge");
                     if (local == null || remote == null || merge == null || !task.mergeStarted)
                         throw new IllegalStateException("partial merge lifecycle missing");
-                    if (merge.executionStart < Math.max(local.resultArrival, remote.resultArrival) + MERGE_OVERHEAD_MS)
+                    if (merge.executionStart + 1e-9 < Math.max(local.resultArrival, remote.resultArrival) + MERGE_OVERHEAD_MS)
                         throw new IllegalStateException("merge started before both branch results");
                 }
             }
@@ -739,13 +837,14 @@ public final class RlOffloadingV2PartialIntegrationExperiment {
         }
     }
 
-    private static String outputType(String module) {
-        if (LOCAL_FULL.equals(module)) return "LOCAL_FULL_RESULT";
-        if (EDGE_FULL.equals(module)) return "EDGE_FULL_RESULT";
-        if (CLOUD_FULL.equals(module)) return "CLOUD_FULL_RESULT";
-        if (module.startsWith("local_partial_")) return "LOCAL_PARTIAL_RESULT_" + module.substring("local_partial_".length());
-        if (module.startsWith("edge_partial_")) return "EDGE_PARTIAL_RESULT_" + module.substring("edge_partial_".length());
-        if (module.startsWith("cloud_partial_")) return "CLOUD_PARTIAL_RESULT_" + module.substring("cloud_partial_".length());
+    private static String outputType(String module, long outputBytes) {
+        String profile = tupleProfileSuffix(outputBytes);
+        if (LOCAL_FULL.equals(module)) return "LOCAL_FULL_RESULT" + profile;
+        if (EDGE_FULL.equals(module)) return "EDGE_FULL_RESULT" + profile;
+        if (CLOUD_FULL.equals(module)) return "CLOUD_FULL_RESULT" + profile;
+        if (module.startsWith("local_partial_")) return "LOCAL_PARTIAL_RESULT_" + module.substring("local_partial_".length()) + profile;
+        if (module.startsWith("edge_partial_")) return "EDGE_PARTIAL_RESULT_" + module.substring("edge_partial_".length()) + profile;
+        if (module.startsWith("cloud_partial_")) return "CLOUD_PARTIAL_RESULT_" + module.substring("cloud_partial_".length()) + profile;
         throw new IllegalArgumentException("unknown worker module " + module);
     }
 
@@ -785,7 +884,11 @@ public final class RlOffloadingV2PartialIntegrationExperiment {
             command.add("--config"); command.add(options.rlRoot.resolve("config/v2.json").toString());
             command.add("--mode"); command.add(options.mode);
             if ("baseline".equals(options.mode)) {
-                command.add("--policy"); command.add(options.action.wireName.toLowerCase());
+                command.add("--policy");
+                command.add(options.action != null ? options.action.wireName.toLowerCase() : options.policy);
+            }
+            if ("eval".equals(options.mode)) {
+                command.add("--model-in"); command.add(options.modelIn.toString());
             }
             command.add("--model-out"); command.add(options.output.resolve("python_model.json").toString());
             ProcessBuilder pb = new ProcessBuilder(command);
@@ -858,9 +961,12 @@ public final class RlOffloadingV2PartialIntegrationExperiment {
     }
 
     private static final class Options {
-        Path output, python, rlRoot;
+        Path output, python, rlRoot, workloadFile, modelIn;
+        List<WorkloadTask> workload = new ArrayList<WorkloadTask>();
+        boolean tasksExplicit;
         String runId;
         String mode = "baseline";
+        String policy;
         String dropBranch;
         OffloadingActionV2.Action action;
         int tasks = 2;
@@ -871,7 +977,7 @@ public final class RlOffloadingV2PartialIntegrationExperiment {
         double wanLatencyMs = 45.0;
         double watchdogMs = 1000.0;
 
-        static Options parse(String[] args) {
+        static Options parse(String[] args) throws Exception {
             Options o = new Options();
             Path cwd = new File(".").toPath().toAbsolutePath().normalize();
             o.output = cwd.resolve("audit_output/v2_partial/latest");
@@ -888,8 +994,11 @@ public final class RlOffloadingV2PartialIntegrationExperiment {
                 else if ("--run-id".equals(key)) o.runId = value;
                 else if ("--mode".equals(key)) o.mode = value;
                 else if ("--action".equals(key)) o.action = OffloadingActionV2.Action.fromName(value);
+                else if ("--policy".equals(key)) o.policy = value.toLowerCase();
+                else if ("--model-in".equals(key)) o.modelIn = Path.of(value).toAbsolutePath();
                 else if ("--drop-branch".equals(key)) o.dropBranch = value;
-                else if ("--tasks".equals(key)) o.tasks = Integer.parseInt(value);
+                else if ("--tasks".equals(key)) { o.tasks = Integer.parseInt(value); o.tasksExplicit = true; }
+                else if ("--workload".equals(key)) o.workloadFile = Path.of(value).toAbsolutePath();
                 else if ("--inter-arrival-ms".equals(key)) o.interArrivalMs = Double.parseDouble(value);
                 else if ("--deadline-ms".equals(key)) o.deadlineMs = Double.parseDouble(value);
                 else if ("--partition-overhead-ms".equals(key)) o.partitionOverheadMs = Double.parseDouble(value);
@@ -898,20 +1007,41 @@ public final class RlOffloadingV2PartialIntegrationExperiment {
                 else if ("--watchdog-ms".equals(key)) o.watchdogMs = Double.parseDouble(value);
                 else throw new IllegalArgumentException("unknown option " + key);
             }
-            if (!"baseline".equals(o.mode) && !"train".equals(o.mode))
-                throw new IllegalArgumentException("mode must be baseline or train");
-            if ("baseline".equals(o.mode) && o.action == null)
-                throw new IllegalArgumentException("baseline mode requires --action");
-            if ("train".equals(o.mode) && o.action != null)
-                throw new IllegalArgumentException("train mode selects actions from the learned policy; omit --action");
-            if (o.tasks < 1 || o.tasks > 100 || !Double.isFinite(o.interArrivalMs) || o.interArrivalMs <= 0)
-                throw new IllegalArgumentException("tasks must be 1..100 and inter-arrival finite/positive");
+            if (!"baseline".equals(o.mode) && !"train".equals(o.mode) && !"eval".equals(o.mode))
+                throw new IllegalArgumentException("mode must be baseline, train, or eval");
+            if ("baseline".equals(o.mode) && o.action == null && o.policy == null)
+                throw new IllegalArgumentException("baseline mode requires --action or --policy");
+            if ("baseline".equals(o.mode) && o.action != null && o.policy != null)
+                throw new IllegalArgumentException("choose either --action or --policy, not both");
+            if ("train".equals(o.mode) && (o.action != null || o.policy != null || o.modelIn != null))
+                throw new IllegalArgumentException("train mode selects actions from the learned policy; omit action/policy/model-in");
+            if ("eval".equals(o.mode) && (o.modelIn == null || o.action != null || o.policy != null))
+                throw new IllegalArgumentException("eval mode requires --model-in and no fixed action/policy");
+            if (o.policy != null && !Arrays.asList("local", "edge", "cloud", "random").contains(o.policy))
+                throw new IllegalArgumentException("--policy must be local, edge, cloud, or random");
+            if (o.tasks < 1 || o.tasks > 10000 || !Double.isFinite(o.interArrivalMs) || o.interArrivalMs <= 0)
+                throw new IllegalArgumentException("tasks must be 1..10000 and inter-arrival finite/positive");
             if (!Double.isFinite(o.deadlineMs) || o.deadlineMs <= 0
                     || !Double.isFinite(o.partitionOverheadMs) || o.partitionOverheadMs < 0
                     || !Double.isFinite(o.mergeOverheadMs) || o.mergeOverheadMs < 0
                     || !Double.isFinite(o.wanLatencyMs) || o.wanLatencyMs < 0
                     || !Double.isFinite(o.watchdogMs) || o.watchdogMs <= 0)
                 throw new IllegalArgumentException("deadline/watchdog must be positive; overheads/WAN latency must be finite and non-negative");
+            if (o.workloadFile != null) {
+                List<String> lines = Files.readAllLines(o.workloadFile, StandardCharsets.UTF_8);
+                int sequence = 1;
+                for (String line : lines) if (!line.trim().isEmpty()) o.workload.add(WorkloadTask.parse(line, sequence++));
+                if (o.workload.isEmpty()) throw new IllegalArgumentException("workload file is empty");
+                if (o.tasksExplicit && o.tasks != o.workload.size())
+                    throw new IllegalArgumentException("--tasks must match the number of workload rows");
+                o.tasks = o.workload.size();
+            } else {
+                for (int sequence = 1; sequence <= o.tasks; sequence++)
+                    o.workload.add(new WorkloadTask(sequence, TASK_MI, INPUT_BYTES, OUTPUT_BYTES,
+                            MERGE_MI, MERGE_OUTPUT_BYTES, o.deadlineMs,
+                            sequence == 1 ? 0.0 : o.interArrivalMs, "normal",
+                            "DATA_PARALLEL_DIVISIBLE", "data-parallel-v1"));
+            }
             return o;
         }
     }

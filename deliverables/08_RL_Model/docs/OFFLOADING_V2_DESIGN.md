@@ -75,14 +75,19 @@ The existing three-action model must not be padded, truncated, or silently reuse
 
 The nine-action catalogue now has an isolated v2 learner, strict JSONL protocol parser, model persistence, configuration loader, and server entrypoint. See [PROTOCOL_V2.md](PROTOCOL_V2.md).
 
-The v2 state configuration currently uses seven features and 972 provisional states:
-- task MI, WAN latency, Local utilization, Edge utilization, Cloud utilization, deadline, splittability
-- 9 actions × 972 states = 8,748 Q-values
+The v2 state configuration now uses nine features and 13,122 provisional states:
+- task MI, input bytes, output bytes, WAN latency, Local utilization, Edge utilization, Cloud utilization, deadline, splittability
+- 9 actions × 13,122 states = 118,098 Q-values
 
-The Local/Cloud utilization and splittability bins are provisional. Partition/merge overheads are passed as task constraints and are not yet Q-state features. This is a deliberate sparsity trade-off, not a claim that overhead variation is irrelevant.
+Payload-size, Local/Cloud utilization, and splittability bins are provisional. The deadline thresholds (180 and 400 ms) currently align with the generator's critical/high/normal deadline ranges; urgency class remains trace metadata rather than a separate feature. Partition/merge overheads are passed as task constraints and are not yet Q-state features. This is a deliberate sparsity trade-off, not a claim that overhead variation is irrelevant.
 
 The v2 parser independently derives the feasible action mask from task constraints and checks that the simulator-advertised mask matches exactly. It also checks that the numeric splittability state feature agrees with the categorical workload declaration.
 
 **Integration status (2026-11-15):** The Java/iFogSim v2 integration now has two accepted vertical slices. The full-placement experiment connects indivisible tasks to the live Python service. The partial executor connects divisible tasks to all nine actions, creates Local+Edge or Local+Cloud branches at 25/50/75, enforces per-task result barriers, executes merge Cloudlets, accounts for provisional partition/merge delays, and reports compound-action outcomes. A watchdog sends failed outcomes when required branch results do not arrive; the failure injection test verified zero orphaned Python tasks and a non-zero simulator acceptance result. See [V2_PARTIAL_EXECUTION_ACCEPTANCE.md](../../10_iFogSim_Simulation/Simulation_Source/V2_PARTIAL_EXECUTION_ACCEPTANCE.md).
 
 These tests prove action-path and lifecycle integration, not benchmark performance, policy convergence, generalization, or RL superiority. The 3 ms partition and 2 ms merge overheads are provisional; the current topology remains Local → Edge → Cloud, and energy is not measured.
+
+
+## Variable workload milestone (2026-11-15)
+
+The iFogSim runner now consumes seeded per-task JSONL workload rows, including variable MI, input/output sizes, deadlines, urgency, splittability, and arrival gaps. Payload sizes are part of the nine-feature v2 state (13,122 states; 118,098 Q values). The same output-profile-aware AppEdges are carried by one worker module per action/tier, avoiding extra device-side module instances. A seed-42 training run (60 tasks) and three paired holdout comparisons on seeds 43/44/45 (180 tasks total) across Local/Edge/Cloud/Random/frozen-RL policies passed. See [V2_VARIABLE_WORKLOAD_ACCEPTANCE.md](../../10_iFogSim_Simulation/Simulation_Source/V2_VARIABLE_WORKLOAD_ACCEPTANCE.md). The results are descriptive across three held-out seeds but use only one training seed; they are not evidence of statistical superiority.

@@ -59,18 +59,20 @@ The v2 server currently uses the same measured-outcome reward function as v1. It
 
 ## State design
 
-The proposed v2 config contains seven features:
+The v2 config contains nine state features:
 1. task MI
-2. WAN latency
-3. Local utilization
-4. Edge utilization
-5. Cloud utilization
-6. deadline
-7. splittability (binary)
+2. input payload bytes
+3. output payload bytes
+4. WAN latency
+5. Local utilization
+6. Edge utilization
+7. Cloud utilization
+8. deadline
+9. splittability (binary)
 
-With the current provisional bins this produces 972 states and 8,748 Q values. The new Local/Cloud utilization and splittability thresholds are placeholders, not calibrated simulator facts.
+With the current provisional bins, the nine features produce 13,122 states and 118,098 Q values across nine actions. Payload-size bins are initial workload-profile boundaries, not calibrated simulator facts. The Local/Cloud utilization and splittability thresholds remain provisional.
 
-Partition and merge overheads are carried as task constraints and execution metadata, not currently discretized into the Q state. This avoids increasing the state space to 8,748 states before we have enough training samples. It also means the learner cannot distinguish two tasks with identical current state features but different partition/merge overheads. This is a known modeling limitation; if overhead heterogeneity proves decision-relevant, test one combined overhead feature in a controlled ablation after calibration.
+Partition and merge overheads are carried as task constraints and execution metadata, not currently discretized into the Q state. The learner therefore cannot distinguish two otherwise identical observations with different partition/merge overheads. This remains a known modeling limitation; test overhead-aware state features in a controlled ablation after calibration. Input and output payload sizes are state features. Deadline thresholds at 180 and 400 ms align with the current generator's critical/high/normal deadline ranges, so urgency is represented through deadline bins rather than a separate urgency feature; recalibrate this mapping for real workload distributions.
 
 ## Baseline behavior
 
@@ -92,3 +94,12 @@ Two separate end-to-end vertical slices now exist:
 The simulator reports a task as failed if a required branch does not return before the watchdog horizon; it never fabricates a successful merge. Python acknowledges failed outcomes and shutdown verifies zero orphaned tasks.
 
 These are **integration/lifecycle acceptance tests**, not performance benchmarks. Exact-action baselines establish action-path coverage but do not establish policy convergence, generalization, or RL superiority. The current topology is Local → Edge → Cloud. Partition/merge overhead parameters remain provisional, and energy is not measured.
+
+
+## Variable workload support (2026-11-15)
+
+The iFogSim v2 runner now accepts a deterministic JSONL workload via `--workload`. Each task supplies its own compute MI, input/output payload bytes, deadline, urgency class, splittability, partition model, merge MI, and arrival gap. The generator and its field distributions are documented in [V2_VARIABLE_WORKLOAD_ACCEPTANCE.md](../../10_iFogSim_Simulation/Simulation_Source/V2_VARIABLE_WORKLOAD_ACCEPTANCE.md).
+
+The observation state now includes `input_bytes` and `output_bytes`; the resulting provisional state space is 13,122 states and 118,098 Q values over nine actions. Optional `task_constraints.urgency_class` accepts `critical`, `high`, or `normal` and is retained for trace/analysis. The learner represents urgency through deadline bins (180/400 ms), aligned to the generator's critical/high/normal deadline ranges; urgency is not a separate feature.
+
+The Java runner supports `train`, frozen `eval` with `--model-in`, and `baseline` with `--policy local|edge|cloud|random`. `run_v2_policy_comparison.ps1` replays one immutable workload file across these policies and produces paired per-task latency differences. A 60-task seed-42 training run and three 60-task held-out comparisons (seeds 43–45; 180 tasks total) passed; results and limitations are recorded in [V2_VARIABLE_WORKLOAD_ACCEPTANCE.md](../../10_iFogSim_Simulation/Simulation_Source/V2_VARIABLE_WORKLOAD_ACCEPTANCE.md). These are descriptive results from three held-out workload seeds but one training seed, not statistical proof of policy superiority.

@@ -25,7 +25,7 @@ def hello(phase="train"):
 def observation(task_id="task-1"):
     return {
         "protocol_version": "2.0", "type": "observation", "task_id": task_id,
-        "features": {"task_mi": 900, "wan_latency_ms": 25, "local_utilization": 0.2,
+        "features": {"task_mi": 900, "input_bytes": 12000, "output_bytes": 2048, "wan_latency_ms": 25, "local_utilization": 0.2,
                      "edge_utilization": 0.3, "cloud_utilization": 0.4,
                      "deadline_ms": 600, "splittability": 1},
         "available_actions": ["LOCAL", "EDGE_PARTIAL_25", "EDGE_PARTIAL_50",
@@ -50,7 +50,7 @@ def test_v2_session_handshake_action_outcome_and_persistence(tmp_path):
     s = make_session(tmp_path)
     ack = send(s, hello())
     assert ack["type"] == "hello_ack" and ack["protocol_version"] == "2.0"
-    assert ack["state_count"] == 972 and len(ack["actions"]) == 9
+    assert ack["state_count"] == 13122 and len(ack["actions"]) == 9
     decision = send(s, observation())
     assert decision["type"] == "action"
     assert decision["action_id"] in (0, 1, 2, 3, 4)

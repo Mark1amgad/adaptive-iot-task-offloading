@@ -71,6 +71,10 @@ def validate_case(case_dir: Path, action: str, tasks_expected: int) -> dict:
 
     tuple_ids = []
     for task_id in task_ids:
+        decision = one(rows, "decision", task_id=task_id)
+        task_mi = decision["task_mi"]
+        input_bytes = decision["input_bytes"]
+        output_bytes = decision["output_bytes"]
         task_branches = many(rows, "branch_created", task_id=task_id)
         expected_branch_count = 2 if partial else 1
         if len(task_branches) != expected_branch_count:
@@ -89,20 +93,19 @@ def validate_case(case_dir: Path, action: str, tasks_expected: int) -> dict:
                 raise AssertionError(f"{action}/{task_id}: wrong Local ratio worker")
             if remote["module"] != remote_module:
                 raise AssertionError(f"{action}/{task_id}: wrong remote ratio worker")
-            if local["mi"] + remote["mi"] != cfg["task_mi"]:
+            if local["mi"] + remote["mi"] != task_mi:
                 raise AssertionError(f"{action}/{task_id}: MI conservation failed")
-            if local["input_bytes"] + remote["input_bytes"] != cfg["input_bytes"]:
+            if local["input_bytes"] + remote["input_bytes"] != input_bytes:
                 raise AssertionError(f"{action}/{task_id}: input-byte conservation failed")
-            if local["output_bytes"] + remote["output_bytes"] != cfg["output_bytes"]:
+            if local["output_bytes"] + remote["output_bytes"] != output_bytes:
                 raise AssertionError(f"{action}/{task_id}: output-byte conservation failed")
             percent = int(action.rsplit("_", 1)[1])
-            if remote["mi"] != int(cfg["task_mi"] * percent / 100 + 0.5):
+            if remote["mi"] != int(task_mi * percent / 100 + 0.5):
                 raise AssertionError(f"{action}/{task_id}: remote compute ratio mismatch")
-            if remote["input_bytes"] != int(cfg["input_bytes"] * percent / 100 + 0.5):
+            if remote["input_bytes"] != int(input_bytes * percent / 100 + 0.5):
                 raise AssertionError(f"{action}/{task_id}: remote input partition ratio mismatch")
-            if remote["output_bytes"] != int(cfg["output_bytes"] * percent / 100 + 0.5):
+            if remote["output_bytes"] != int(output_bytes * percent / 100 + 0.5):
                 raise AssertionError(f"{action}/{task_id}: remote output partition ratio mismatch")
-            decision = one(rows, "decision", task_id=task_id)
             partition_start = one(rows, "partition_overhead_started", task_id=task_id)
             partition_done = one(rows, "partition_overhead_completed", task_id=task_id)
             if partition_start["sim_time_ms"] != decision["sim_time_ms"]:
@@ -119,7 +122,7 @@ def validate_case(case_dir: Path, action: str, tasks_expected: int) -> dict:
             }[action]
             if branch["branch"] != "full" or branch["module"] != expected_module:
                 raise AssertionError(f"{action}/{task_id}: wrong full-placement worker")
-            if branch["mi"] != cfg["task_mi"] or branch["input_bytes"] != cfg["input_bytes"]:
+            if branch["mi"] != task_mi or branch["input_bytes"] != input_bytes:
                 raise AssertionError(f"{action}/{task_id}: full task workload changed")
 
         executions = many(rows, "execution", task_id=task_id)
@@ -215,6 +218,9 @@ def validate_training_case(case_dir: Path, tasks_expected: int) -> dict:
         if action not in ACTIONS or decision.get("action_id") != ACTIONS[action][0]:
             raise AssertionError(f"train_policy: invalid action response {decision}")
         action_id, partial, remote_tier, remote_module = ACTIONS[action]
+        task_mi = decision["task_mi"]
+        input_bytes = decision["input_bytes"]
+        output_bytes = decision["output_bytes"]
         counts[action] = counts.get(action, 0) + 1
         partial_count += int(partial)
         full_count += int(not partial)
@@ -235,13 +241,13 @@ def validate_training_case(case_dir: Path, tasks_expected: int) -> dict:
                 raise AssertionError(f"train_policy/{task_id}: ratio worker mismatch")
             if local["tier"] != "LOCAL" or remote["tier"] != remote_tier:
                 raise AssertionError(f"train_policy/{task_id}: tier mismatch")
-            if local["mi"] + remote["mi"] != cfg["task_mi"] or local["input_bytes"] + remote["input_bytes"] != cfg["input_bytes"] or local["output_bytes"] + remote["output_bytes"] != cfg["output_bytes"]:
+            if local["mi"] + remote["mi"] != task_mi or local["input_bytes"] + remote["input_bytes"] != input_bytes or local["output_bytes"] + remote["output_bytes"] != output_bytes:
                 raise AssertionError(f"train_policy/{task_id}: workload conservation failed")
-            if remote["mi"] != int(cfg["task_mi"] * percent / 100 + 0.5):
+            if remote["mi"] != int(task_mi * percent / 100 + 0.5):
                 raise AssertionError(f"train_policy/{task_id}: compute ratio mismatch")
-            if remote["input_bytes"] != int(cfg["input_bytes"] * percent / 100 + 0.5):
+            if remote["input_bytes"] != int(input_bytes * percent / 100 + 0.5):
                 raise AssertionError(f"train_policy/{task_id}: input ratio mismatch")
-            if remote["output_bytes"] != int(cfg["output_bytes"] * percent / 100 + 0.5):
+            if remote["output_bytes"] != int(output_bytes * percent / 100 + 0.5):
                 raise AssertionError(f"train_policy/{task_id}: output ratio mismatch")
             pstart = one(rows, "partition_overhead_started", task_id=task_id)
             pdone = one(rows, "partition_overhead_completed", task_id=task_id)

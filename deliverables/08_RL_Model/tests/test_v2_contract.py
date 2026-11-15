@@ -22,10 +22,11 @@ def v2_space():
 
 def test_v2_config_has_controlled_state_cardinality():
     space = v2_space()
-    assert space.n_states == 972
+    assert space.n_states == 13122
     assert set(space.feature_names) == {
-        "task_mi", "wan_latency_ms", "local_utilization", "edge_utilization",
-        "cloud_utilization", "deadline_ms", "splittability",
+        "task_mi", "input_bytes", "output_bytes", "wan_latency_ms",
+        "local_utilization", "edge_utilization", "cloud_utilization",
+        "deadline_ms", "splittability",
     }
 
 
@@ -57,6 +58,10 @@ def test_v2_observation_requires_mask_and_valid_partial_constraints():
                              "partition_overhead_ms": 5, "merge_overhead_ms": 5},
     }
     assert parse_observation_v2(valid)["available_actions"] == (0, 1, 2, 3, 4)
+    bad_urgency = json.loads(json.dumps(valid))
+    bad_urgency["task_constraints"]["urgency_class"] = "urgent"
+    with pytest.raises(V2ProtocolError, match="urgency_class"):
+        parse_observation_v2(bad_urgency)
     bad = dict(valid)
     bad["task_constraints"] = {"splittability": "INDIVISIBLE", "local_available": True,
                                "edge_available": True, "cloud_available": False}
@@ -165,7 +170,7 @@ def test_v2_observation_json_schema_accepts_full_contract():
     schema = json.loads((ROOT / "schemas" / "observation.v2.schema.json").read_text())
     msg = {
         "protocol_version": "2.0", "type": "observation", "task_id": "t-schema",
-        "features": {"task_mi": 1000, "wan_latency_ms": 30, "local_utilization": 0.2,
+        "features": {"task_mi": 1000, "input_bytes": 12000, "output_bytes": 2048, "wan_latency_ms": 30, "local_utilization": 0.2,
                      "edge_utilization": 0.3, "cloud_utilization": 0.4,
                      "deadline_ms": 600, "splittability": 1},
         "available_actions": ["LOCAL", "EDGE_PARTIAL_25", "EDGE_PARTIAL_50",
@@ -173,7 +178,8 @@ def test_v2_observation_json_schema_accepts_full_contract():
         "task_constraints": {"splittability": "DATA_PARALLEL_DIVISIBLE",
                              "partition_model_id": "frames-v1", "local_available": True,
                              "edge_available": True, "cloud_available": False,
-                             "partition_overhead_ms": 5, "merge_overhead_ms": 5},
+                             "partition_overhead_ms": 5, "merge_overhead_ms": 5,
+                             "urgency_class": "critical"},
     }
     jsonschema.validate(msg, schema, cls=jsonschema.Draft202012Validator)
 

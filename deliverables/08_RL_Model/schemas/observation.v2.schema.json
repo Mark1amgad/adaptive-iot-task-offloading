@@ -13,9 +13,11 @@
     "features": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["task_mi", "wan_latency_ms", "local_utilization", "edge_utilization", "cloud_utilization", "deadline_ms", "splittability"],
+      "required": ["task_mi", "input_bytes", "output_bytes", "wan_latency_ms", "local_utilization", "edge_utilization", "cloud_utilization", "deadline_ms", "splittability"],
       "properties": {
         "task_mi": {"type": "number", "minimum": 0},
+        "input_bytes": {"type": "number", "minimum": 0},
+        "output_bytes": {"type": "number", "minimum": 0},
         "wan_latency_ms": {"type": "number", "minimum": 0},
         "local_utilization": {"type": "number", "minimum": 0, "maximum": 1},
         "edge_utilization": {"type": "number", "minimum": 0, "maximum": 1},
@@ -41,7 +43,8 @@
         "cloud_available": {"type": "boolean"},
         "partition_model_id": {"type": "string", "minLength": 1},
         "partition_overhead_ms": {"type": "number", "minimum": 0},
-        "merge_overhead_ms": {"type": "number", "minimum": 0}
+        "merge_overhead_ms": {"type": "number", "minimum": 0},
+        "urgency_class": {"enum": ["critical", "high", "normal"]}
       }
     }
   },

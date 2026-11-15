@@ -49,6 +49,12 @@ public final class OffloadingActionV2ExecutionPlan {
 
     public static OffloadingActionV2ExecutionPlan create(OffloadingActionV2.Action action,
             long taskMi, long inputBytes, long outputBytes, long mergeMi) {
+        return create(action, taskMi, inputBytes, outputBytes, mergeMi, null);
+    }
+
+    public static OffloadingActionV2ExecutionPlan create(OffloadingActionV2.Action action,
+            long taskMi, long inputBytes, long outputBytes, long mergeMi, String outputProfile) {
+        String tupleProfileSuffix = outputProfile == null || outputProfile.isEmpty() ? "" : "_" + outputProfile.toUpperCase();
         if (action == null) throw new IllegalArgumentException("action is required");
         if (taskMi <= 0 || inputBytes < 0 || outputBytes < 0 || mergeMi < 0)
             throw new IllegalArgumentException("invalid task/merge workload sizes");
@@ -58,7 +64,7 @@ public final class OffloadingActionV2ExecutionPlan {
             String module = action == OffloadingActionV2.Action.LOCAL ? LOCAL_FULL_MODULE
                     : action.remoteTier == OffloadingActionV2.Tier.EDGE ? EDGE_FULL_MODULE : CLOUD_FULL_MODULE;
             String tier = action == OffloadingActionV2.Action.LOCAL ? "LOCAL" : action.remoteTier.name();
-            branches.add(new Branch("full", module, "TASK_INPUT", taskMi,
+            branches.add(new Branch("full", module, "TASK_INPUT" + tupleProfileSuffix, taskMi,
                     inputBytes, outputBytes, tier));
             return new OffloadingActionV2ExecutionPlan(action, branches, false, 0, 0);
         }
@@ -73,10 +79,10 @@ public final class OffloadingActionV2ExecutionPlan {
         long remoteOutput = Math.round(outputBytes * action.remoteFraction);
         long localOutput = outputBytes - remoteOutput;
 
-        branches.add(new Branch("local", "local_partial_" + suffix, "LOCAL_PARTIAL_INPUT",
+        branches.add(new Branch("local", "local_partial_" + suffix, "LOCAL_PARTIAL_INPUT" + tupleProfileSuffix,
                 localMi, localInput, localOutput, "LOCAL"));
         branches.add(new Branch(remote, remote + "_partial_" + suffix,
-                remote.toUpperCase() + "_PARTIAL_INPUT", remoteMi, remoteInput,
+                remote.toUpperCase() + "_PARTIAL_INPUT" + tupleProfileSuffix, remoteMi, remoteInput,
                 remoteOutput, action.remoteTier.name()));
 
         long sumMi = 0, sumInput = 0, sumOutput = 0;

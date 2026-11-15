@@ -43,3 +43,10 @@ python -m rl_model.server_v2 --mode eval --config config/v2.json --model-in arti
 ```
 
 The Java/iFogSim v2 acceptance runners are `../10_iFogSim_Simulation/Simulation_Source/run_v2_full_acceptance.ps1` and `../10_iFogSim_Simulation/Simulation_Source/run_v2_partial_acceptance.ps1`. The latter executes all nine exact-action baselines (two overlapping tasks per action), including six ratio-specific partial paths and real merge Cloudlets, then runs a 30-task live learned-policy training episode. See `../10_iFogSim_Simulation/Simulation_Source/V2_PARTIAL_EXECUTION_ACCEPTANCE.md`. These are integration/lifecycle tests, not performance benchmarks or evidence of RL superiority.
+
+
+## Variable workload and paired evaluation
+
+The current v2 state has nine features (including input/output payload bytes and three deadline bands), 13,122 states, and 118,098 Q values. Use `../10_iFogSim_Simulation/Simulation_Source/generate_workload_v2.py` to generate seeded mixed/divisible/indivisible JSONL workloads. The iFogSim runner supports `train`, frozen `eval`, and Local/Edge/Cloud/Random baselines. `run_v2_policy_comparison.ps1` evaluates all policies against the same workload file. See [V2_VARIABLE_WORKLOAD_ACCEPTANCE.md](../10_iFogSim_Simulation/Simulation_Source/V2_VARIABLE_WORKLOAD_ACCEPTANCE.md) for the seed-42 training run, three held-out paired comparisons (seeds 43–45), aggregate results, and limitations.
+
+The reproducible multi-seed holdout orchestrator is `../10_iFogSim_Simulation/Simulation_Source/run_v2_multiseed_holdout.ps1`; it regenerates each seeded workload, replays all policies, and aggregates paired per-task results.

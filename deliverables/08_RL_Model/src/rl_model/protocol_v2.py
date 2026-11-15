@@ -59,7 +59,7 @@ def parse_observation_v2(msg: Mapping[str, Any]) -> dict:
     if not isinstance(constraints, dict):
         raise V2ProtocolError("task_constraints must be an object")
     required_constraints = {"splittability", "local_available", "edge_available", "cloud_available"}
-    optional_constraints = {"partition_model_id", "partition_overhead_ms", "merge_overhead_ms"}
+    optional_constraints = {"partition_model_id", "partition_overhead_ms", "merge_overhead_ms", "urgency_class"}
     missing = required_constraints - set(constraints)
     extra = set(constraints) - required_constraints - optional_constraints
     if missing or extra:
@@ -75,6 +75,9 @@ def parse_observation_v2(msg: Mapping[str, Any]) -> dict:
         expected_split_feature = 1.0 if split == "DATA_PARALLEL_DIVISIBLE" else 0.0
         if features["splittability"] != expected_split_feature:
             raise V2ProtocolError("features.splittability disagrees with task_constraints")
+    urgency = constraints.get("urgency_class")
+    if urgency is not None and urgency not in ("critical", "high", "normal"):
+        raise V2ProtocolError("task_constraints.urgency_class must be critical, high, or normal")
     if split == "DATA_PARALLEL_DIVISIBLE":
         if not isinstance(partition, str) or not partition.strip():
             raise V2ProtocolError("divisible task requires partition_model_id")
