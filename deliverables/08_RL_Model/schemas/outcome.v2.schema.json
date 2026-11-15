@@ -1,0 +1,26 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "rl_model/outcome/2.0",
+  "title": "Task outcome v2 (Java to Python, after execution)",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["protocol_version", "type", "task_id", "action_executed", "status", "deadline_met", "resource_metrics"],
+  "properties": {
+    "protocol_version": {"const": "2.0"},
+    "type": {"const": "outcome"},
+    "task_id": {"type": "string", "minLength": 1, "maxLength": 128},
+    "action_executed": {"enum": ["LOCAL", "EDGE_PARTIAL_25", "EDGE_PARTIAL_50", "EDGE_PARTIAL_75", "EDGE_FULL", "CLOUD_PARTIAL_25", "CLOUD_PARTIAL_50", "CLOUD_PARTIAL_75", "CLOUD_FULL", 0, 1, 2, 3, 4, 5, 6, 7, 8]},
+    "status": {"enum": ["completed", "failed"]},
+    "latency_ms": {"type": ["number", "null"], "minimum": 0},
+    "deadline_met": {"type": "boolean"},
+    "failure_reason": {"type": "string", "minLength": 1},
+    "sim_time_ms": {"type": "number", "minimum": 0},
+    "resource_metrics": {"type": "object", "additionalProperties": {"type": ["number", "null"], "minimum": 0}}
+  },
+  "allOf": [
+    {"if": {"properties": {"status": {"const": "completed"}}},
+     "then": {"required": ["latency_ms"]}},
+    {"if": {"properties": {"status": {"const": "failed"}}},
+     "then": {"properties": {"deadline_met": {"const": false}}}}
+  ]
+}

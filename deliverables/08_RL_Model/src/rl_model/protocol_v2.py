@@ -153,7 +153,7 @@ def parse_outcome_v2(msg: Mapping[str, Any]) -> dict:
     _check_version(msg)
     _check_keys(msg, {"protocol_version", "type", "task_id", "action_executed", "status",
                       "deadline_met", "resource_metrics"},
-                {"latency_ms", "failure_reason"}, "outcome")
+                {"latency_ms", "failure_reason", "sim_time_ms"}, "outcome")
     if msg["type"] != "outcome":
         raise V2ProtocolError("type must be outcome")
     tid = msg["task_id"]
@@ -177,6 +177,10 @@ def parse_outcome_v2(msg: Mapping[str, Any]) -> dict:
     reason = msg.get("failure_reason")
     if reason is not None and (not failed or not isinstance(reason, str) or not reason):
         raise V2ProtocolError("failure_reason is allowed only as a non-empty string for failed tasks")
+    if "sim_time_ms" in msg:
+        sim_time = msg["sim_time_ms"]
+        if isinstance(sim_time, bool) or not isinstance(sim_time, (int, float)) or not math.isfinite(sim_time) or sim_time < 0:
+            raise V2ProtocolError("sim_time_ms must be finite and >= 0")
     metrics = msg["resource_metrics"]
     if not isinstance(metrics, dict):
         raise V2ProtocolError("resource_metrics must be an object")

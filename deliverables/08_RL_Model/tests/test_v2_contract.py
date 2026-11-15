@@ -176,3 +176,20 @@ def test_v2_observation_json_schema_accepts_full_contract():
                              "partition_overhead_ms": 5, "merge_overhead_ms": 5},
     }
     jsonschema.validate(msg, schema, cls=jsonschema.Draft202012Validator)
+
+
+def test_v2_outcome_schema_and_simulator_timestamp():
+    import jsonschema
+
+    schema = json.loads((ROOT / "schemas" / "outcome.v2.schema.json").read_text())
+    msg = {
+        "protocol_version": "2.0", "type": "outcome", "task_id": "t-schema",
+        "action_executed": "CLOUD_FULL", "status": "completed",
+        "latency_ms": 22.5, "deadline_met": True, "sim_time_ms": 150.0,
+        "resource_metrics": {"bandwidth_bytes": 5000, "energy_joules": None},
+    }
+    jsonschema.validate(msg, schema, cls=jsonschema.Draft202012Validator)
+    assert parse_outcome_v2(msg)["action_executed"] == 8
+    msg["sim_time_ms"] = -1
+    with pytest.raises(V2ProtocolError, match="sim_time_ms"):
+        parse_outcome_v2(msg)

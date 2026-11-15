@@ -84,3 +84,10 @@ A fixed baseline errors if its action is infeasible; it does not silently switch
 ## Current scope and blockers
 
 The Python v2 engine and protocol are implemented and tested in isolation. The iFogSim Java adapter is not yet migrated to protocol v2 and does not yet produce these observations or execute all nine actions. Until that adapter and end-to-end acceptance tests exist, v2 is not an integrated simulator result and must not be used for performance claims.
+
+
+## iFogSim integration status (2026-11-15)
+
+A separate Java v2 experiment now completes an end-to-end full-placement handshake and lifecycle against iFogSim. It sends indivisible tasks with the exact mask `[LOCAL, EDGE_FULL, CLOUD_FULL]`, validates the returned action ID/name/tier/fractions in Java, routes to the corresponding module, and reports measured outcomes. The 10-task acceptance suite (4-task training + 2 tasks per fixed baseline) passed. See [V2_FULL_PLACEMENT_ACCEPTANCE.md](../../10_iFogSim_Simulation/Simulation_Source/V2_FULL_PLACEMENT_ACCEPTANCE.md).
+
+This does **not** yet integrate partial execution. All nine action definitions and Python-side mask handling are implemented, but Java currently executes only the three full-placement choices in the end-to-end v2 experiment. Do not treat the current acceptance as evidence for Partial Offloading or as a benchmark comparison.
