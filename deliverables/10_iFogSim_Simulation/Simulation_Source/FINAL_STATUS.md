@@ -28,6 +28,14 @@
 - Current multi-task partial fixture uses fixed Local 40% / Edge 60% and is not one of the workload spec's candidate ratios. It remains mechanism-feasibility evidence only.
 - Wrote `PARTIAL_ACTION_SPACE_INTEGRATION_AUDIT.md`. No Python RL action, protocol, model, or schema files were changed pending approval of the nine-action contract and state-feature set.
 
+### Mixed full/partial simulator fixture
+- Added `MixedMultiTaskOffloadingSpike.java`: six-task run with three full tasks (Local, Edge, Cloud) and three partial Local+Edge tasks under one run-level coordinator.
+- All six tasks were created before the first terminal event; full tasks terminalized directly while partial tasks waited for their own branch barriers and merge Cloudlets.
+- The run registered 12 unique tuple IDs and passed mode-specific lifecycle/tuple validation.
+- A fixed-seed repeat produced byte-identical trace and summary CSVs.
+- Five additional validator unit tests passed, bringing the combined standard-library suite to ten passing tests.
+- Evidence: `audit_output/mixed_full_partial_acceptance_20261115_183000/`.
+
 ## Remaining / not verified
 - The partial split remains a fixed 40/60 Local/Edge simulator fixture; it is not a general task partitioner.
 - Actual merge-data construction, copying, serialization, and semantic merge are not modeled; the merge Cloudlet receives an aggregate 1,000-byte input tuple.
@@ -37,4 +45,4 @@
 - Task failure/cancellation/horizon semantics and per-task energy remain unimplemented.
 - Workload calibration, paired multi-seed benchmark results, statistical comparisons, and policy-superiority claims remain unverified.
 
-The current evidence establishes multi-task full-placement lifecycle correctness and multi-task Local+Edge partial-fixture lifecycle feasibility. It does not establish a complete RL-controlled partial-offloading system or calibrated performance advantage.
+The current evidence establishes multi-task full-placement lifecycle correctness, multi-task Local+Edge partial-fixture feasibility, and mixed full/partial simulator lifecycle handling in one run. It does not establish a complete RL-controlled partial-offloading system or calibrated performance advantage.

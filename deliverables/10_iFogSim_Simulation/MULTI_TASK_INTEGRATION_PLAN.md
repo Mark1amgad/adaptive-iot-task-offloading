@@ -165,7 +165,7 @@ The first implementation should pass these deterministic cases before workload-s
 | A | 1 full Local task | One decision, one branch, one terminal, one outcome ack |
 | B | 2 full tasks with overlapping execution | Two independent records; no cross-attribution; two outcomes |
 | C | 2+ partial tasks with interleaved branch results | **PASS in simulator-owned 1/4/8-task fixture:** each merge waits for its own branches; no cross-task tuple mapping |
-| D | 1 full + 1 partial task | Pending: connect full-placement and partial fixture in one run-level coordinator |
+| D | Mixed full + partial tasks | **PASS:** six-task shared-run fixture (three full Local/Edge/Cloud + three partial Local+Edge) under one coordinator |
 | E | 3 tasks with different selected destinations | Per-task transfer/execution accounting matches tuple ownership |
 | F | Duplicate branch result in corrupted trace | **PASS at validator layer:** corrupted trace rejected; simulator runtime fault injection pending |
 | G | Duplicate terminal event injected | Pending runtime fault-injection test |
@@ -191,9 +191,9 @@ For every accepted run, assert:
 2. **Done for the experiment path:** added a run-scoped Java task registry. A separate pure-Java unit-test suite for the registry is not yet present.
 3. **Done for full placement and isolated partial fixture:** full-placement tuple correlation is task-scoped; partial branch and merge tuples are indexed by actual tuple ID and map back to their owning TaskRecord.
 4. **Done:** four overlapping tasks were tested, including a training run that selected Local, Edge, Local, and Cloud in one simulation.
-5. **Done for simulator-owned fixture:** four- and eight-task Local+Edge partial runs passed with independent branch barriers and real merge Cloudlets. **Pending:** mixed full/partial execution in one run and learner-selected Partial actions, which require a versioned action contract.
+5. **Done for simulator-owned fixtures:** four- and eight-task Local+Edge partial runs passed; a six-task mixed run passed with three full tasks and three partial tasks under one shared coordinator. **Pending:** learner-selected Partial actions, which require a versioned action contract.
 6. **Done:** one run-level completion coordinator saves once (training mode), sends one shutdown, and terminates only after all task outcomes are acknowledged.
-7. **Done for current scope:** full-placement acceptance covers regressions, multi-task overlap, mixed-tier decisions, repeatability, fallback, and deadline behavior. Partial acceptance covers 1/4/8 tasks, repeat-run byte identity, tuple/barrier/transfer invariants, plus five validator unit tests that reject duplicate branch results, cross-task tuple correlation, premature barriers, and invalid transfer attribution. Runtime fault injection for duplicate terminal events remains pending.
+7. **Done for current scope:** full-placement acceptance covers regressions, multi-task overlap, mixed-tier decisions, repeatability, fallback, and deadline behavior. Partial acceptance covers 1/4/8 tasks. Mixed full/partial acceptance covers one shared coordinator, direct full terminals, task-local partial barriers, and merge terminals. The combined validator unit suite has ten passing tests. Runtime fault injection for duplicate terminal/merge events remains pending.
 8. **Pending:** connect calibrated generated workloads and proceed to benchmark calibration.
 
 Keep the one-task acceptance suite as regression coverage throughout. Preserve existing evidence and write each new run into a fresh output directory.
@@ -217,16 +217,17 @@ Verified on 2026-11-15:
 - The full acceptance runner passed ten Java cases with exit code 0: four single-task route/train cases, four-task baseline overlap, four-task training, a fixed-seed training repeat, timeout fallback, malformed-response fallback, and deadline miss.
 - The mixed-action four-task training run chose Local, Edge, Local, and Cloud. All four tasks were registered before the first terminal event; all four outcomes were acknowledged; training was saved once; shutdown was acknowledged once with zero orphans.
 - The fixed-seed repeat produced the same logical task summary.
-- A separate multi-task Local+Edge partial fixture passed one-task regression, four-task overlap, and eight-task overlap. It registered 12 tuple IDs for four tasks and 24 for eight tasks; every task had two branch results, its own merge barrier, one real merge Cloudlet, and one terminal event.
-- Four-task and eight-task partial runs were repeated with byte-identical trace and summary CSVs. Five validator unit tests passed, including four negative cases.
+- A separate multi-task Local+Edge partial fixture passed one-task regression, four-task overlap, and eight-task overlap. It registered 12 tuple IDs for four tasks and 24 for eight tasks; every partial task had two branch results, its own merge barrier, one real merge Cloudlet, and one terminal event.
+- Four-task and eight-task partial runs were repeated with byte-identical trace and summary CSVs.
+- A six-task mixed full/partial run passed under one coordinator: full Local, Edge, and Cloud tasks terminalized directly; three Local+Edge partial tasks each waited for their own branch barrier and merge Cloudlet. All six tasks were registered before the first terminal; 12 unique tuple IDs were correlated correctly.
+- The mixed run was repeated with byte-identical trace and summary CSVs. Ten combined validator unit tests passed, including negative cases for cross-task tuple reuse, duplicate branch results, premature barriers, invalid transfers, and incorrect full/partial lifecycle events.
 - The external iFogSim working tree had 488 status entries before and after this work. It was not reset, cleaned, checked out, or compiled into.
 
 Remaining gates:
 
-- Connect the partial branch/merge fixture to the run-level full-placement coordinator and define mixed full/partial task semantics.
-- Extend learner protocol and action legality only after partitionability constraints and a versioned Partial action contract are specified.
+- Extend learner protocol and action legality only after partitionability constraints and a versioned nine-action Partial contract are explicitly approved.
 - Add runtime fault-injection cases for duplicate terminal events, duplicate merge results, and unknown task/tuple correlations; current negative tests exercise validator rejection of corrupted traces.
 - Implement and audit the target 4 IoT / 2 Edge / 1 Cloud topology.
 - Calibrate workload assumptions before benchmark-scale experiments.
 
-This is evidence for multi-task **full-placement** support and a separate multi-task **Local+Edge partial-feasibility fixture**. It is not evidence of RL-controlled partial offloading, mixed full/partial run support, general task divisibility, or benchmark performance superiority.
+This is evidence for multi-task **full-placement** support, a separate multi-task **Local+Edge partial-feasibility fixture**, and simulator-level **mixed full/partial lifecycle support** in one run. It is not evidence of RL-controlled partial offloading, general task divisibility, Local+Cloud partial support, or benchmark performance superiority.
