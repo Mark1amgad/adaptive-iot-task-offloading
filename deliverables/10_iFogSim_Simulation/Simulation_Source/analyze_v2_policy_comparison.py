@@ -27,6 +27,11 @@ def seq(task_id: str) -> int:
     return int(task_id.rsplit(":", 1)[1])
 
 
+def tuple_profile_suffix(output_bytes: int) -> str:
+    # 1001 bytes is the simulator's legacy/default edge type and has no suffix.
+    return "" if int(output_bytes) == 1001 else f"_O{int(output_bytes)}"
+
+
 def percentile(values: list[float], p: float) -> float:
     ordered = sorted(values)
     return ordered[max(0, math.ceil(p * len(ordered)) - 1)]
@@ -139,7 +144,7 @@ def main() -> int:
             if "_PARTIAL_" in action and task["splittability"] != "DATA_PARALLEL_DIVISIBLE":
                 raise AssertionError(f"{policy}/task{k}: partial action selected for indivisible workload")
             branches = [b for b in trace if b.get("record") == "branch_created" and b.get("task_id") == decision["task_id"]]
-            profile_suffix = f"_O{task['output_bytes']}"
+            profile_suffix = tuple_profile_suffix(task["output_bytes"])
             for branch in branches:
                 expected_base = ("LOCAL_PARTIAL_INPUT" if branch["branch"] == "local" else f"{branch['tier']}_PARTIAL_INPUT") if "_PARTIAL_" in action else "TASK_INPUT"
                 if branch.get("tuple_type") != expected_base + profile_suffix:
