@@ -1,9 +1,9 @@
 # Abdo handoff report — synthetic workload inputs and schemas
 
-**Extension version:** 1.1.0  
+**Extension version:** 1.2.0  
 **Repository baseline:** `main` at `39d6cd448ba5a15e690ac67ff777017a445ce577` (2026-11-03 16:45:53 UTC)  
-**Delivery form:** additive local overlay under `team-work/Astta-Abdo/`; not written to GitHub  
-**Status:** generator, development inputs, schemas, validator and tests implemented; benchmark numeric calibration awaits Mark/Ayoub evidence.
+**Delivery form:** committed on `abdo/industrial-workload-replay-seed-v2`, based on `mark/iiot-scope-transition-v1`; not merged to `main`  
+**Status:** V1.2.0 implementation and generated Development samples are on the research-based feature branch; CI passed 41 tests. Actual topology verification and the complete historical seed archive audit remain external dependencies.
 
 ## 1. Completed work
 
@@ -54,8 +54,8 @@ Run from `team-work/Astta-Abdo/` after applying the overlay:
 
 ```bash
 python -m pip install -r requirements.txt
-python scripts/generate_workloads.py --scenario all-core --seed 7 --seed-count 1 --task-count 48 --output data/dev --hash-report reports/dev_hashes_v1_1.json
-python scripts/validate_dataset.py --tasks data/dev/stable_steady__seed_0007_tasks.csv --manifest data/dev/stable_steady__seed_0007_scenario_manifest.csv --check-replay --report reports/stable_steady_validation.json
+python scripts/generate_workloads.py --scenario all-core --dataset-split development --seed 1300 --seed-count 1 --task-count 48 --output data/dev --hash-report reports/dev_hashes_v1_2.json
+python scripts/validate_dataset.py --tasks data/dev/stable_steady__seed_1300_tasks.csv --manifest data/dev/stable_steady__seed_1300_scenario_manifest.csv --check-replay --report reports/stable_steady_validation.json
 pytest -q
 ```
 
@@ -68,18 +68,18 @@ for f in data/dev/*_tasks.csv; do
  done
 ```
 
-For the minimum planned paired-seed schedule, use `--scenario all-core --seed-count 20 --task-count 48` on the generated per-scenario output. The seed bands are Train 1–60, Validation 61–80, Test 81–120; the current validation band is exactly 20 seeds. The preferred 30-seed plan therefore requires Mark to widen the Validation band without overlapping Train/Test and to approve the resulting seed allocation. No iFogSim experiment was run for this handoff.
+Seed selection is registry-only. Seed 1300 is Development/CI only; historical seed 81 and all other repository-known prior-use seeds are retired. The current registry has no approved Train, Validation or Test seeds, and full coverage awaits local/team archive review. Do not request 20/30 seed benchmark schedules until fresh non-overlapping seeds are inventoried and approved. No iFogSim experiment was run for this handoff.
 
 ## 4. Verification results
 
-- `pytest -q`: **35 passed**.
+- `pytest -q`: **41 passed in 1.99s** on CI for the V1.2.0 branch commit preceding the generated-data synchronization commit; the post-sync verification run is recorded in GitHub Actions.
 - Eight core scenarios generated; each development sample has 48 task rows and a one-row run manifest.
 - Each sample has a successful task/manifest validation and deterministic replay check; no outcome or decision records are generated.
 - All six JSON Schemas parse and validate structurally.
-- The precise task/manifest SHA-256 pairs and canonical config hash are in `reports/dev_hashes_v1_1.json`. Independent regeneration into two separate output directories reproduced all eight task hashes and all eight manifest hashes byte-for-byte; replay is also checked inside the automated tests. The canonical configuration hash is `68e2ba5ad5ab23fbbe32a418b81b14014791978eb3387a5aae3a7f6ed2641c64`.
+- The precise task/manifest SHA-256 pairs and canonical config hash are in `reports/dev_hashes_v1_2.json`. Independent regeneration into two separate output directories reproduced all eight task hashes and all eight manifest hashes byte-for-byte; replay is also checked inside the automated tests. The canonical configuration hash is `68e2ba5ad5ab23fbbe32a418b81b14014791978eb3387a5aae3a7f6ed2641c64`.
 - The test suite includes a negative partial-action timeline check and confirms the validator rejects merge-before-branch-completion chronology. It also verifies exactly 20 unique, disjoint seed values per split band and rejects a 30-seed request while Validation remains limited to 20 seeds.
 
-`reports/pytest_results.txt`, per-scenario validation JSON, `reports/dev_generation.log`, and `reports/dev_hashes_v1_1.json` retain the command evidence.
+`reports/pytest_results_v1_2.txt`, eight seed-1300 per-scenario validation JSON files, and `reports/dev_hashes_v1_2.json` retain the current V1.2.0 evidence. V1.1 report files remain archived and are not current inputs.
 
 ## 5. Configuration summary and status
 
@@ -157,3 +157,18 @@ Implemented in the V2 work branch:
 - The workload pipeline remains input-only. It does not generate simulator results, latency, energy, reward, queue measurements or execution decisions.
 
 All workload ranges and mix proportions remain proposed synthetic configurations. They are not factory measurements or industrial traces. Numeric profile approval and actual topology confirmation remain with Mark/Ayoub.
+
+
+## 12. V1.2.0 branch verification and acceptance status
+
+- Current research integration base: `mark/iiot-scope-transition-v1`.
+- Feature branch: `abdo/industrial-workload-replay-seed-v2`.
+- Current development task/manifest CSVs were regenerated with seed 1300, generator 1.2.0, 48 tasks per scenario, and the industrial profile IDs. The previous seed-7/61/81 CSVs were removed from `data/dev/`; historical reports remain archived and are labelled as historical.
+- A→B→A exact replay: A1/A2 use the same task templates, attribute stream and relative arrival offsets. The manifest records the same A condition-profile ID for A1/A2; B uses its own workload stream.
+- Industrial archetypes: Predictive Maintenance indivisible inference; Visual Inspection indivisible single-image inference plus divisible frame batches; Production Monitoring indivisible single-event processing plus divisible aggregation windows.
+- Seed allocation: seed 1300 is allocated to Development/CI only. Seed 81, seeds 102–121, and other known previous-use seeds are retired. There are no approved final Test seeds; repository-visible inventory is incomplete pending local and team archive scans.
+- Topology: `target_topology_id` captures the proposed 4-IoT/2-Edge/1-Cloud target. `actual_topology_id` is null with `NOT_VERIFIED_PENDING_AYOUB_CONFIRMATION`; no implementation claim is made.
+- CI: eight scenario generation and validation, deterministic replay, and 41 automated tests passed before generated-data synchronization; the final post-synchronization run is linked in GitHub Actions and checks the same generated data commit.
+- No simulator outcomes, execution decisions, performance measurements, latency, energy, or rewards are created by this workstream.
+
+All workload values remain proposed synthetic configurations, not factory measurements or industrial traces. Mark's approval of numerical profiles and Ayoub's verification of the actual topology remain prerequisites before benchmark use.

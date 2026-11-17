@@ -1,4 +1,4 @@
-# Dataset Card — Synthetic IoT Task Inputs (Development v1.1.0)
+# Dataset Card — Synthetic IoT Task Inputs (Development v1.2.0)
 
 ## Summary
 
@@ -45,9 +45,11 @@ python scripts/validate_dataset.py \
   --check-replay --report reports/stable_steady_validation.json
 ```
 
-## Train / validation / test split
+## Development and benchmark split policy
 
-Disjoint split by scenario family and seed band. Train: seeds 1–60 (`stable`, `bursty`); validation: 61–80 (`network_bandwidth`, `network_wan_delay`, `edge_capacity`); test: 81–120 (`task_mix_shift`, `repeated_aba`, combined stress and unseen topology if later approved). This prevents random-row leakage between regimes and seed groups. Each principal scenario is planned for at least 20 paired seeds. The validation band must be widened before a 30-seed validation plan can be claimed.
+The current checked-in files under `data/dev/` are Development-only and use seed 1300 from `research/experiments/SEED_REGISTRY_V2.csv`. Seed 1300 is not eligible for Train, Validation or Test. All known historical seeds are retired, including seed 81 (prior Development use) and seeds 102–121 (earlier A→B→A runs). The registry currently contains no approved Train, Validation or final held-out Test seeds. Generation for those splits fails closed until new, unused seeds are approved in the registry.
+
+The registry inventory covers repository-visible history only and is marked incomplete until local experiment archives and all team workstreams have been audited. Do not assume an unlisted seed is unused. A numeric seed cannot be assigned to more than one split; duplicate or cross-split reuse is a validation error.
 
 ## Limitations
 
@@ -62,7 +64,7 @@ Disjoint split by scenario family and seed band. Train: seeds 1–60 (`stable`, 
 
 ## Provenance
 
-Controlled by `configs/workload_profiles.yaml`, `configs/scenario_profiles.yaml`, generator version `1.1.0`, units version `SI-ms-bytes-MI-v1`, and per-run `config_hash`. Related source limitations are preserved under `provenance/`. Mostafa's dataset inventory remains in `team-work/Mostafa/Dataset/` and is not duplicated here.
+Controlled by `configs/workload_profiles.yaml`, `configs/scenario_profiles.yaml`, generator version `1.2.0`, units version `SI-ms-bytes-MI-v1`, and per-run `config_hash`. Related source limitations are preserved under `provenance/`. Mostafa's dataset inventory remains in `team-work/Mostafa/Dataset/` and is not duplicated here.
 
 ## License and access
 
@@ -70,7 +72,7 @@ The repository's `LICENSE_STATUS.md` states that no project license has been sel
 
 ## Version
 
-- Dataset / pipeline version: 1.1.0
+- Dataset / pipeline version: 1.2.0
 - Status: development-only; numerical parameters awaiting Mark approval
 - Base repository revision inspected: `main` at `39d6cd448ba5a15e690ac67ff777017a445ce577` (pushed 2026-11-03)
 

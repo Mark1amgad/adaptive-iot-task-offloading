@@ -2,7 +2,7 @@
 
 **Project:** Risk-Calibrated Adaptive Task Partitioning and Offloading under Repeated Workload and Network Shifts in the IoT–Edge–Cloud Continuum  
 **Workstream:** Synthetic task-input dataset and simulator handoff contracts  
-**Specification version:** 1.1.0  
+**Specification version:** 1.2.0  
 **Status:** Implementation complete for reproducible development inputs; numerical benchmark values remain `PROPOSED` / `BLOCKED` pending approval and simulator evidence.
 
 ## 1. Scope and data boundary
