@@ -22,13 +22,15 @@
     "edge_capacity_profile_json",
     "task_mix_profile_id",
     "task_mix_profile_json",
-    "topology_id",
     "dataset_split",
     "split_strategy_id",
     "paired_seed_plan_json",
     "config_hash",
     "generator_version",
-    "policy_replay_contract"
+    "policy_replay_contract",
+    "target_topology_id",
+    "actual_topology_id",
+    "actual_topology_status"
   ],
   "properties": {
     "run_id": {
@@ -101,10 +103,6 @@
       "type": "string",
       "minLength": 2
     },
-    "topology_id": {
-      "type": "string",
-      "minLength": 1
-    },
     "dataset_split": {
       "enum": [
         "train",
@@ -131,6 +129,23 @@
     "policy_replay_contract": {
       "type": "string",
       "minLength": 1
+    },
+    "target_topology_id": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Declared target topology; not proof of simulator implementation."
+    },
+    "actual_topology_id": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "description": "Null until Ayoub confirms the instantiated simulator topology."
+    },
+    "actual_topology_status": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Verification status of actual_topology_id."
     }
   }
 }
