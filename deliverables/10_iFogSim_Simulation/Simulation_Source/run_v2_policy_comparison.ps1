@@ -42,6 +42,8 @@ $javaClasspath = "$classes;$classpath"
 if ($LASTEXITCODE -ne 0) { throw "Java contract tests failed: $LASTEXITCODE" }
 
 # Freeze provenance before any policy run. Every arm receives the exact same manifest.
+Write-Host 'PROVENANCE: begin'
+Write-Host 'PROVENANCE: parse workload'
 $workloadRows = @(Get-Content -LiteralPath $WorkloadFile | Where-Object { $_.Trim() } | ForEach-Object { $_ | ConvertFrom-Json })
 if (-not $workloadRows -or $workloadRows.Count -lt 1) { throw "Workload is empty or invalid: $WorkloadFile" }
 $seedValues = @($workloadRows | ForEach-Object { [string]$_.seed } | Select-Object -Unique)
@@ -49,12 +51,14 @@ $profileValues = @($workloadRows | ForEach-Object { [string]$_.profile } | Selec
 if ($seedValues.Count -ne 1 -or $profileValues.Count -ne 1) {
     throw "Workload rows must share exactly one seed and one profile."
 }
+Write-Host 'PROVENANCE: resolve source commit'
 $gitCommit = (& git -C $ProjectRoot rev-parse HEAD).Trim()
 if ($LASTEXITCODE -ne 0 -or -not $gitCommit) { throw "Cannot resolve source Git commit." }
 $javaVersion = (Get-Content -LiteralPath (Join-Path $JdkHome 'release') |
     Where-Object { $_ -like 'JAVA_VERSION=*' } | Select-Object -First 1)
 # Hash the actual source files used, not only Git HEAD: this also captures local edits
 # in a working tree whose commit may be behind the remote branch.
+Write-Host 'PROVENANCE: enumerate source files'
 $sourceFiles = @(
     Get-Item -LiteralPath @($action,$plan,$contract,$experiment,$analyzer,
         (Join-Path $simulationSource 'run_v2_policy_comparison.ps1'),
@@ -64,12 +68,14 @@ $sourceFiles = @(
         Where-Object { $_.Extension -in @('.json','.yaml','.yml') }
 ) | Sort-Object FullName -Unique
 $rootPrefix = $ProjectRoot.TrimEnd([char[]]@('\','/')) + [IO.Path]::DirectorySeparatorChar
+Write-Host ('PROVENANCE: hash ' + $sourceFiles.Count + ' source files')
 $sourceInventory = @($sourceFiles | ForEach-Object {
     [ordered]@{
         path = $_.FullName.Substring($rootPrefix.Length).Replace([IO.Path]::DirectorySeparatorChar, '/')
         sha256 = (Get-FileHash -Algorithm SHA256 -LiteralPath $_.FullName).Hash.ToLowerInvariant()
     }
 })
+Write-Host 'PROVENANCE: hash simulator binaries and write manifest'
 $manifest = [ordered]@{
     schema_version = "v1"
     experiment_id = [IO.Path]::GetFileName($OutputRoot)
@@ -103,6 +109,7 @@ $manifestJson = $manifest | ConvertTo-Json -Depth 8
 [IO.File]::WriteAllText($manifestPath, $manifestJson + [Environment]::NewLine, [Text.UTF8Encoding]::new($false))
 $manifestSha256 = (Get-FileHash -Algorithm SHA256 -LiteralPath $manifestPath).Hash.ToLowerInvariant()
 
+Write-Host 'PROVENANCE: manifest ready; starting policy arms'
 # Fixed baselines must not receive the learned policy's risk filter or calibration state.
 # Otherwise the comparison would confound placement policy with risk filtering.
 $common = @('--python',$PythonExe,'--rl-root',$rlRoot,'--workload',$WorkloadFile,'--partition-overhead-ms',"$PartitionOverheadMs",'--merge-overhead-ms',"$MergeOverheadMs",'--wan-latency-ms',"$WanLatencyMs",'--watchdog-ms',"$WatchdogMs")
