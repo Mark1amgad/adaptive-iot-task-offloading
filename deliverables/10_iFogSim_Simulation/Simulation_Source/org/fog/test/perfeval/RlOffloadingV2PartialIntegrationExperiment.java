@@ -75,6 +75,9 @@ public final class RlOffloadingV2PartialIntegrationExperiment {
     private static double PARTITION_OVERHEAD_MS = 3.0;
     private static double MERGE_OVERHEAD_MS = 2.0;
     private static double WAN_LATENCY_MS = 45.0;
+
+    // CloudSim time is seconds; protocol, workload and trace time fields are milliseconds.
+    private static double simulationTimeMs() { return CloudSim.clock() * 1000.0; }
     private static final long AGENT_TIMEOUT_MS = 2000L;
     private static final String LOCAL_FULL = OffloadingActionV2ExecutionPlan.LOCAL_FULL_MODULE;
     private static final String EDGE_FULL = OffloadingActionV2ExecutionPlan.EDGE_FULL_MODULE;
@@ -115,11 +118,11 @@ public final class RlOffloadingV2PartialIntegrationExperiment {
         InstrumentedFogDevice edge = createDevice("edge", 2800, 4000, 10000, 10000,
                 1, 107.339, 83.4333, registry);
         edge.setParentId(cloud.getId());
-        edge.setUplinkLatency(WAN_LATENCY_MS);
+        edge.setUplinkLatency(WAN_LATENCY_MS / 1000.0);
         InstrumentedFogDevice local = createDevice("local", 1000, 2000, 10000, 10000,
                 2, 87.53, 82.44, registry);
         local.setParentId(edge.getId());
-        local.setUplinkLatency(2.0);
+        local.setUplinkLatency(2.0 / 1000.0);
 
         List<FogDevice> devices = Arrays.<FogDevice>asList(cloud, edge, local);
         TaskCoordinator coordinator = new TaskCoordinator("v2-partial-coordinator", registry, local);
@@ -269,14 +272,14 @@ public final class RlOffloadingV2PartialIntegrationExperiment {
                     edge.getObservedUtilization(), cloud.getObservedUtilization(), workload);
             if (task.action.isPartial()) {
                 registry.trace.record("partition_overhead_started", mapOf("task_id", task.taskId,
-                        "duration_ms", PARTITION_OVERHEAD_MS, "sim_time_ms", CloudSim.clock()));
-                send(getId(), PARTITION_OVERHEAD_MS, Events.DISPATCH_BRANCHES, task);
+                        "duration_ms", PARTITION_OVERHEAD_MS, "sim_time_ms", simulationTimeMs()));
+                send(getId(), PARTITION_OVERHEAD_MS / 1000.0, Events.DISPATCH_BRANCHES, task);
             } else {
                 dispatchBranches(task);
             }
             if (emitted < registry.options.tasks) {
                 double nextGap = registry.options.workload.get(emitted).arrivalGapMs;
-                send(getId(), nextGap, Events.EMIT);
+                send(getId(), nextGap / 1000.0, Events.EMIT);
             }
         }
         private void dispatchBranches(TaskRecord task) {
@@ -363,9 +366,14 @@ public final class RlOffloadingV2PartialIntegrationExperiment {
             super(name); this.registry = registry; this.local = local;
         }
         @Override public void startEntity() {
-            double horizon = registry.options.watchdogMs;
-            registry.trace.record("watchdog_scheduled", mapOf("horizon_sim_time_ms", horizon));
-            send(getId(), horizon, Events.WATCHDOG);
+            double arrivalSpanMs = 0.0;
+            for (int i = 1; i < registry.options.workload.size(); i++)
+                arrivalSpanMs += registry.options.workload.get(i).arrivalGapMs;
+            // First task is intentionally emitted after a 5-second simulator warm-up.
+            double horizonSeconds = 5.0 + (arrivalSpanMs + registry.options.watchdogMs) / 1000.0;
+            registry.trace.record("watchdog_scheduled",
+                    mapOf("horizon_sim_time_ms", horizonSeconds * 1000.0));
+            send(getId(), horizonSeconds, Events.WATCHDOG);
         }
         void acceptBranch(Tuple tuple) { sendNow(getId(), Events.BRANCH_RESULT, tuple); }
         void acceptMerge(Tuple tuple) { sendNow(getId(), Events.MERGE_RESULT, tuple); }
@@ -376,7 +384,7 @@ public final class RlOffloadingV2PartialIntegrationExperiment {
                 if (task != null) {
                     registry.trace.record("merge_overhead_started", mapOf("task_id", task.taskId,
                             "duration_ms", MERGE_OVERHEAD_MS, "sim_time_ms", CloudSim.clock()));
-                    send(getId(), MERGE_OVERHEAD_MS, Events.START_MERGE, task);
+                    send(getId(), MERGE_OVERHEAD_MS / 1000.0, Events.START_MERGE, task);
                 }
                 if (registry.completedCount == registry.options.tasks) registry.finishRun();
             } else if (event.getTag() == Events.START_MERGE) {
@@ -530,10 +538,13 @@ public final class RlOffloadingV2PartialIntegrationExperiment {
                     constraints.put("merge_overhead_ms", MERGE_OVERHEAD_MS);
                 }
                 List<Map<String, Object>> localEdgePath = Arrays.asList(
-                        mapOf("bandwidth_mbps", 10.0, "latency_ms", 2.0));
-                List<Map<String, Object>> cloudPath = Arrays.asList(
-                        mapOf("bandwidth_mbps", 10.0, "latency_ms", 2.0),
-                        mapOf("bandwidth_mbps", 10.0, "latency_ms", WAN_LATENCY_MS));
+                        mapOf("bandwidth_bytes_per_second", 10000.0, "latency_ms", 2.0));
+                List<Map<String, Object>> cloudUplinkPath = Arrays.asList(
+                        mapOf("bandwidth_bytes_per_second", 10000.0, "latency_ms", 2.0),
+                        mapOf("bandwidth_bytes_per_second", 10000.0, "latency_ms", WAN_LATENCY_MS));
+                List<Map<String, Object>> cloudDownlinkPath = Arrays.asList(
+                        mapOf("bandwidth_bytes_per_second", 100000.0, "latency_ms", WAN_LATENCY_MS),
+                        mapOf("bandwidth_bytes_per_second", 10000.0, "latency_ms", 2.0));
                 Map<String, Object> riskContext = mapOf(
                         "remaining_deadline_ms", workload.deadlineMs,
                         "partition_overhead_ms", workload.divisible() ? PARTITION_OVERHEAD_MS : 0.0,
@@ -548,11 +559,11 @@ public final class RlOffloadingV2PartialIntegrationExperiment {
                                         "queue_wait_ms", 0.0, "uplink_path", localEdgePath,
                                         "downlink_path", localEdgePath),
                                 "CLOUD", mapOf("compute_mips", 44800.0, "utilization", cloudUtil,
-                                        "queue_wait_ms", 0.0, "uplink_path", cloudPath,
-                                        "downlink_path", cloudPath)));
+                                        "queue_wait_ms", 0.0, "uplink_path", cloudUplinkPath,
+                                        "downlink_path", cloudDownlinkPath)));
                 Map<String, Object> observation = mapOf("protocol_version", "2.0", "type", "observation",
                         "task_id", taskId, "features", features, "available_actions", mask,
-                        "task_constraints", constraints, "sim_time_ms", CloudSim.clock());
+                        "task_constraints", constraints, "sim_time_ms", simulationTimeMs());
                 if (options.riskFilter) observation.put("risk_context", riskContext);
                 JSONObject response = python.request(observation);
                 requireType(response, "action");
@@ -710,7 +721,7 @@ public final class RlOffloadingV2PartialIntegrationExperiment {
             if (task.terminal) throw new IllegalStateException("duplicate task terminal " + task.taskId);
             task.terminal = true;
             task.terminalTime = CloudSim.clock();
-            task.latency = task.terminalTime - task.creationTime;
+            task.latency = (task.terminalTime - task.creationTime) * 1000.0;
             boolean deadlineMet = task.latency <= task.workload.deadlineMs;
             double utilSum = 0.0;
             int utilCount = 0;
@@ -722,7 +733,7 @@ public final class RlOffloadingV2PartialIntegrationExperiment {
                     "latency_ms", task.latency, "deadline_ms", task.workload.deadlineMs,
                     "urgency_class", task.workload.urgencyClass, "deadline_met", deadlineMet,
                     "bandwidth_bytes", task.bandwidthBytes, "transfer_count", task.transferCount,
-                    "sim_time_ms", task.terminalTime));
+                    "sim_time_ms", task.terminalTime * 1000.0));
             try {
                 JSONObject ack = python.request(mapOf("protocol_version", "2.0", "type", "outcome",
                         "task_id", task.taskId, "action_executed", task.action.id,
