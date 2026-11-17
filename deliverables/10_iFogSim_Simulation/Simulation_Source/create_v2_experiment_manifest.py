@@ -32,6 +32,7 @@ def main() -> int:
     parser.add_argument("--risk-mode", choices=("none", "analytical", "calibrated"), default="calibrated")
     parser.add_argument("--seed-registry", type=Path, required=True)
     parser.add_argument("--experiment-family", required=True)
+    parser.add_argument("--expected-split", choices=("development", "validation", "test"), default="test")
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--partition-overhead-ms", type=float, required=True)
     parser.add_argument("--merge-overhead-ms", type=float, required=True)
@@ -76,9 +77,9 @@ def main() -> int:
             f"{args.experiment_family!r}; found {len(family_seed_rows)}"
         )
     allocation = family_seed_rows[0]
-    if allocation.get("split") != "test" or allocation.get("status") != "approved":
+    if allocation.get("split") != args.expected_split or allocation.get("status") != "approved":
         raise ValueError(
-            f"seed {workload_seed} is not approved for final test in {args.experiment_family!r}: "
+            f"seed {workload_seed} is not approved for {args.expected_split} in {args.experiment_family!r}: "
             f"split={allocation.get('split')!r}, status={allocation.get('status')!r}"
         )
     family_seed_counts = {}
