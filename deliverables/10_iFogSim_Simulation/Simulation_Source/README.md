@@ -26,3 +26,12 @@ This folder contains experiment-owned Java integrations, isolated runners, and t
 The Python RL action schema remains Local / Edge / Cloud. The partial fixture is not connected to the learner and uses a fixed 40/60 Local/Edge split. It does not model actual merge-data construction or establish comparative performance.
 
 The external iFogSim source remains a dependency. These experiments do not modify iFogSim core and compile into fresh `audit_output` directories, not the external simulator's tracked `out/production`.
+
+
+## V2 risk-calibrated feasibility filter
+
+The V2 partial-integration runner now accepts --risk-filter; this adds a pre-decision completion-time context to observations and records per-action estimates, residual margin, calibration source/sample count, feasible mask, and fallback state in the decision trace. Training persists the residual state beside python_model.json as python_model.json.risk.json. For frozen evaluation, pass --risk-state-in and use the same sidecar for every compared policy. run_v2_policy_comparison.ps1 requires and shares that sidecar across the paired Local/Edge/Cloud/Random/RL runs.
+
+run_v2_workload_smoke.ps1 and the learned-policy phase of run_v2_partial_acceptance.ps1 exercise the filter during training. Exact-action executor acceptance remains unfiltered, so it continues to test the nine concrete paths independently of risk-policy choices.
+
+The current risk context uses explicit but provisional Local/Edge/Cloud MIPS and link profiles, zero queue-wait estimates, symmetric paths, and configured partition/merge overhead. It includes merge MI because partial execution creates a real Local merge Cloudlet. These inputs require calibration against the actual topology/traces. The residual quantile is empirical, not a deterministic deadline guarantee; uncalibrated decisions and forced fallbacks must be separately reported. See ../../08_RL_Model/docs/RISK_CALIBRATION_V1.md.
