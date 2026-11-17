@@ -4,20 +4,249 @@
   "title": "Compound offloading action v2 (Python to Java)",
   "type": "object",
   "additionalProperties": false,
-  "required": ["protocol_version", "type", "task_id", "action_id", "action", "remote_tier", "remote_fraction", "local_fraction", "model_version", "mode", "epsilon"],
+  "required": [
+    "protocol_version",
+    "type",
+    "task_id",
+    "action_id",
+    "action",
+    "remote_tier",
+    "remote_fraction",
+    "local_fraction",
+    "model_version",
+    "mode",
+    "epsilon"
+  ],
   "properties": {
-    "protocol_version": {"const": "2.0"},
-    "type": {"const": "action"},
-    "task_id": {"type": "string", "minLength": 1, "maxLength": 128},
-    "action_id": {"type": "integer", "minimum": 0, "maximum": 8},
-    "action": {"enum": ["LOCAL", "EDGE_PARTIAL_25", "EDGE_PARTIAL_50", "EDGE_PARTIAL_75", "EDGE_FULL", "CLOUD_PARTIAL_25", "CLOUD_PARTIAL_50", "CLOUD_PARTIAL_75", "CLOUD_FULL"]},
-    "remote_tier": {"enum": ["EDGE", "CLOUD", null]},
-    "remote_fraction": {"type": "number", "minimum": 0, "maximum": 1},
-    "local_fraction": {"type": "number", "minimum": 0, "maximum": 1},
-    "model_version": {"type": "string", "minLength": 1},
-    "mode": {"enum": ["explore", "exploit", "greedy", "fallback", "baseline"]},
-    "epsilon": {"type": "number", "minimum": 0, "maximum": 1},
-    "state_index": {"type": "integer", "minimum": 0},
-    "q_values": {"type": "array", "minItems": 9, "maxItems": 9, "items": {"type": "number"}}
+    "protocol_version": {
+      "const": "2.0"
+    },
+    "type": {
+      "const": "action"
+    },
+    "task_id": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 128
+    },
+    "action_id": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 8
+    },
+    "action": {
+      "enum": [
+        "LOCAL",
+        "EDGE_PARTIAL_25",
+        "EDGE_PARTIAL_50",
+        "EDGE_PARTIAL_75",
+        "EDGE_FULL",
+        "CLOUD_PARTIAL_25",
+        "CLOUD_PARTIAL_50",
+        "CLOUD_PARTIAL_75",
+        "CLOUD_FULL"
+      ]
+    },
+    "remote_tier": {
+      "enum": [
+        "EDGE",
+        "CLOUD",
+        null
+      ]
+    },
+    "remote_fraction": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1
+    },
+    "local_fraction": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1
+    },
+    "model_version": {
+      "type": "string",
+      "minLength": 1
+    },
+    "mode": {
+      "enum": [
+        "explore",
+        "exploit",
+        "greedy",
+        "fallback",
+        "baseline",
+        "risk_fallback"
+      ]
+    },
+    "epsilon": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1
+    },
+    "state_index": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "q_values": {
+      "type": "array",
+      "minItems": 9,
+      "maxItems": 9,
+      "items": {
+        "type": "number"
+      }
+    },
+    "risk": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "filter_applied",
+        "status",
+        "no_feasible_action"
+      ],
+      "properties": {
+        "filter_applied": {
+          "type": "boolean"
+        },
+        "status": {
+          "enum": [
+            "calibrated",
+            "uncalibrated",
+            "no_feasible_action",
+            "missing_context",
+            "disabled"
+          ]
+        },
+        "remaining_deadline_ms": {
+          "type": "number",
+          "minimum": 0
+        },
+        "predicted_completion_ms": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": 0
+        },
+        "residual_margin_ms": {
+          "type": "number",
+          "minimum": 0
+        },
+        "safe_completion_ms": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": 0
+        },
+        "calibration_source": {
+          "type": "string"
+        },
+        "calibration_group": {
+          "type": "string"
+        },
+        "calibration_samples": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "calibrated": {
+          "type": "boolean"
+        },
+        "feasible_actions": {
+          "type": "array",
+          "items": {
+            "enum": [
+              "LOCAL",
+              "EDGE_PARTIAL_25",
+              "EDGE_PARTIAL_50",
+              "EDGE_PARTIAL_75",
+              "EDGE_FULL",
+              "CLOUD_PARTIAL_25",
+              "CLOUD_PARTIAL_50",
+              "CLOUD_PARTIAL_75",
+              "CLOUD_FULL"
+            ]
+          }
+        },
+        "no_feasible_action": {
+          "type": "boolean"
+        },
+        "fallback_reason": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "queue_wait_basis": {
+          "type": "string"
+        },
+        "calibration_updates": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "candidates": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "action",
+              "predicted_completion_ms",
+              "residual_margin_ms",
+              "safe_completion_ms",
+              "calibration_group",
+              "calibration_samples",
+              "calibrated",
+              "feasible"
+            ],
+            "properties": {
+              "action": {
+                "enum": [
+                  "LOCAL",
+                  "EDGE_PARTIAL_25",
+                  "EDGE_PARTIAL_50",
+                  "EDGE_PARTIAL_75",
+                  "EDGE_FULL",
+                  "CLOUD_PARTIAL_25",
+                  "CLOUD_PARTIAL_50",
+                  "CLOUD_PARTIAL_75",
+                  "CLOUD_FULL"
+                ]
+              },
+              "predicted_completion_ms": {
+                "type": [
+                  "number",
+                  "null"
+                ],
+                "minimum": 0
+              },
+              "residual_margin_ms": {
+                "type": "number",
+                "minimum": 0
+              },
+              "safe_completion_ms": {
+                "type": [
+                  "number",
+                  "null"
+                ],
+                "minimum": 0
+              },
+              "calibration_group": {
+                "type": "string"
+              },
+              "calibration_samples": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "calibrated": {
+                "type": "boolean"
+              },
+              "feasible": {
+                "type": "boolean"
+              }
+            }
+          }
+        }
+      }
+    }
   }
 }
