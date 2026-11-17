@@ -64,7 +64,7 @@ $sourceFiles = @(
 ) | Sort-Object FullName -Unique
 $sourceInventory = @($sourceFiles | ForEach-Object {
     [ordered]@{
-        path = $_.FullName.Substring($ProjectRoot.TrimEnd('\\').Length + 1).Replace('\\','/')
+        path = [IO.Path]::GetRelativePath($ProjectRoot, $_.FullName).Replace([IO.Path]::DirectorySeparatorChar, '/')
         sha256 = (Get-FileHash -Algorithm SHA256 -LiteralPath $_.FullName).Hash.ToLowerInvariant()
     }
 })
