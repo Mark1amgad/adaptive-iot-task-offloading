@@ -143,3 +143,17 @@ The original overlay archive was reported as incomplete by the recipient. The im
 - A fully empty virtualenv could not download dependencies because the package index was unreachable from this execution environment. The documented `pip install -r requirements.txt` command did complete successfully in the available Python environment, where both declared dependencies were already installed. Exact failure output is recorded in `reports/package_verification/fresh_venv_install_attempt.txt`.
 
 This is a packaging/verification correction only. All unverified numeric values retain their existing `PROPOSED` or `BLOCKED` designations. No simulator, policy, model, Git branch, commit or push was changed.
+
+
+## 12. V2 research-branch handoff correction — 17 November 2026
+
+The current revision is prepared additively on mark/iiot-scope-transition-v1, not main. The earlier PR targeting main remains separate and must not be merged into main as an integration shortcut.
+
+Implemented in the V2 work branch:
+- A1/A2 use identical task attribute RNG streams and relative arrival-time templates; B uses a separate workload stream. The validator and tests assert equality of A1/A2 inputs and their exogenous condition profile.
+- Visual Inspection adds indivisible single-image inference; Production Monitoring adds indivisible single-event processing. Divisible frame-batch and aggregation-window variants remain available for partial-offloading comparisons.
+- Seed registry V2 preserves known historical seed uses as retired, records seed 61's prior development use, and allocates seed 1300 for Development/CI only. Seed 81 and 102-121 are not final-test eligible. No final Train/Validation/Test allocations are approved. Registry coverage remains incomplete until local and all team archives are checked.
+- Manifests distinguish target_topology_id from nullable actual_topology_id and label actual topology NOT_VERIFIED_PENDING_AYOUB_CONFIRMATION.
+- The workload pipeline remains input-only. It does not generate simulator results, latency, energy, reward, queue measurements or execution decisions.
+
+All workload ranges and mix proportions remain proposed synthetic configurations. They are not factory measurements or industrial traces. Numeric profile approval and actual topology confirmation remain with Mark/Ayoub.

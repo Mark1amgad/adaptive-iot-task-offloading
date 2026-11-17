@@ -206,7 +206,8 @@ def validate_aba_exact_replay(task_rows: list[dict[str, str]],
     return errors
 
 
-def validate_manifest(path: Path, task_rows: list[dict[str, str]]) -> list[str]:
+def validate_manifest(path: Path, task_rows: list[dict[str, str]],
+                       seed_registry_path: Path = gen.DEFAULT_SEED_REGISTRY_PATH) -> list[str]:
     errors: list[str] = []
     fields, rows = read_csv(path)
     errors.extend(f"manifest missing required column: {f}" for f in sorted(MANIFEST_REQUIRED - set(fields)))
@@ -255,7 +256,7 @@ def validate_manifest(path: Path, task_rows: list[dict[str, str]]) -> list[str]:
     if manifest.get("dataset_split") not in {"development", "train", "validation", "test"}:
         errors.append("dataset_split must be development, train, validation or test")
     try:
-        registry = gen.read_seed_registry()
+        registry = gen.read_seed_registry(seed_registry_path)
         errors.extend(gen.validate_seed_allocation(int(manifest.get("seed", -1)), manifest.get("dataset_split", ""), registry))
     except Exception as exc:
         errors.append(f"seed registry validation failed: {exc}")
@@ -726,7 +727,8 @@ def validate_paired_inputs(paths: list[Path]) -> list[str]:
 
 
 def validate_replay(tasks_path: Path, manifest_path: Path,
-                    workload_config: Path, scenario_config: Path) -> list[str]:
+                    workload_config: Path, scenario_config: Path,
+                    seed_registry_path: Path = gen.DEFAULT_SEED_REGISTRY_PATH) -> list[str]:
     errors: list[str] = []
     _, task_rows = read_csv(tasks_path)
     _, manifest_rows = read_csv(manifest_path)
@@ -739,7 +741,8 @@ def validate_replay(tasks_path: Path, manifest_path: Path,
         with tempfile.TemporaryDirectory(prefix="abdo-replay-") as tmp:
             replay_tasks, replay_manifest, _ = gen.generate_one(
                 manifest["scenario_id"], int(manifest["seed"]), len(task_rows),
-                manifest["run_id"], workload_cfg, scenario_cfg, Path(tmp)
+                manifest["run_id"], workload_cfg, scenario_cfg, Path(tmp),
+                manifest.get("dataset_split", "development"), seed_registry_path
             )
             expected_tasks = hashlib.sha256(tasks_path.read_bytes()).hexdigest()
             expected_manifest = hashlib.sha256(manifest_path.read_bytes()).hexdigest()
@@ -793,7 +796,7 @@ def main() -> int:
 
     errors, summary = validate_tasks(args.tasks)
     _, task_rows = read_csv(args.tasks)
-    errors += validate_manifest(args.manifest, task_rows)
+    errors += validate_manifest(args.manifest, task_rows, args.seed_registry)
     try:
         errors += gen.validate_seed_registry_rows(gen.read_seed_registry(args.seed_registry))
     except Exception as exc:
@@ -811,7 +814,7 @@ def main() -> int:
     if args.paired_inputs:
         errors += validate_paired_inputs(args.paired_inputs)
     if args.check_replay:
-        errors += validate_replay(args.tasks, args.manifest, args.workload_config, args.scenario_config)
+        errors += validate_replay(args.tasks, args.manifest, args.workload_config, args.scenario_config, args.seed_registry)
     errors += validate_schemas(args.schema_dir)
 
     report = {

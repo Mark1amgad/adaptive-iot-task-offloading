@@ -20,11 +20,30 @@ From this directory:
 
 ```bash
 python -m pip install -r requirements.txt
-python scripts/generate_workloads.py --scenario all-core --seed 7 --seed-count 1 --task-count 48 --output data/dev --hash-report reports/dev_hashes_v1_1.json
-python scripts/validate_dataset.py --tasks data/dev/stable_steady__seed_0007_tasks.csv --manifest data/dev/stable_steady__seed_0007_scenario_manifest.csv --check-replay --report reports/stable_steady_validation.json
+python scripts/generate_workloads.py --scenario all-core --dataset-split development --seed 1300 --seed-count 1 --task-count 48 --output data/dev --hash-report reports/dev_hashes_v1_2.json
+python scripts/validate_dataset.py --tasks data/dev/stable_steady__seed_1300_tasks.csv --manifest data/dev/stable_steady__seed_1300_scenario_manifest.csv --check-replay --report reports/stable_steady_validation.json
 pytest -q
 ```
 
 The generator creates task inputs and scenario manifests only. `decision_contexts`, `decisions`, `task_outcomes`, and `calibration_log` have schema contracts and header-only templates; only simulator/policy runs may populate them.
 
 Existing `README.md` and all files in `adaptive_offloading/` are intentionally left untouched.
+
+
+## Industrial archetype coverage
+
+Predictive Maintenance is represented by indivisible inference tasks. Visual Inspection includes indivisible single-product-image inference and divisible independent frame batches. Production Monitoring includes indivisible single-event processing and divisible aggregation-window batches. The bulk frame and large aggregation profiles provide proposed shifted-load variants.
+
+## A-B-A exact recovery replay
+
+For both repeated A-B-A scenarios, A1 and A2 are generated from the same task-attribute random stream and relative arrival-time template. Their task attributes and relative arrival offsets must match exactly. B uses a separate task-template stream; in the workload-mix-shift scenario, B also uses the heavier synthetic profile distribution. A1/A2 condition-profile identifiers are required to match. The absolute arrival and deadline timestamps differ only by phase offset.
+
+## Seed registry and split eligibility
+
+The registry at research/experiments/SEED_REGISTRY_V2.csv is the only seed allocator. Historical seeds, including seed 81 (development) and the earlier A-B-A batch seeds 102-121, are retired and cannot be reused for final held-out testing. Seed 1300 is allocated only to development/CI. There are currently no approved Train, Validation, or Test seed allocations. The inventory remains incomplete until local experiment archives and each team workstream have been inspected.
+
+## Topology provenance
+
+Manifests use target_topology_id for the proposed 4-IoT / 2-Edge / 1-Cloud design and actual_topology_id for the implemented simulator layout. actual_topology_id remains null with status NOT_VERIFIED_PENDING_AYOUB_CONFIRMATION until Ayoub confirms the running topology. Logical source IDs do not prove instantiated FogDevices.
+
+All sizes, compute demands, deadlines, rates, profile proportions and partition overheads remain proposed synthetic configurations. They are not factory measurements, industrial traces or measured performance. The generator never creates simulator outcomes.

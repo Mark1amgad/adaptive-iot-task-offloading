@@ -32,7 +32,7 @@ Use Python 3.10+ with `PyYAML` and `pytest`. From the workload-workstream direct
 
 ```bash
 python -m pip install -r requirements.txt
-python scripts/generate_workloads.py --scenario all-core --seed 7 --seed-count 1 --task-count 48 --output data/dev --hash-report reports/dev_hashes_v1_1.json
+python scripts/generate_workloads.py --scenario all-core --seed 1300 --seed-count 1 --task-count 48 --output data/dev --hash-report reports/dev_hashes_v1_2.json
 pytest -q
 ```
 
@@ -40,8 +40,8 @@ Same seed/config/scenario/run ID/task count produces byte-identical CSVs. The de
 
 ```bash
 python scripts/validate_dataset.py \
-  --tasks data/dev/stable_steady__seed_0007_tasks.csv \
-  --manifest data/dev/stable_steady__seed_0007_scenario_manifest.csv \
+  --tasks data/dev/stable_steady__seed_1300_tasks.csv \
+  --manifest data/dev/stable_steady__seed_1300_scenario_manifest.csv \
   --check-replay --report reports/stable_steady_validation.json
 ```
 
@@ -73,3 +73,12 @@ The repository's `LICENSE_STATUS.md` states that no project license has been sel
 - Dataset / pipeline version: 1.1.0
 - Status: development-only; numerical parameters awaiting Mark approval
 - Base repository revision inspected: `main` at `39d6cd448ba5a15e690ac67ff777017a445ce577` (pushed 2026-11-03)
+
+
+## V2 correction: archetypes, seed leakage and topology provenance
+
+The current development dataset is generated with the registry-allocated development seed 1300. Seed 81 is historical development use and is retired; seeds 102-121 were used in prior test-labelled A-B-A experiments and are also retired. No Train, Validation or final Test seed is currently approved. The repository registry remains incomplete pending local/team archive review.
+
+A1 and A2 in each A-B-A generator scenario use identical task templates and relative arrival offsets, with matching A condition profiles; B uses an independent stream. The industrial profiles include indivisible image inference and indivisible production-event processing, alongside their divisible batch counterparts.
+
+The target topology is stored separately from the actual topology. The actual topology ID remains null until Ayoub confirms the deployed simulator topology. All generated parameters remain proposed synthetic configurations, not factory measurements, industrial traces or performance results. No simulator outcomes are generated.

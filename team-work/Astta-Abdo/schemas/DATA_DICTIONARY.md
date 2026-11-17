@@ -47,8 +47,10 @@ All six machine-readable record contracts are in the adjacent JSON Schema files.
 | `network_profile_id`, `network_profile_json` | string / JSON string | Exogenous network profile and factor values. |
 | `edge_capacity_profile_id`, `edge_capacity_profile_json` | string / JSON string | Exogenous edge capacity/load profile and factor values. |
 | `task_mix_profile_id`, `task_mix_profile_json` | string / JSON string | Application profile mix or A/B/A schedule. |
-| `topology_id` | string | Intended target topology reference; V2 target status is proposed. |
-| `dataset_split` | enum | `train`, `validation`, or `test`, based on family and seed band. |
+| `target_topology_id` | string | Declared target topology design; not proof of simulator implementation. |
+| `actual_topology_id` | string/null | Actual instantiated simulator topology; null pending Ayoub verification. |
+| `actual_topology_status` | string | Verification status, currently `NOT_VERIFIED_PENDING_AYOUB_CONFIRMATION`. |
+| `dataset_split` | enum | `development`, `train`, `validation`, or `test`, allocated only through the seed registry. |
 | `split_strategy_id` | string | Versioned split definition. |
 | `paired_seed_plan_json` | JSON string | Minimum/preferred paired seeds per scenario and run-plan status. |
 | `config_hash`, `generator_version` | string | Reproducibility provenance. |
@@ -100,3 +102,6 @@ One row per task/policy/candidate site/action calibration record (add a time/win
 | `CLOUD_PARTIAL_25` | 0.25 | 0.75 | `CLOUD` | Divisible only |
 | `CLOUD_PARTIAL_50` | 0.50 | 0.50 | `CLOUD` | Divisible only |
 | `CLOUD_PARTIAL_75` | 0.75 | 0.25 | `CLOUD` | Divisible only |
+
+
+The profile set now includes indivisible single-image Visual Inspection and single-event Production Monitoring in addition to their divisible frame-batch and aggregation-window counterparts. All numeric profile values are proposed synthetic inputs, not factory measurements or industrial traces.
