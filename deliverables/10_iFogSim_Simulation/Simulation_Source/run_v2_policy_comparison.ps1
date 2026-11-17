@@ -51,7 +51,8 @@ if ($seedValues.Count -ne 1 -or $profileValues.Count -ne 1) {
 }
 $gitCommit = (& git -C $ProjectRoot rev-parse HEAD).Trim()
 if ($LASTEXITCODE -ne 0 -or -not $gitCommit) { throw "Cannot resolve source Git commit." }
-$javaVersion = (& $java -version 2>&1 | Select-Object -First 1).ToString()
+$javaVersion = (Get-Content -LiteralPath (Join-Path $JdkHome 'release') |
+    Where-Object { $_ -like 'JAVA_VERSION=*' } | Select-Object -First 1)
 # Hash the actual source files used, not only Git HEAD: this also captures local edits
 # in a working tree whose commit may be behind the remote branch.
 $sourceFiles = @(
