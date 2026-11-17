@@ -23,6 +23,9 @@ from .protocol_v2 import (
     parse_observation_v2, parse_outcome_v2,
 )
 from .reward import RewardError, compute_reward
+from .risk import (
+    RiskCalibrator, RiskError, filter_feasible_actions, predict_legal_actions,
+)
 
 
 @dataclass
@@ -32,11 +35,15 @@ class PendingV2:
     mask: tuple[int, ...]
     action_id: int
     model_version: str
+    predicted_completion_ms: dict[str, Optional[float]]
+    decision_sim_time_ms: Optional[float]
+    risk_forced_fallback: bool
 
 
 class V2Session:
     def __init__(self, config: V2RuntimeConfig, mode: str = "train", policy: Optional[str] = None,
-                 model_in: Optional[str] = None, model_out: str = "artifacts/model_v2.json"):
+                 model_in: Optional[str] = None, model_out: str = "artifacts/model_v2.json",
+                 risk_state_in: Optional[str] = None, risk_state_out: Optional[str] = None):
         if mode not in ("train", "eval", "baseline"):
             raise ValueError("mode must be train, eval, or baseline")
         if mode == "baseline" and policy not in ("random", "local", "edge", "cloud") + tuple(name.lower() for name in ACTION_NAMES):
@@ -45,6 +52,14 @@ class V2Session:
             raise ValueError("eval mode requires --model-in")
         self.config, self.mode, self.policy = config, mode, policy
         self.model_out = Path(model_out)
+        self.risk_state_out = Path(risk_state_out or (str(self.model_out) + ".risk.json"))
+        self.risk_calibrator = RiskCalibrator(config.risk)
+        if risk_state_in is None and model_in:
+            candidate = Path(str(model_in) + ".risk.json")
+            if candidate.exists():
+                risk_state_in = str(candidate)
+        if risk_state_in:
+            self.risk_calibrator = RiskCalibrator.load(risk_state_in, config.risk)
         if model_in:
             self.agent = load_v2_model(
                 model_in, config.space.n_states, config.space.fingerprint(),
@@ -131,6 +146,10 @@ class V2Session:
             "features": list(self.config.space.feature_names),
             "state_fingerprint": self.config.space.fingerprint(),
             "reward_fingerprint": self.config.reward.fingerprint(),
+            "risk_enabled": self.config.risk.enabled,
+            "risk_config_fingerprint": self.config.risk.fingerprint(),
+            "risk_calibration_updates": self.risk_calibrator.updates,
+            "risk_calibration_samples": self.risk_calibrator.sample_counts(),
         }
 
     def _observation(self, msg: dict) -> dict:
@@ -142,24 +161,73 @@ class V2Session:
             state = self.config.space.encode(obs["features"])
         except ValueError as exc:
             return self._error("invalid_observation", str(exc), tid)
-        mask = obs["available_actions"]
-        if self.mode == "baseline":
-            fixed = {"local": 0, "edge": 4, "cloud": 8, **{name.lower(): index for index, name in enumerate(ACTION_NAMES)}}
+
+        legal_mask = obs["available_actions"]
+        decision_mask = legal_mask
+        risk_decision = None
+        predictions: dict[str, Optional[float]] = {}
+        context = obs["risk_context"]
+        if context is not None:
+            if not self.config.risk.enabled:
+                return self._error("risk_disabled", "risk_context supplied while risk filter is disabled", tid)
+            try:
+                predictions = predict_legal_actions(
+                    obs["features"], obs["task_constraints"], legal_mask, context
+                )
+                risk_decision = filter_feasible_actions(
+                    legal_mask, predictions, context.remaining_deadline_ms,
+                    self.risk_calibrator, self.config.agent.fallback_order,
+                )
+                decision_mask = risk_decision.allowed_actions
+            except RiskError as exc:
+                return self._error("invalid_risk_context", str(exc), tid)
+
+        forced_risk_fallback = bool(risk_decision and risk_decision.no_feasible_action)
+        if forced_risk_fallback:
+            selected = decision_mask[0]
+            mode, epsilon = "risk_fallback", 0.0
+        elif self.mode == "baseline":
+            fixed = {"local": 0, "edge": 4, "cloud": 8,
+                     **{name.lower(): index for index, name in enumerate(ACTION_NAMES)}}
             if self.policy == "random":
-                selected = self.agent.rng.choice(mask)
+                selected = self.agent.rng.choice(decision_mask)
             else:
                 selected = fixed[self.policy]
-                if selected not in mask:
-                    return self._error("baseline_unavailable", f"{self.policy} baseline action is not feasible", tid)
+                if selected not in decision_mask:
+                    return self._error(
+                        "baseline_unavailable",
+                        f"{self.policy} baseline action is not risk-feasible for this task",
+                        tid,
+                    )
             mode, epsilon = "baseline", 0.0
         else:
-            decision = self.agent.select_action(state, mask)
+            decision = self.agent.select_action(state, decision_mask)
             selected, mode, epsilon = decision.action_id, decision.mode, decision.epsilon
+
         version = self.model_version()
-        self.pending[tid] = PendingV2(state, obs["features"], mask, selected, version)
+        self.pending[tid] = PendingV2(
+            state_index=state,
+            features=obs["features"],
+            mask=legal_mask,
+            action_id=selected,
+            model_version=version,
+            predicted_completion_ms=predictions,
+            decision_sim_time_ms=obs["sim_time_ms"],
+            risk_forced_fallback=forced_risk_fallback,
+        )
         response = action_message_v2(tid, selected, version, mode, epsilon)
         response["state_index"] = state
         response["q_values"] = [round(value, 8) for value in self.agent.q[state]]
+        if risk_decision is not None:
+            response["risk"] = risk_decision.metadata(
+                selected, context.remaining_deadline_ms, context.queue_wait_basis
+            )
+        else:
+            response["risk"] = {
+                "filter_applied": False,
+                "status": "missing_context" if self.config.risk.enabled else "disabled",
+                "calibration_updates": self.risk_calibrator.updates,
+            }
         return response
 
     def _outcome(self, msg: dict) -> dict:
@@ -178,20 +246,45 @@ class V2Session:
             )
         except RewardError as exc:
             return self._error("invalid_outcome", str(exc), tid)
-        updated = self.mode == "train"
-        if updated:
+
+        agent_updated = self.mode == "train" and not pending.risk_forced_fallback
+        if agent_updated:
             self.agent.update(pending.state_index, out["action_executed"], reward.reward)
+
+        calibration_updated = False
+        residual_ms = None
+        executed_name = ACTION_NAMES[out["action_executed"]]
+        predicted = pending.predicted_completion_ms.get(executed_name)
+        if (self.mode == "train" and self.config.risk.enabled
+                and self.config.risk.update_on_train_outcomes
+                and not out["failed"] and predicted is not None
+                and out["sim_time_ms"] is not None
+                and pending.decision_sim_time_ms is not None):
+            observed_duration = out["sim_time_ms"] - pending.decision_sim_time_ms
+            if observed_duration < -1e-9:
+                return self._error("invalid_outcome", "outcome sim_time_ms precedes its decision", tid)
+            residual_ms = self.risk_calibrator.observe(
+                out["action_executed"], predicted, max(0.0, observed_duration)
+            )
+            calibration_updated = True
+
         del self.pending[tid]
         self.tasks_reported += 1
         return {
             "protocol_version": PROTOCOL_VERSION_V2, "type": "outcome_ack",
-            "task_id": tid, "updated": updated, "reward": round(reward.reward, 8),
+            "task_id": tid, "updated": agent_updated, "agent_updated": agent_updated,
+            "risk_calibration_updated": calibration_updated,
+            "risk_residual_ms": None if residual_ms is None else round(residual_ms, 8),
+            "risk_calibration_updates": self.risk_calibrator.updates,
+            "reward": round(reward.reward, 8),
             "model_version": self.model_version(), "update_count": self.agent.updates,
         }
 
     def _save(self) -> None:
         save_v2_model(self.agent, self.config.space.fingerprint(), self.model_out,
                       self.config.reward.fingerprint())
+        if self.config.risk.enabled:
+            self.risk_calibrator.save(self.risk_state_out)
 
     def _shutdown(self) -> dict:
         if self.mode == "train" and self.hello:
@@ -212,11 +305,16 @@ def main(argv: Optional[list[str]] = None) -> int:
     parser.add_argument("--policy", choices=("random", "local", "edge", "cloud") + tuple(name.lower() for name in ACTION_NAMES))
     parser.add_argument("--model-in")
     parser.add_argument("--model-out", default="artifacts/model_v2.json")
+    parser.add_argument("--risk-state-in")
+    parser.add_argument("--risk-state-out")
     args = parser.parse_args(argv)
     try:
         config = V2RuntimeConfig.load(args.config)
-        session = V2Session(config, args.mode, args.policy, args.model_in, args.model_out)
-    except (ValueError, V2CompatibilityError, OSError) as exc:
+        session = V2Session(
+            config, args.mode, args.policy, args.model_in, args.model_out,
+            args.risk_state_in, args.risk_state_out,
+        )
+    except (ValueError, V2CompatibilityError, RiskError, OSError) as exc:
         print(json.dumps({"protocol_version": PROTOCOL_VERSION_V2, "type": "error",
                           "code": "startup_failed", "message": str(exc), "fatal": True}), flush=True)
         return 2
