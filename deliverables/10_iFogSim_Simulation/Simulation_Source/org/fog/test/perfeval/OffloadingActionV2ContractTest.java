@@ -10,6 +10,37 @@ public final class OffloadingActionV2ContractTest {
     private OffloadingActionV2ContractTest() { }
 
     public static void main(String[] args) {
+        Map<String, Object> riskFeasible = new LinkedHashMap<String, Object>();
+        riskFeasible.put("filter_applied", true);
+        riskFeasible.put("no_feasible_action", false);
+        riskFeasible.put("feasible_actions", Arrays.asList("EDGE_FULL"));
+        Map<String, Object> riskResponse = new LinkedHashMap<String, Object>();
+        riskResponse.put("protocol_version", "2.0");
+        riskResponse.put("type", "action");
+        riskResponse.put("task_id", "task-risk");
+        riskResponse.put("action_id", 4);
+        riskResponse.put("action", "EDGE_FULL");
+        riskResponse.put("remote_tier", "EDGE");
+        riskResponse.put("remote_fraction", 1.0);
+        riskResponse.put("local_fraction", 0.0);
+        riskResponse.put("model_version", "risk-test");
+        riskResponse.put("mode", "greedy");
+        riskResponse.put("epsilon", 0.0);
+        riskResponse.put("risk", riskFeasible);
+        if (OffloadingActionV2.validateResponse(riskResponse, "task-risk", Arrays.asList(0, 4, 8))
+                != OffloadingActionV2.Action.EDGE_FULL)
+            throw new AssertionError("valid risk-filtered action was rejected");
+        riskFeasible.put("feasible_actions", Arrays.asList("LOCAL"));
+        boolean rejectedRiskExcludedAction = false;
+        try {
+            OffloadingActionV2.validateResponse(riskResponse, "task-risk", Arrays.asList(0, 4, 8));
+        } catch (IllegalArgumentException expected) {
+            rejectedRiskExcludedAction = expected.getMessage().contains("risk-filtered");
+        }
+        if (!rejectedRiskExcludedAction)
+            throw new AssertionError("risk-excluded action was accepted");
+
+
         List<Integer> divisible = OffloadingActionV2.legalActionIds(
                 "DATA_PARALLEL_DIVISIBLE", "frames-v1", true, true, true);
         check(divisible.equals(Arrays.asList(0, 1, 2, 3, 4, 5, 6, 7, 8)), "nine-action divisible mask");
