@@ -8,9 +8,9 @@ This guide describes the current runnable pilot and how to aggregate multiple se
 
 1. Select training and validation seeds before opening the test set.
 2. Train the learner and risk-calibration sidecar using training/validation data only.
-3. Freeze both artifacts. Record their hashes and the source commit.
-4. Generate one immutable workload file per test seed. Each file must encode the exact task rows, arrival gaps, deadlines, divisibility and profile parameters for that seed.
-5. Never regenerate a workload file between policy arms for the same seed.
+3. Freeze both artifacts. The runner records SHA-256 hashes for the model, risk sidecar, workload, source commit, Java runtime, iFogSim JAR inventory, and simulator parameters.
+4. Generate one immutable workload file per test seed. Each file must encode the exact task rows, arrival gaps, deadlines, divisibility, seed, and profile parameters for that seed.
+5. Never regenerate a workload file between policy arms for the same seed. The runner hashes the exact file bytes, not its parsed JSON content.
 
 ## 2. Run the five currently supported policy arms per seed
 
@@ -28,7 +28,20 @@ Repeat with a different test seed and a different immutable workload file. The r
 
 Current policy arms are Local, Edge, Cloud, Random, and learned evaluation. This is a pilot subset; it does not implement all nine core arms in EXPERIMENT_PROTOCOL_V1.md.
 
-## 3. Aggregate across paired seeds
+## 3. Provenance and integrity checks
+
+The runner creates `experiment_manifest.json` at the output root and copies the byte-identical manifest into every policy directory. The manifest records:
+- exact workload SHA-256, seed, profile, and test split;
+- frozen model and risk-calibration sidecar SHA-256;
+- source Git commit and Java runtime;
+- SHA-256 inventory of the iFogSim JAR files;
+- simulator parameters and the exact five policy arms.
+
+The policy analyzer refuses to summarize a run if the workload hash differs, a policy manifest is missing/modified, a run's simulator parameters differ, or workload seed/profile do not match the manifest. Each per-seed summary includes a manifest hash and a provenance fingerprint.
+
+Across seeds, the paired inference analyzer requires the same provenance fingerprint. Thus all seeds in one inferential batch must use the same source commit, model, risk state, Java/iFogSim binaries, and simulator parameters. Only the workload seed/content should vary. The inference analyzer also rejects summaries not explicitly marked as test split.
+
+## 4. Aggregate across paired seeds
 
 After at least two seed outputs exist (20 distinct paired seeds are required by the protocol), run:
 
@@ -48,15 +61,14 @@ The analyzer:
 
 For latency and bandwidth, negative differences mean the learner used less. For deadline-miss rate, a negative difference means fewer misses. Always interpret effect direction metric by metric.
 
-## 4. What this does not yet solve
+## 5. What this does not yet solve
 
-- The simulator currently rejects any run with failed tasks as a run-level acceptance failure. Therefore, current pilot summaries cannot yet represent FAILED and UNRESOLVED_AT_HORIZON in the all-generated-task denominator required by the protocol.
 - The current runner executes one seed per invocation and only the five policy arms listed above.
 - It does not yet execute A→B→A shifts or calculate recovery time / recovery miss burden.
 - It does not yet implement the full-only vs partial-enabled and risk-filter ablations.
 - The analyzer trusts the per-seed summaries' internal paired-workload checks. Preserve and inspect each raw trace and manifest; the summary file alone is not a complete provenance record.
 - Do not claim final statistical evidence until there are at least 20 distinct paired test seeds per principal scenario and all training/test boundaries are audited.
 
-## 5. Interpretation rule
+## 6. Interpretation rule
 
 A lower mean latency is not sufficient if deadline misses or unresolved tasks rise. Compare on-time ratio and deadline-miss rate first, then latency conditional on completion with coverage reported beside it. The run/seed is the independent unit for inference; tasks within one simulation run are not independent replications.
