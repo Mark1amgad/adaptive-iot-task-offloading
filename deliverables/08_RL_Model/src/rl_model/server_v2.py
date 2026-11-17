@@ -183,6 +183,8 @@ class V2Session:
                 return self._error("invalid_risk_context", str(exc), tid)
 
         forced_risk_fallback = bool(risk_decision and risk_decision.no_feasible_action)
+        baseline_override = False
+        requested_baseline_action = None
         if forced_risk_fallback:
             selected = decision_mask[0]
             mode, epsilon = "risk_fallback", 0.0
@@ -194,12 +196,24 @@ class V2Session:
             else:
                 selected = fixed[self.policy]
                 if selected not in decision_mask:
-                    return self._error(
-                        "baseline_unavailable",
-                        f"{self.policy} baseline action is not risk-feasible for this task",
-                        tid,
+                    if risk_decision is None:
+                        return self._error("baseline_unavailable",
+                                           f"{self.policy} baseline action is not available for this task", tid)
+                    requested_baseline_action = ACTION_NAMES[selected]
+                    selected = min(
+                        decision_mask,
+                        key=lambda action_id: (
+                            math.inf if risk_decision.estimates[ACTION_NAMES[action_id]]["safe_completion_ms"] is None
+                            else risk_decision.estimates[ACTION_NAMES[action_id]]["safe_completion_ms"],
+                            action_id,
+                        ),
                     )
-            mode, epsilon = "baseline", 0.0
+                    baseline_override = True
+                    forced_risk_fallback = True
+                    mode = "risk_fallback"
+                else:
+                    mode = "baseline"
+            epsilon = 0.0
         else:
             decision = self.agent.select_action(state, decision_mask)
             selected, mode, epsilon = decision.action_id, decision.mode, decision.epsilon
@@ -222,6 +236,10 @@ class V2Session:
             response["risk"] = risk_decision.metadata(
                 selected, context.remaining_deadline_ms, context.queue_wait_basis
             )
+            if baseline_override:
+                response["risk"]["baseline_action_override"] = True
+                response["risk"]["baseline_action_requested"] = requested_baseline_action
+                response["risk"]["fallback_reason"] = "BASELINE_ACTION_NOT_RISK_FEASIBLE"
         else:
             response["risk"] = {
                 "filter_applied": False,
