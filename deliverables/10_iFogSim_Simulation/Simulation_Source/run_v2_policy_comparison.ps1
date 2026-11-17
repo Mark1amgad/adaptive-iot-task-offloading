@@ -56,10 +56,8 @@ $javaVersion = (Get-Content -LiteralPath (Join-Path $JdkHome 'release') |
 # Hash the actual source files used, not only Git HEAD: this also captures local edits
 # in a working tree whose commit may be behind the remote branch.
 $sourceFiles = @(
-    Get-ChildItem -LiteralPath $simulationSource -Recurse -File |
-        Where-Object { $_.Extension -in @('.java','.py','.ps1') }
-    Get-ChildItem -LiteralPath (Join-Path $rlRoot 'src') -Recurse -File |
-        Where-Object { $_.Extension -eq '.py' }
+    Get-Item -LiteralPath @($action,$plan,$contract,$experiment,$analyzer,$PSCommandPath)
+    Get-ChildItem -LiteralPath (Join-Path $rlRoot 'src') -Recurse -File -Filter '*.py'
     Get-ChildItem -LiteralPath (Join-Path $rlRoot 'config') -Recurse -File |
         Where-Object { $_.Extension -in @('.json','.yaml','.yml') }
 ) | Sort-Object FullName -Unique
