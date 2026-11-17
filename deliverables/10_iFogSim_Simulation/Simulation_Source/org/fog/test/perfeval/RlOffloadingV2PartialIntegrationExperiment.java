@@ -875,11 +875,13 @@ public final class RlOffloadingV2PartialIntegrationExperiment {
             for (TaskRecord task : tasks.values()) {
                 if (!task.terminal || !task.outcomeAck) throw new IllegalStateException("unreconciled task");
                 int expectedBranches = task.action.isPartial() ? 3 : 1;
-                if (task.branches.size() != expectedBranches)
+                if (task.failureReason == null && task.branches.size() != expectedBranches)
                     throw new IllegalStateException("branch count mismatch for " + task.taskId);
+                if (task.failureReason != null && task.branches.size() > expectedBranches)
+                    throw new IllegalStateException("failed task has excess branches " + task.taskId);
                 long mi = 0, in = 0, out = 0;
                 for (Branch branch : task.branches.values()) {
-                    if (!task.outcomeAck || task.failureReason == null) {
+                    if (task.failureReason == null) {
                         if (branch.executingNode == null || Double.isNaN(branch.executionStart)
                                 || Double.isNaN(branch.resultArrival) || branch.resultArrival < branch.executionStart)
                             throw new IllegalStateException("incomplete branch lifecycle " + task.taskId + "/" + branch.name);
@@ -889,7 +891,9 @@ public final class RlOffloadingV2PartialIntegrationExperiment {
                         throw new IllegalStateException("tuple attribution error " + branch.tupleId);
                     if (!"merge".equals(branch.name)) { mi += branch.mi; in += branch.inputBytes; out += branch.outputBytes; }
                 }
-                if (mi != task.workload.taskMi || in != task.workload.inputBytes || out != task.workload.outputBytes)
+                int expectedComputeBranches = task.action.isPartial() ? 2 : 1;
+                if (task.branches.size() >= expectedComputeBranches
+                        && (mi != task.workload.taskMi || in != task.workload.inputBytes || out != task.workload.outputBytes))
                     throw new IllegalStateException("partition conservation failed for " + task.taskId);
                 if (task.action.isPartial() && task.failureReason == null) {
                     Branch local = task.branches.get("local");
