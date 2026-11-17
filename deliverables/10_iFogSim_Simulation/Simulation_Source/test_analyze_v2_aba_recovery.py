@@ -14,7 +14,7 @@ def task(sequence, latency, outcome="ON_TIME", terminal_time=None):
 
 class AbaRecoveryTests(unittest.TestCase):
     def test_first_qualifying_window_and_elapsed_time(self):
-        items = [task(i, 150.0 if i < 4 else 105.0, terminal_time=1000.0 + i * 100.0)
+        items = [task(i, 150.0 if i < 4 else 105.0, terminal_time=1000.0 + (i - 30) * 100.0)
                  for i in range(31, 41)]
         recovered, elapsed = find_recovery_window(0.0, 100.0, items, 900.0)
         self.assertIsNotNone(recovered)
