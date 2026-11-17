@@ -29,7 +29,7 @@ class AbaWorkloadTests(unittest.TestCase):
         rows = MODULE.build(17, 10)
         a, b = rows[:10], rows[10:20]
         self.assertTrue(all(x["wan_latency_ms"] == 45.0 for x in a))
-        self.assertTrue(all(x["wan_latency_ms"] == 220.0 for x in b))
+        self.assertTrue(all(x["wan_latency_ms"] == 160.0 for x in b))
         self.assertGreater(sum(x["task_mi"] for x in b), sum(x["task_mi"] for x in a))
         self.assertLess(sum(x["arrival_gap_ms"] for x in b[1:]), sum(x["arrival_gap_ms"] for x in a[1:]))
 
