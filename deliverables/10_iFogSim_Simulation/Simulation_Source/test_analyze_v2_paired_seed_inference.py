@@ -18,11 +18,24 @@ def summary(seed, offset=0.0, profile="industrial_a"):
             "deadline_miss_rate": 0.20 - i * 0.01,
             "mean_bandwidth_bytes": 1000.0 + i * 100,
         }
+    provenance = {
+        "source_git_commit": "abc123",
+        "model_sha256": "a" * 64,
+        "risk_state_sha256": "b" * 64,
+        "java_version": "Java 25",
+        "simulator_jar_inventory": [{"name": "sim.jar", "sha256": "c" * 64}],
+        "parameters": {"watchdog_ms": 60000.0},
+        "policies": list(MODULE.POLICIES),
+        "evaluation_split": "test",
+    }
     return {
         "status": "PASS",
         "workload_seed": seed,
         "workload_profile": profile,
         "policy_metrics": metrics,
+        "provenance": provenance,
+        "provenance_fingerprint": "d" * 64,
+        "evaluation_split": "test",
     }
 
 
@@ -67,6 +80,14 @@ class PairedSeedInferenceTests(unittest.TestCase):
             self.write("b.json", summary(2, profile="industrial_b")),
         ]
         with self.assertRaisesRegex(MODULE.AnalysisError, "mixed workload profiles"):
+            MODULE.analyze(paths)
+
+    def test_mixed_model_provenance_is_rejected(self):
+        first = summary(1)
+        second = summary(2)
+        second["provenance"]["model_sha256"] = "e" * 64
+        paths = [self.write("a.json", first), self.write("b.json", second)]
+        with self.assertRaisesRegex(MODULE.AnalysisError, "mixed model/source/simulator provenance"):
             MODULE.analyze(paths)
 
     def test_missing_policy_metric_is_rejected(self):
