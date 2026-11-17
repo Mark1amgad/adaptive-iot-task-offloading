@@ -180,3 +180,12 @@ All workload values remain proposed synthetic configurations, not factory measur
 The target topology ID is `v2_target_100iot_20edge_1cloud`: logical source IDs `iot-001` through `iot-100`, 20 target Edge nodes `edge-001` through `edge-020`, and one target Cloud node `cloud-001`. The target mapping assigns five sequential IoT source IDs to each Edge node. This is a target contract only, not evidence of instantiated simulator devices or confirmed actual placement. `actual_topology_id` remains null and `actual_topology_status` remains `NOT_VERIFIED_PENDING_AYOUB_CONFIRMATION` until Ayoub verifies the implementation.
 
 Network contract items remain BLOCKED pending Ayoub confirmation: bandwidth physical units and transfer-time conversion; uplink/downlink semantics; IoT–Edge and Edge–Cloud link definitions; and measured/confirmed latency and network-shift parameters. No unconfirmed values or units are inferred.
+
+
+## 6. Residual-calibration coverage and seed-governance addendum (2026-11-18)
+
+- The tracked `data/dev/schemas_only/calibration_log.csv` is header-only: **0 direct residual records** are present in the workload dataset package. This is not evidence that the separate runtime calibrator has zero observations; its persisted risk sidecar was not present in the reviewed PR tree, so runtime per-action/family sample counts cannot be reconstructed from this branch.
+- The risk implementation's exact fallback is `action:<name>` → `family:<LOCAL|EDGE_FULL|CLOUD_FULL|EDGE_PARTIAL|CLOUD_PARTIAL>` → `pooled`; each level requires `min_samples=20`, with `window_size=200`, `epsilon=0.10`, and `uncalibrated_margin_ms=0` in the documented provisional configuration. If no level qualifies, it reports `calibrated=false` and uses the configured uncalibrated prior.
+- Only a completed task with a valid prediction and observed completion for its actually executed action contributes a direct residual. Unfiltered (`NO_FILTER`) traces without paired predictions do not establish residual calibration coverage for unexecuted candidate actions.
+- Seeds 2050–2069 are documented as proposed Calibration candidates only; none is allocated or approved. Final Test remains unallocated/unapproved pending the complete external archive scan and Mark's protocol approval.
+- CI generation now stages all eight datasets and validation reports separately; publication to `data/dev` occurs only after all scenario checks, reproducibility checks, and pytest succeed. The source verifier writes its JSON report via a temporary file and atomic replace.

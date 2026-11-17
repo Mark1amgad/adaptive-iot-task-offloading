@@ -6,7 +6,7 @@ run the simulator. It verifies source CSV/manifest consistency, source IDs,
 target-only mapping, and computes byte-level SHA-256 hashes.
 """
 from __future__ import annotations
-import argparse, csv, hashlib, json, sys
+import argparse, csv, hashlib, json, os, sys, tempfile
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -44,9 +44,9 @@ def read_one_manifest(path: Path) -> dict:
         raise ValueError(f"{path}: expected exactly one manifest row, got {len(rows)}")
     return rows[0]
 
-def verify(scenario: str) -> dict:
-    task_path = DATA / f"{scenario}__seed_1300_tasks.csv"
-    manifest_path = DATA / f"{scenario}__seed_1300_scenario_manifest.csv"
+def verify(scenario: str, data_dir: Path = DATA) -> dict:
+    task_path = data_dir / f"{scenario}__seed_1300_tasks.csv"
+    manifest_path = data_dir / f"{scenario}__seed_1300_scenario_manifest.csv"
     for path in (task_path, manifest_path):
         if not path.is_file():
             raise FileNotFoundError(path)
@@ -123,9 +123,9 @@ def verify(scenario: str) -> dict:
         "target_topology_id": manifest["target_topology_id"],
         "actual_topology_id": None,
         "actual_topology_status": manifest["actual_topology_status"],
-        "task_csv": str(task_path.relative_to(ROOT)),
+        "task_csv": f"data/dev/{task_path.name}",
         "task_csv_sha256": sha256(task_path),
-        "manifest_csv": str(manifest_path.relative_to(ROOT)),
+        "manifest_csv": f"data/dev/{manifest_path.name}",
         "manifest_csv_sha256": sha256(manifest_path),
         "status": "SOURCE_INPUTS_VALIDATED_ONLY_NOT_SIMULATOR_VALIDATED",
     }
@@ -133,9 +133,10 @@ def verify(scenario: str) -> dict:
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--output", type=Path, default=ROOT / "v2_integration" / "reproducibility_report.json")
+    parser.add_argument("--data-dir", type=Path, default=DATA)
     args = parser.parse_args()
     try:
-        scenarios = [verify(name) for name in SCENARIOS]
+        scenarios = [verify(name, args.data_dir.resolve()) for name in SCENARIOS]
         report = {
             "package": "Generator V1.2 to V2 workload integration",
             "generator_version": "1.2.0",
@@ -154,7 +155,19 @@ def main() -> int:
             "note": "No simulator output, runtime source mapping, or performance result is created by this verifier.",
         }
         args.output.parent.mkdir(parents=True, exist_ok=True)
-        args.output.write_text(json.dumps(report, indent=2) + "\n", encoding="utf-8")
+        temp_name = None
+        try:
+            with tempfile.NamedTemporaryFile("w", encoding="utf-8", dir=args.output.parent, prefix=args.output.name + ".", suffix=".tmp", delete=False) as stream:
+                temp_name = stream.name
+                json.dump(report, stream, indent=2, allow_nan=False)
+                stream.write("\\n")
+                stream.flush()
+                os.fsync(stream.fileno())
+            os.replace(temp_name, args.output)
+            temp_name = None
+        finally:
+            if temp_name and os.path.exists(temp_name):
+                os.unlink(temp_name)
         print(json.dumps({"status": "PASS_SOURCE_INPUTS_ONLY", "scenarios": 8,
                           "tasks": report["actual_total_task_count"],
                           "report": str(args.output)}, indent=2))

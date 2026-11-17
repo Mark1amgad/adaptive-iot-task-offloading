@@ -91,6 +91,13 @@ def test_no_final_test_seed_is_approved_yet():
     assert not any(row["split"] == "test" and row["status"] == "approved" for row in registry)
 
 
+def test_proposed_calibration_seed_range_is_not_allocated_or_approved():
+    registry = gen.read_seed_registry()
+    proposed = [row for row in registry if 2050 <= int(row["seed"]) <= 2069]
+    assert proposed == []
+    assert not any(row["split"] == "test" and row["status"] == "approved" for row in registry)
+
+
 def test_deadlines_are_positive_predecision_and_profile_urgency_based(generated):
     task_path, manifest_path, _ = generated
     _, rows = val.read_csv(task_path)

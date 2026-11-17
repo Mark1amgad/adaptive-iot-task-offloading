@@ -35,46 +35,77 @@ jobs:
       - name: Install dependencies
         run: python -m pip install -r requirements.txt
 
-      - name: Generate eight registered development scenarios
+      - name: Prepare isolated generation workspace
+        shell: bash
         run: |
-          find data/dev -maxdepth 1 -type f \( -name "*_tasks.csv" -o -name "*_scenario_manifest.csv" \) -delete
+          set -euo pipefail
+          echo "WORKLOAD_STAGE=$RUNNER_TEMP/abdo-workload-$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT" >> "$GITHUB_ENV"
+          mkdir -p "$RUNNER_TEMP/abdo-workload-$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT/data"
+          mkdir -p "$RUNNER_TEMP/abdo-workload-$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT/reports"
+
+      - name: Generate eight registered development scenarios in staging
+        shell: bash
+        run: |
+          set -euo pipefail
           python scripts/generate_workloads.py \
             --scenario all-core \
             --dataset-split development \
             --seed 1300 \
             --seed-count 1 \
             --task-count 48 \
-            --output data/dev \
-            --hash-report reports/dev_hashes_v1_2.json
+            --output "$WORKLOAD_STAGE/data" \
+            --hash-report "$WORKLOAD_STAGE/reports/dev_hashes_v1_2.json"
 
-      - name: Validate every task/manifest pair including replay
+      - name: Validate every staged task/manifest pair including replay
         shell: bash
         run: |
           set -euo pipefail
           count=0
-          for tasks in data/dev/*_tasks.csv; do
+          for tasks in "$WORKLOAD_STAGE"/data/*_tasks.csv; do
             manifest="${tasks%_tasks.csv}_scenario_manifest.csv"
             stem="$(basename "${tasks%_tasks.csv}")"
             python scripts/validate_dataset.py \
               --tasks "$tasks" \
               --manifest "$manifest" \
               --check-replay \
-              --report "reports/${stem}_validation.json"
+              --report "$WORKLOAD_STAGE/reports/${stem}_validation.json"
             count=$((count + 1))
           done
           test "$count" -eq 8
 
-      - name: Verify immutable V2 handoff inputs and write SHA-256 report
+      - name: Verify staged immutable inputs and write SHA-256 report
         run: |
           python v2_integration/verify_integration_inputs.py \
-            --output v2_integration/reproducibility_report.json
+            --data-dir "$WORKLOAD_STAGE/data" \
+            --output "$WORKLOAD_STAGE/reproducibility_report.json"
 
-      - name: Run automated tests
+      - name: Run automated tests before publishing generated files
         shell: bash
         run: |
           set -euo pipefail
-          python -m pytest -q 2>&1 | tee /tmp/pytest_results_v1_2.raw
-          tail -n 1 /tmp/pytest_results_v1_2.raw | sed -E 's/ in [0-9.]+s$//' > reports/pytest_results_v1_2.txt
+          python -m pytest -q 2>&1 | tee "$WORKLOAD_STAGE/pytest_results.raw"
+          tail -n 1 "$WORKLOAD_STAGE/pytest_results.raw" | sed -E 's/ in [0-9.]+s$//' > "$WORKLOAD_STAGE/reports/pytest_results_v1_2.txt"
+
+      - name: Publish only fully validated staged inputs
+        if: success()
+        working-directory: .
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p team-work/Astta-Abdo/data
+          previous="$WORKLOAD_STAGE/data.previous"
+          if [ -d team-work/Astta-Abdo/data/dev ]; then
+            mv team-work/Astta-Abdo/data/dev "$previous"
+          fi
+          if mv "$WORKLOAD_STAGE/data" team-work/Astta-Abdo/data/dev; then
+            rm -rf "$previous"
+          else
+            if [ -d "$previous" ]; then mv "$previous" team-work/Astta-Abdo/data/dev; fi
+            exit 1
+          fi
+          cp "$WORKLOAD_STAGE"/reports/*.json team-work/Astta-Abdo/reports/
+          cp "$WORKLOAD_STAGE"/reports/pytest_results_v1_2.txt team-work/Astta-Abdo/reports/
+          cp "$WORKLOAD_STAGE/reproducibility_report.json" team-work/Astta-Abdo/v2_integration/
 
       - name: Commit regenerated development-only dataset and verification reports
         if: success() && github.event_name == 'push' && github.ref == 'refs/heads/abdo/industrial-workload-replay-seed-v2'
@@ -82,21 +113,19 @@ jobs:
         shell: bash
         run: |
           git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git config user.email "41898282+users.noreply.github.com"
           git add -A team-work/Astta-Abdo/data/dev/
-          git add team-work/Astta-Abdo/reports/dev_hashes_v1_2.json
-          git add team-work/Astta-Abdo/reports/*_seed_1300_validation.json
-          git add team-work/Astta-Abdo/reports/pytest_results_v1_2.txt
+          git add team-work/Astta-Abdo/reports/
           git add team-work/Astta-Abdo/v2_integration/reproducibility_report.json
           if git diff --cached --quiet; then
             echo "Development dataset and verification reports already match this run."
           else
-            git commit -m "data(workloads): add registry-approved synthetic development inputs"
+            git commit -m "data(workloads): publish only validated development inputs"
             git push
           fi
 
       - name: Upload generated data and validation evidence
-        if: always()
+        if: success()
         uses: actions/upload-artifact@v4
         with:
           name: abdo-industrial-workload-dev-v1-2
