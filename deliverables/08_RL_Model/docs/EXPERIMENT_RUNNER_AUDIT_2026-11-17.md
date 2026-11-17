@@ -2,7 +2,7 @@
 
 ## Scope
 
-Read-only review of the V2 policy comparison runner and analyzer on branch `mark/risk-calibration-v1`. One narrowly scoped runner correction was committed; no simulator source was changed in this audit.
+Historical audit of the V2 policy comparison runner and analyzer on branch `mark/risk-calibration-v1`. The limitations below describe the state at the time of this audit; subsequent commits address the task-outcome denominator and failure reconciliation items.
 
 ## Verified artifacts
 
@@ -26,7 +26,7 @@ This is a fairness correction, not a benchmark result.
 1. **Single seed only.** The runner launches one run per policy on one workload file. Its task-level pairing is useful for a pilot, but it is not the preregistered paired-seed evaluation (minimum 20 seeds).
 2. **Policy coverage is incomplete.** It currently runs Local, Edge, Cloud, Random, and learned evaluation. It does not implement the full preregistered matrix: deterministic deadline-aware heuristic, partial-enabled heuristic, learner full-only/partial-enabled ablation, and risk/no-risk ablations.
 3. **Random is not the deterministic heuristic.** It is a useful sanity baseline but cannot substitute for the specified minimum heuristic baseline.
-4. **No failure/censoring analysis.** The analyzer currently requires one terminal record and one outcome acknowledgement for every generated task, rejects any `task_failed` record, and computes latency over all terminal latencies. This is acceptable only for a tightly controlled successful pilot. It cannot yet represent FAILED or UNRESOLVED_AT_HORIZON outcomes in the final benchmark denominator.
+4. **Task outcome handling (subsequently addressed).** At audit time, the analyzer could not represent FAILED or UNRESOLVED_AT_HORIZON in the all-generated-task denominator. Later commits added explicit evaluation mode, unified `task_outcome` records, outcome reconciliation, and coverage-aware metrics. See `PAIRED_SEED_EVALUATION_GUIDE.md` for the current behavior.
 5. **No paired-seed inference.** The analyzer reports per-task differences for one seed. Tasks within a run are not independent experimental replicates. It does not compute paired-seed confidence intervals, paired tests, effect sizes, or multiple-comparison correction.
 6. **No regime-shift recovery metrics.** It does not yet calculate recovery time, recovery miss burden, or A→B→A hysteresis.
 7. **No held-out split enforcement.** The runner accepts one workload file; the analyzer does not verify a frozen train/validation/test manifest or test-seed disjointness.
