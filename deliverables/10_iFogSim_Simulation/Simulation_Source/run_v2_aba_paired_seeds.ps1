@@ -28,7 +28,7 @@ foreach ($required in @($generator,$runner,$inference,$regimeInference,$PythonEx
     if (-not (Test-Path $required)) { throw "Required file not found: $required" }
 }
 if ($Seeds.Count -lt 2) { throw 'No default seed allocation is provided. Supply at least two explicitly approved seeds after checking the versioned seed registry and local run archives.' }
-$historicalSeeds = @(7,42,43,44,45,81,101..121,201..205,301..305,401..405,901..906,951..956)
+$historicalSeeds = @(7,42,43,44,45,81) + (101..121) + (201..205) + (301..305) + (401..405) + (901..906) + (951..956)
 $reused = @($Seeds | Where-Object { $historicalSeeds -contains $_ })
 if ($reused.Count -gt 0) { throw "Refusing known reused seed IDs for a new batch: $($reused -join ', '). Historical IDs require a separately labelled exploratory run." }
 if (($Seeds | Select-Object -Unique).Count -ne $Seeds.Count) { throw 'Seed list contains duplicates.' }
