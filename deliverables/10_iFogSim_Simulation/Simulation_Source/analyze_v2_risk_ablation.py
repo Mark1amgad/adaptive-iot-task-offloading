@@ -115,10 +115,10 @@ def analyze(no_filter_paths: list[Path], analytical_paths: list[Path],
         p1 = groups["none"][seed]["provenance"]
         p2 = groups["analytical"][seed]["provenance"]
         p3 = groups["calibrated"][seed]["provenance"]
-        if p1.get("risk_state_sha256") is not None:
-            raise AnalysisError(f"seed {seed}: P1 no-filter manifest must not claim a risk state")
-        if not p2.get("risk_state_sha256") or not p3.get("risk_state_sha256"):
-            raise AnalysisError(f"seed {seed}: P2/P3 must identify their risk-state artifacts")
+        if not p1.get("risk_state_sha256") or not p2.get("risk_state_sha256") or not p3.get("risk_state_sha256"):
+            raise AnalysisError(f"seed {seed}: P1/P2/P3 must identify the loaded risk-state artifacts")
+        if p1["risk_state_sha256"] != p2["risk_state_sha256"]:
+            raise AnalysisError(f"seed {seed}: P1 and P2 must load the same empty risk state")
         if p2["risk_state_sha256"] == p3["risk_state_sha256"]:
             raise AnalysisError(f"seed {seed}: analytical and calibrated risk-state hashes are identical")
 
