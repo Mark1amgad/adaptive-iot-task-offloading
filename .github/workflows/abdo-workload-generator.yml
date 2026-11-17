@@ -72,6 +72,7 @@ jobs:
 
       - name: Commit regenerated development-only dataset and verification reports
         if: success() && github.event_name == 'push' && github.ref == 'refs/heads/abdo/industrial-workload-replay-seed-v2'
+        working-directory: .
         shell: bash
         run: |
           git config user.name "github-actions[bot]"
