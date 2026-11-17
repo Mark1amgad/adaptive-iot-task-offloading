@@ -15,14 +15,12 @@ param(
     [double]$WatchdogMs = 60000.0
 )
 $ErrorActionPreference = 'Stop'
-$rlPythonSource = Join-Path $ProjectRoot "deliverables\08_RL_Model\src"
-if ($env:PYTHONPATH) { $env:PYTHONPATH = $rlPythonSource + [IO.Path]::PathSeparator + $env:PYTHONPATH } else { $env:PYTHONPATH = $rlPythonSource }
 $simulationSource = $PSScriptRoot
 $generator = Join-Path $simulationSource 'generate_v2_aba_workload.py'
 $runner = Join-Path $simulationSource 'run_v2_policy_comparison.ps1'
 $inference = Join-Path $simulationSource 'analyze_v2_paired_seed_inference.py'
 if (-not $RiskStateIn) { $RiskStateIn = "$ModelIn.risk.json" }
-foreach ($required in @($generator,$runner,$inference,$PythonExe,$ModelIn,$RiskStateIn,(Join-Path $JdkHome 'bin\javac.exe'),(Join-Path $IFogSimRoot 'jars'))) {
+foreach ($required in @($generator,$runner,$inference,$PythonExe,$InferencePythonExe,$ModelIn,$RiskStateIn,(Join-Path $JdkHome 'bin\javac.exe'),(Join-Path $IFogSimRoot 'jars'))) {
     if (-not (Test-Path $required)) { throw "Required file not found: $required" }
 }
 if ($Seeds.Count -lt 2) { throw 'At least two distinct test seeds are required.' }
@@ -53,6 +51,6 @@ foreach ($seed in $Seeds) {
 }
 $inferenceOutput = Join-Path $OutputRoot 'paired_seed_inference.json'
 Write-Host "All per-seed policy comparisons completed. Running paired-seed inference."
-& $PythonExe $inference @summaryPaths --output $inferenceOutput
+& $InferencePythonExe $inference @summaryPaths --output $inferenceOutput
 if ($LASTEXITCODE -ne 0) { throw 'Paired-seed inference failed.' }
 Write-Host "PASS: paired-seed A-B-A batch completed. Artifacts: $OutputRoot"
