@@ -499,6 +499,7 @@ def test_aba_a1_a2_are_exact_task_and_exogenous_replays(tmp_path, configs, scena
     regimes = json.loads(manifests[0]["regime_timeline_json"])
     assert [item["regime_id"] for item in regimes] == ["A", "B", "A"]
     assert val.validate_aba_exact_replay(tasks, regimes) == []
+    assert val.validate_aba_exogenous_profiles(manifests[0]) == []
     phase_rows = [[row for row in tasks if int(item["start_time_ms"]) <= int(row["arrival_time_ms"]) < int(item["end_time_ms"])] for item in regimes]
     a1, b, a2 = phase_rows
     assert len(a1) == len(b) == len(a2) == 40
@@ -571,3 +572,23 @@ def test_manifest_keeps_target_and_actual_topology_separate(tmp_path, configs):
     assert manifest["target_topology_id"] == "v2_target_4iot_2edge_1cloud"
     assert manifest["actual_topology_id"] == ""
     assert manifest["actual_topology_status"] == "NOT_VERIFIED_PENDING_AYOUB_CONFIRMATION"
+
+def test_aba_validator_rejects_changed_network_or_workload_exogenous_inputs(tmp_path, configs):
+    wc, sc = configs
+    for scenario_id, profile_field, nested_key in (
+        ("repeated_a_b_a", "network_profile_json", "bandwidth_scale"),
+        ("repeated_aba_task_mix", "task_mix_profile_json", "weights"),
+    ):
+        _, manifest_path, _ = gen.generate_one(
+            scenario_id, 1300, 120, f"{scenario_id}-exogenous-negative", wc, sc, tmp_path
+        )
+        _, rows = val.read_csv(manifest_path)
+        manifest = rows[0]
+        profile = json.loads(manifest[profile_field])
+        if nested_key == "bandwidth_scale":
+            profile["regimes"][2][nested_key] = 0.75
+        else:
+            profile["regimes"][2][nested_key]["PREDICTIVE_MAINTENANCE_INFERENCE"] += 0.01
+        manifest[profile_field] = json.dumps(profile)
+        errors = val.validate_aba_exogenous_profiles(manifest)
+        assert any("A1/A2" in error and "exogenous configuration values differ" in error for error in errors)

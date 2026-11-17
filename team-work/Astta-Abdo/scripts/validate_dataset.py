@@ -206,6 +206,42 @@ def validate_aba_exact_replay(task_rows: list[dict[str, str]],
     return errors
 
 
+def validate_aba_exogenous_profiles(manifest: dict[str, str]) -> list[str]:
+    """Verify that any explicit A/B/A configuration schedules restore the same A inputs."""
+    errors: list[str] = []
+    profile_fields = (
+        ("network_profile_json", "network"),
+        ("edge_capacity_profile_json", "edge-capacity"),
+        ("task_mix_profile_json", "task-mix"),
+    )
+    ignored_timeline_fields = {
+        "from_fraction", "to_fraction", "start_fraction", "end_fraction",
+        "start_time_ms", "end_time_ms", "regime_id",
+    }
+    for field, label in profile_fields:
+        raw = manifest.get(field, "")
+        if not raw:
+            errors.append(f"A-B-A manifest is missing {field}")
+            continue
+        try:
+            profile = json.loads(raw)
+        except (TypeError, json.JSONDecodeError) as exc:
+            errors.append(f"A-B-A {label} profile is not valid JSON: {exc}")
+            continue
+        schedule = profile.get("regimes") if isinstance(profile, dict) else None
+        if schedule is None:
+            continue
+        if not isinstance(schedule, list) or len(schedule) != 3:
+            errors.append(f"A-B-A {label} schedule must contain exactly three A/B/A entries")
+            continue
+        first, last = schedule[0], schedule[2]
+        first_values = {k: v for k, v in first.items() if k not in ignored_timeline_fields}
+        last_values = {k: v for k, v in last.items() if k not in ignored_timeline_fields}
+        if first_values != last_values:
+            errors.append(f"A1/A2 {label} exogenous configuration values differ")
+    return errors
+
+
 def validate_manifest(path: Path, task_rows: list[dict[str, str]],
                        seed_registry_path: Path = gen.DEFAULT_SEED_REGISTRY_PATH) -> list[str]:
     errors: list[str] = []
@@ -268,6 +304,7 @@ def validate_manifest(path: Path, task_rows: list[dict[str, str]],
         errors.append("actual_topology_id cannot be asserted without confirmed topology status")
     if isinstance(regimes, list) and [item.get("regime_id") for item in regimes] == ["A", "B", "A"]:
         errors.extend(validate_aba_exact_replay(task_rows, regimes))
+        errors.extend(validate_aba_exogenous_profiles(manifest))
     return errors
 
 
