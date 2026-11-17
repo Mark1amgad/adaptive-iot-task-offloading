@@ -1,0 +1,93 @@
+name: Abdo industrial workload pipeline
+
+on:
+  push:
+    branches:
+      - abdo/industrial-workload-generator-fix
+  pull_request:
+    branches:
+      - main
+    paths:
+      - "team-work/Astta-Abdo/**"
+      - ".github/workflows/abdo-workload-generator.yml"
+
+permissions:
+  contents: write
+
+jobs:
+  verify-and-generate:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: team-work/Astta-Abdo
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+          cache-dependency-path: team-work/Astta-Abdo/requirements.txt
+
+      - name: Install dependencies
+        run: python -m pip install -r requirements.txt
+
+      - name: Generate all eight core industrial scenarios
+        run: |
+          python scripts/generate_workloads.py \
+            --scenario all-core \
+            --seed 7 \
+            --seed-count 1 \
+            --task-count 48 \
+            --output data/dev \
+            --hash-report reports/dev_hashes_v1_1.json
+
+      - name: Validate every generated task and manifest pair
+        shell: bash
+        run: |
+          set -euo pipefail
+          count=0
+          for tasks in data/dev/*_tasks.csv; do
+            manifest="${tasks%_tasks.csv}_scenario_manifest.csv"
+            stem="$(basename "${tasks%_tasks.csv}")"
+            python scripts/validate_dataset.py \
+              --tasks "$tasks" \
+              --manifest "$manifest" \
+              --check-replay \
+              --report "reports/${stem}_validation.json"
+            count=$((count + 1))
+          done
+          test "$count" -eq 8
+
+      - name: Run automated tests and save the actual result
+        shell: bash
+        run: |
+          set -o pipefail
+          python -m pytest -q | tee reports/pytest_results.txt
+
+      - name: Commit regenerated development datasets on the review branch
+        if: github.event_name == 'push' && github.ref == 'refs/heads/abdo/industrial-workload-generator-fix'
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/dev reports/dev_hashes_v1_1.json reports/*__seed_*_validation.json reports/pytest_results.txt
+          if git diff --cached --quiet; then
+            echo "Generated development datasets are already up to date."
+          else
+            git commit -m "Regenerate industrial workload development datasets"
+            git push
+          fi
+
+      - name: Upload generated workload package
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: abdo-industrial-workload-dev
+          path: |
+            team-work/Astta-Abdo/
+          if-no-files-found: error
+          include-hidden-files: true
+          if-no-files-found: error

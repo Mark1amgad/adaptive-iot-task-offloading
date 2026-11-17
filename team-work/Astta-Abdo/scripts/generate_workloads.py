@@ -237,7 +237,47 @@ def expand_regimes(regimes: list[dict[str, Any]], generation_end_ms: int) -> lis
     return expanded
 
 
+def _validate_mix_weights(mix_id: str, weights: Any, application_profiles: dict[str, Any], source: str) -> None:
+    if not isinstance(weights, dict) or not weights:
+        raise ValueError(f"{source}.{mix_id}: profile weights must be a non-empty mapping")
+    unknown = set(weights) - set(application_profiles)
+    if unknown:
+        raise ValueError(
+            f"{source}.{mix_id}: unknown application profiles {sorted(unknown)}"
+        )
+    weighted_choice(random.Random(0), weights)
+
+
+def validate_all_mix_profiles(workload_cfg: dict[str, Any], scenario_cfg: dict[str, Any]) -> None:
+    """Fail before generation if any configured mix references an unknown profile."""
+    application_profiles = workload_cfg["application_profiles"]
+
+    for source, definitions in (
+        ("workload_profiles.mix_profiles", workload_cfg.get("mix_profiles", {})),
+        ("scenario_profiles.task_mix_profiles", scenario_cfg.get("task_mix_profiles", {})),
+    ):
+        for mix_id, definition in definitions.items():
+            if "profile_weights" in definition:
+                candidates = [definition["profile_weights"]]
+            elif "application_profile_weights" in definition:
+                candidates = [definition["application_profile_weights"]]
+            elif "regimes" in definition:
+                candidates = [
+                    regime.get("weights") or regime.get("profile_weights")
+                    for regime in definition["regimes"]
+                ]
+            else:
+                raise ValueError(f"{source}.{mix_id}: no profile weights or regimes")
+
+            if not candidates or any(candidate is None for candidate in candidates):
+                raise ValueError(f"{source}.{mix_id}: every regime must define profile weights")
+
+            for weights in candidates:
+                _validate_mix_weights(mix_id, weights, application_profiles, source)
+
+
 def validate_configs(workload_cfg: dict[str, Any], scenario_cfg: dict[str, Any]) -> None:
+    validate_all_mix_profiles(workload_cfg, scenario_cfg)
     if not workload_cfg.get("source_devices"):
         raise ValueError("workload config must define at least one source device")
     for name, profile in workload_cfg["application_profiles"].items():

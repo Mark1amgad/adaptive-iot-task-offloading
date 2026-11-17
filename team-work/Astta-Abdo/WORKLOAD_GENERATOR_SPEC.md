@@ -90,8 +90,8 @@ For the two explicitly named frame/window data-parallel profiles, input and outp
 
 ### Workload mix assumptions
 
-- `balanced_v1`: 50% indivisible `SENSOR_INFERENCE`, 25% divisible `VIDEO_FRAME_BATCH`, 25% divisible `PARALLEL_SENSOR_AGGREGATION`; resulting target mix 50% indivisible / 50% divisible.
-- `heavy_shift_B_v1`: 20% indivisible `SENSOR_INFERENCE`, 40% divisible `BULK_VIDEO_FRAME_BATCH`, 40% divisible `LARGE_PARALLEL_SENSOR_AGGREGATION`; resulting target mix 20% indivisible / 80% divisible.
+- `balanced_v1`: 50% indivisible `PREDICTIVE_MAINTENANCE_INFERENCE`, 25% divisible `VISUAL_INSPECTION_FRAME_BATCH`, 25% divisible `PRODUCTION_MONITORING_AGGREGATION`; resulting target mix 50% indivisible / 50% divisible.
+- `heavy_shift_B_v1`: 20% indivisible `PREDICTIVE_MAINTENANCE_INFERENCE`, 40% divisible `VISUAL_INSPECTION_BULK_FRAME_BATCH`, 40% divisible `PRODUCTION_MONITORING_LARGE_AGGREGATION`; resulting target mix 20% indivisible / 80% divisible.
 
 These are synthetic experimental design assumptions, not frequencies estimated from ECW, SMD, or Mostafa's dataset inventory.
 
@@ -101,11 +101,11 @@ All task-size/compute values below are smoke-test or shift-stress values. They a
 
 | Application profile | Divisibility | Required MI values / range | Input bytes values / range | Output bytes values / range | Partition / merge overhead | Status |
 |---|---|---|---|---|---|---|
-| `SENSOR_INFERENCE` | Indivisible | 200, 1,000, 4,000 | 2,000, 10,000, 50,000 | 256, 1,024, 2,048 | n/a | `PROPOSED_SMOKE_ONLY` |
-| `VIDEO_FRAME_BATCH` | Divisible | 1,000, 4,000 | 10,000, 50,000 | 1,024, 2,048, 4,096 | 5 / 5 ms | `PROPOSED_SMOKE_ONLY` |
-| `PARALLEL_SENSOR_AGGREGATION` | Divisible | 1,000, 4,000 | 2,000, 10,000, 50,000 | 256, 1,024, 2,048 | 3 / 4 ms | `PROPOSED_SMOKE_ONLY` |
-| `BULK_VIDEO_FRAME_BATCH` | Divisible | 4,000, 8,000, 16,000 | 50,000, 100,000, 250,000 | 2,048, 4,096, 8,192 | 5 / 5 ms | `PROPOSED_SHIFT_SMOKE_ONLY` |
-| `LARGE_PARALLEL_SENSOR_AGGREGATION` | Divisible | 4,000, 8,000, 16,000 | 10,000, 50,000, 100,000 | 1,024, 2,048, 4,096 | 3 / 4 ms | `PROPOSED_SHIFT_SMOKE_ONLY` |
+| `PREDICTIVE_MAINTENANCE_INFERENCE` | Indivisible | 200, 1,000, 4,000 | 2,000, 10,000, 50,000 | 256, 1,024, 2,048 | n/a | `PROPOSED_SMOKE_ONLY` |
+| `VISUAL_INSPECTION_FRAME_BATCH` | Divisible | 1,000, 4,000 | 10,000, 50,000 | 1,024, 2,048, 4,096 | 5 / 5 ms | `PROPOSED_SMOKE_ONLY` |
+| `PRODUCTION_MONITORING_AGGREGATION` | Divisible | 1,000, 4,000 | 2,000, 10,000, 50,000 | 256, 1,024, 2,048 | 3 / 4 ms | `PROPOSED_SMOKE_ONLY` |
+| `VISUAL_INSPECTION_BULK_FRAME_BATCH` | Divisible | 4,000, 8,000, 16,000 | 50,000, 100,000, 250,000 | 2,048, 4,096, 8,192 | 5 / 5 ms | `PROPOSED_SHIFT_SMOKE_ONLY` |
+| `PRODUCTION_MONITORING_LARGE_AGGREGATION` | Divisible | 4,000, 8,000, 16,000 | 10,000, 50,000, 100,000 | 1,024, 2,048, 4,096 | 3 / 4 ms | `PROPOSED_SHIFT_SMOKE_ONLY` |
 
 Deadlines are assigned before any policy action. Profile urgency weights are stored beside each application profile; deadline sampling uses only the resulting urgency class and its versioned distribution. No action, future shift, policy, outcome or test metric affects a deadline.
 

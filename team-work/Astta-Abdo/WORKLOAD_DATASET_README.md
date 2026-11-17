@@ -14,6 +14,18 @@ This folder contains the versioned synthetic workload-input generator and simula
 - [`provenance/`](provenance/) — prior technical audits and supplied V2 handoff copies, retained as versioned references.
 - [`reports/`](reports/) — validation, hash, and test evidence generated during this workstream.
 
+## Industrial workload profiles
+
+The generator uses five explicitly synthetic industrial workload profiles:
+
+- `PREDICTIVE_MAINTENANCE_INFERENCE` — indivisible inference tasks.
+- `VISUAL_INSPECTION_FRAME_BATCH` — divisible independent frame batches.
+- `PRODUCTION_MONITORING_AGGREGATION` — divisible independent sensor-window shards.
+- `VISUAL_INSPECTION_BULK_FRAME_BATCH` — larger visual-inspection batches for shifted regime B.
+- `PRODUCTION_MONITORING_LARGE_AGGREGATION` — larger production-monitoring shards for shifted regime B.
+
+These labels describe synthetic workload designs, not categories measured from ECW, SMD, or an industrial deployment.
+
 ## Quick start
 
 From this directory:
