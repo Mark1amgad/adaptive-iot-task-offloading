@@ -34,7 +34,8 @@ MANIFEST_FIELDS = [
     "task_count", "generation_window_end_ms", "regime_timeline_json",
     "network_profile_id", "network_profile_json", "edge_capacity_profile_id",
     "edge_capacity_profile_json", "task_mix_profile_id", "task_mix_profile_json",
-    "target_topology_id", "actual_topology_id", "actual_topology_status",
+    "target_topology_id", "target_topology_tier_counts_json", "target_device_mapping_json",
+    "actual_topology_id", "actual_topology_status",
     "dataset_split", "split_strategy_id", "paired_seed_plan_json",
     "config_hash", "generator_version", "policy_replay_contract",
 ]
@@ -309,8 +310,27 @@ def expand_regimes(regimes: list[dict[str, Any]], generation_end_ms: int) -> lis
 
 
 def validate_configs(workload_cfg: dict[str, Any], scenario_cfg: dict[str, Any]) -> None:
-    if not workload_cfg.get("source_devices"):
-        raise ValueError("workload config must define at least one source device")
+    expected_topology_id = "v2_target_100iot_20edge_1cloud"
+    expected_sources = [f"iot-{index:03d}" for index in range(1, 101)]
+    target = scenario_cfg.get("topology_profiles", {}).get(expected_topology_id)
+    if target is None or target.get("target_topology_id") != expected_topology_id:
+        raise ValueError("required target topology v2_target_100iot_20edge_1cloud is missing")
+    if target.get("tier_counts") != {"IOT": 100, "EDGE": 20, "CLOUD": 1}:
+        raise ValueError("target topology tier_counts must be exactly IOT=100, EDGE=20, CLOUD=1")
+    if target.get("source_devices") != expected_sources or workload_cfg.get("source_devices") != expected_sources:
+        raise ValueError("source_devices must be exactly iot-001 through iot-100")
+    if target.get("actual_topology_id") is not None or target.get("actual_topology_status") != "NOT_VERIFIED_PENDING_AYOUB_CONFIRMATION":
+        raise ValueError("actual topology must remain null and NOT_VERIFIED_PENDING_AYOUB_CONFIRMATION")
+    expected_edges = {f"edge-{index:03d}": expected_sources[(index-1)*5:index*5] for index in range(1, 21)}
+    if target.get("target_device_mapping") != expected_edges:
+        raise ValueError("target mapping must assign five sequential IoT IDs to each of 20 Edge nodes")
+    workload_target = workload_cfg.get("topology_references", {}).get(expected_topology_id)
+    if workload_target is None or workload_target.get("device_counts") != {"iot_devices": 100, "edge_nodes": 20, "cloud_nodes": 1}:
+        raise ValueError("workload_profiles target topology device_counts must be exactly 100/20/1")
+    if workload_target.get("target_device_mapping") != expected_edges:
+        raise ValueError("workload_profiles target mapping must match the 5-to-1 Edge contract")
+    if workload_target.get("actual_topology_id") is not None or workload_target.get("actual_topology_status") != "NOT_VERIFIED_PENDING_AYOUB_CONFIRMATION":
+        raise ValueError("workload_profiles actual topology must remain unverified")
     for name, profile in workload_cfg["application_profiles"].items():
         if profile.get("splittability") not in SPLIT_LABELS:
             raise ValueError(f"{name}: invalid splittability")
@@ -454,6 +474,8 @@ def generate_one(scenario_id: str, seed: int, count: int, run_id: str,
         "edge_capacity_profile_json": canonical_json(scenario_cfg["edge_capacity_profiles"][edge_profile_id]),
         "task_mix_profile_id": task_mix_id, "task_mix_profile_json": canonical_json(task_mix_definition),
         "target_topology_id": scenario["target_topology_id"],
+        "target_topology_tier_counts_json": canonical_json(topology.get("tier_counts", {})),
+        "target_device_mapping_json": canonical_json(topology.get("target_device_mapping", {})),
         "actual_topology_id": actual_topology_id,
         "actual_topology_status": actual_topology_status,
         "dataset_split": split_name,
