@@ -187,3 +187,16 @@ def test_residual_state_roundtrips_with_configuration_fingerprint(tmp_path):
     assert loaded.sample_counts() == calibrator.sample_counts()
     with pytest.raises(RiskError, match="fingerprint"):
         RiskCalibrator.load(path, RiskConfig(min_samples=4))
+
+    
+def test_residual_state_roundtrips_negative_prediction_errors(tmp_path):
+    config = RiskConfig(min_samples=3)
+    calibrator = RiskCalibrator(config)
+    # Negative residuals are valid: the simulator completed faster than predicted.
+    calibrator.observe("LOCAL", 120, 100)
+    calibrator.observe("LOCAL", 110, 105)
+    path = calibrator.save(tmp_path / "negative-calibration.json")
+    loaded = RiskCalibrator.load(path, config)
+    assert loaded.updates == 2
+    assert loaded.sample_counts() == calibrator.sample_counts()
+    assert loaded.margin_for("LOCAL")["raw_quantile_ms"] is None
