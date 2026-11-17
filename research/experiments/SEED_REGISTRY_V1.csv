@@ -6,26 +6,26 @@ seed,experiment_family,split,status,first_known_use,source,notes
 45,v2_policy_comparison,development,used,2026-11-15,audit_output/v2_policy_comparison_seed45_20261115_2225,Policy-comparison pilot
 81,industrial_workload_generator,development,used,2026-11-17,team-work/Astta-Abdo/data/dev,Abdo repeated A-B-A workload-generator development seed; not final test eligible
 101,generic_aba,development,used,2026-11-17,audit_output/aba_pilot_seed_101_20261117,Model training / A-only pilot seed
-102,generic_aba,development,used,2026-11-17,deliverables/10_iFogSim_Simulation/results/aba_paired_20seed_20261117,Reused in earlier generic A-B-A batch; exploratory only
-103,generic_aba,development,used,2026-11-17,deliverables/10_iFogSim_Simulation/results/aba_paired_20seed_20261117,Reused in earlier generic A-B-A batch; exploratory only
-104,generic_aba,development,used,2026-11-17,deliverables/10_iFogSim_Simulation/results/aba_paired_20seed_20261117,Reused in earlier generic A-B-A batch; exploratory only
-105,generic_aba,development,used,2026-11-17,deliverables/10_iFogSim_Simulation/results/aba_paired_20seed_20261117,Reused in earlier generic A-B-A batch; exploratory only
-106,generic_aba,development,used,2026-11-17,deliverables/10_iFogSim_Simulation/results/aba_paired_20seed_20261117,Reused in earlier generic A-B-A batch; exploratory only
-107,generic_aba,development,used,2026-11-17,deliverables/10_iFogSim_Simulation/results/aba_paired_20seed_20261117,Reused in earlier generic A-B-A batch; exploratory only
-108,generic_aba,development,used,2026-11-17,deliverables/10_iFogSim_Simulation/results/aba_paired_20seed_20261117,Reused in earlier generic A-B-A batch; exploratory only
-109,generic_aba,development,used,2026-11-17,deliverables/10_iFogSim_Simulation/results/aba_paired_20seed_20261117,Reused in earlier generic A-B-A batch; exploratory only
-110,generic_aba,development,used,2026-11-17,deliverables/10_iFogSim_Simulation/results/aba_paired_20seed_20261117,Reused in earlier generic A-B-A batch; exploratory only
-111,generic_aba,development,used,2026-11-17,deliverables/10_iFogSim_Simulation/results/aba_paired_20seed_20261117,Reused in earlier generic A-B-A batch; exploratory only
-112,generic_aba,development,used,2026-11-17,deliverables/10_iFogSim_Simulation/results/aba_paired_20seed_20261117,Reused in earlier generic A-B-A batch; exploratory only
-113,generic_aba,development,used,2026-11-17,deliverables/10_iFogSim_Simulation/results/aba_paired_20seed_20261117,Reused in earlier generic A-B-A batch; exploratory only
-114,generic_aba,development,used,2026-11-17,deliverables/10_iFogSim_Simulation/results/aba_paired_20seed_20261117,Reused in earlier generic A-B-A batch; exploratory only
-115,generic_aba,development,used,2026-11-17,deliverables/10_iFogSim_Simulation/results/aba_paired_20seed_20261117,Reused in earlier generic A-B-A batch; exploratory only
-116,generic_aba,development,used,2026-11-17,deliverables/10_iFogSim_Simulation/results/aba_paired_20seed_20261117,Reused in earlier generic A-B-A batch; exploratory only
-117,generic_aba,development,used,2026-11-17,deliverables/10_iFogSim_Simulation/results/aba_paired_20seed_20261117,Reused in earlier generic A-B-A batch; exploratory only
-118,generic_aba,development,used,2026-11-17,deliverables/10_iFogSim_Simulation/results/aba_paired_20seed_20261117,Reused in earlier generic A-B-A batch; exploratory only
-119,generic_aba,development,used,2026-11-17,deliverables/10_iFogSim_Simulation/results/aba_paired_20seed_20261117,Reused in earlier generic A-B-A batch; exploratory only
-120,generic_aba,development,used,2026-11-17,deliverables/10_iFogSim_Simulation/results/aba_paired_20seed_20261117,Reused in earlier generic A-B-A batch; exploratory only
-121,generic_aba,development,used,2026-11-17,deliverables/10_iFogSim_Simulation/results/aba_paired_20seed_20261117,Reused in earlier generic A-B-A batch; exploratory only
+102,generic_aba,historical_test_reused,used,2026-11-17,deliverables/10_iFogSim_Simulation/results/aba_paired_20seed_20261117,Reused in earlier generic A-B-A batch; exploratory only
+103,generic_aba,historical_test_reused,used,2026-11-17,deliverables/10_iFogSim_Simulation/results/aba_paired_20seed_20261117,Reused in earlier generic A-B-A batch; exploratory only
+104,generic_aba,historical_test_reused,used,2026-11-17,deliverables/10_iFogSim_Simulation/results/aba_paired_20seed_20261117,Reused in earlier generic A-B-A batch; exploratory only
+105,generic_aba,historical_test_reused,used,2026-11-17,deliverables/10_iFogSim_Simulation/results/aba_paired_20seed_20261117,Reused in earlier generic A-B-A batch; exploratory only
+106,generic_aba,historical_test_reused,used,2026-11-17,deliverables/10_iFogSim_Simulation/results/aba_paired_20seed_20261117,Reused in earlier generic A-B-A batch; exploratory only
+107,generic_aba,historical_test_reused,used,2026-11-17,deliverables/10_iFogSim_Simulation/results/aba_paired_20seed_20261117,Reused in earlier generic A-B-A batch; exploratory only
+108,generic_aba,historical_test_reused,used,2026-11-17,deliverables/10_iFogSim_Simulation/results/aba_paired_20seed_20261117,Reused in earlier generic A-B-A batch; exploratory only
+109,generic_aba,historical_test_reused,used,2026-11-17,deliverables/10_iFogSim_Simulation/results/aba_paired_20seed_20261117,Reused in earlier generic A-B-A batch; exploratory only
+110,generic_aba,historical_test_reused,used,2026-11-17,deliverables/10_iFogSim_Simulation/results/aba_paired_20seed_20261117,Reused in earlier generic A-B-A batch; exploratory only
+111,generic_aba,historical_test_reused,used,2026-11-17,deliverables/10_iFogSim_Simulation/results/aba_paired_20seed_20261117,Reused in earlier generic A-B-A batch; exploratory only
+112,generic_aba,historical_test_reused,used,2026-11-17,deliverables/10_iFogSim_Simulation/results/aba_paired_20seed_20261117,Reused in earlier generic A-B-A batch; exploratory only
+113,generic_aba,historical_test_reused,used,2026-11-17,deliverables/10_iFogSim_Simulation/results/aba_paired_20seed_20261117,Reused in earlier generic A-B-A batch; exploratory only
+114,generic_aba,historical_test_reused,used,2026-11-17,deliverables/10_iFogSim_Simulation/results/aba_paired_20seed_20261117,Reused in earlier generic A-B-A batch; exploratory only
+115,generic_aba,historical_test_reused,used,2026-11-17,deliverables/10_iFogSim_Simulation/results/aba_paired_20seed_20261117,Reused in earlier generic A-B-A batch; exploratory only
+116,generic_aba,historical_test_reused,used,2026-11-17,deliverables/10_iFogSim_Simulation/results/aba_paired_20seed_20261117,Reused in earlier generic A-B-A batch; exploratory only
+117,generic_aba,historical_test_reused,used,2026-11-17,deliverables/10_iFogSim_Simulation/results/aba_paired_20seed_20261117,Reused in earlier generic A-B-A batch; exploratory only
+118,generic_aba,historical_test_reused,used,2026-11-17,deliverables/10_iFogSim_Simulation/results/aba_paired_20seed_20261117,Reused in earlier generic A-B-A batch; exploratory only
+119,generic_aba,historical_test_reused,used,2026-11-17,deliverables/10_iFogSim_Simulation/results/aba_paired_20seed_20261117,Reused in earlier generic A-B-A batch; exploratory only
+120,generic_aba,historical_test_reused,used,2026-11-17,deliverables/10_iFogSim_Simulation/results/aba_paired_20seed_20261117,Reused in earlier generic A-B-A batch; exploratory only
+121,generic_aba,historical_test_reused,used,2026-11-17,deliverables/10_iFogSim_Simulation/results/aba_paired_20seed_20261117,Reused in earlier generic A-B-A batch; exploratory only
 201,omar_simulator_stress,development,used,2026-11-17,team-work/Omar/deliverables/Omar_iFogSim_Experiment_Results_v26,Separate team simulation workstream; inspect before reuse
 202,omar_simulator_stress,development,used,2026-11-17,team-work/Omar/deliverables/Omar_iFogSim_Experiment_Results_v26,Separate team simulation workstream; inspect before reuse
 203,omar_simulator_stress,development,used,2026-11-17,team-work/Omar/deliverables/Omar_iFogSim_Experiment_Results_v26,Separate team simulation workstream; inspect before reuse
