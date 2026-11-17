@@ -64,6 +64,11 @@ jobs:
           done
           test "$count" -eq 8
 
+      - name: Verify immutable V2 handoff inputs and write SHA-256 report
+        run: |
+          python v2_integration/verify_integration_inputs.py \
+            --output v2_integration/reproducibility_report.json
+
       - name: Run automated tests
         shell: bash
         run: |
@@ -82,6 +87,7 @@ jobs:
           git add team-work/Astta-Abdo/reports/dev_hashes_v1_2.json
           git add team-work/Astta-Abdo/reports/*_seed_1300_validation.json
           git add team-work/Astta-Abdo/reports/pytest_results_v1_2.txt
+          git add team-work/Astta-Abdo/v2_integration/reproducibility_report.json
           if git diff --cached --quiet; then
             echo "Development dataset and verification reports already match this run."
           else
@@ -97,6 +103,7 @@ jobs:
           path: |
             team-work/Astta-Abdo/data/dev/
             team-work/Astta-Abdo/reports/
+            team-work/Astta-Abdo/v2_integration/reproducibility_report.json
             research/experiments/SEED_REGISTRY_V2.csv
           if-no-files-found: error
           include-hidden-files: true
