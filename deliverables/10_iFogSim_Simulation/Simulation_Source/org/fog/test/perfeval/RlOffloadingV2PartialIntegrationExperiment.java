@@ -247,7 +247,7 @@ public final class RlOffloadingV2PartialIntegrationExperiment {
                 "x86", "Linux", "Xen", host, 10.0, 3.0, 0.05, 0.001, 0.0);
         InstrumentedFogDevice device = new InstrumentedFogDevice(name, characteristics,
                 new AppModuleAllocationPolicy(hosts), new LinkedList<Storage>(),
-                10, upBw, downBw, 0, 0.0, registry);
+                0.01, upBw, downBw, 0, 0.0, registry);
         device.setLevel(level);
         return device;
     }
