@@ -1,6 +1,6 @@
 import unittest
 
-from analyze_v2_policy_comparison import find_recovery_window
+from analyze_v2_policy_comparison import find_recovery_window, tuple_profile_suffix
 
 
 def task(sequence, latency, outcome="ON_TIME", terminal_time=None):
@@ -13,6 +13,11 @@ def task(sequence, latency, outcome="ON_TIME", terminal_time=None):
 
 
 class AbaRecoveryTests(unittest.TestCase):
+    def test_default_output_profile_has_no_legacy_edge_suffix(self):
+        self.assertEqual(tuple_profile_suffix(1001), "")
+        self.assertEqual(tuple_profile_suffix(512), "_O512")
+        self.assertEqual(tuple_profile_suffix(2048), "_O2048")
+
     def test_first_qualifying_window_and_elapsed_time(self):
         items = [task(i, 150.0 if i < 4 else 105.0, terminal_time=1000.0 + (i - 30) * 100.0)
                  for i in range(31, 41)]
