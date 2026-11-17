@@ -32,6 +32,37 @@ def percentile(values: list[float], p: float) -> float:
     return ordered[max(0, math.ceil(p * len(ordered)) - 1)]
 
 
+def find_recovery_window(
+    baseline_miss_rate: float,
+    baseline_median_latency_ms: float | None,
+    return_tasks: list[dict],
+    transition_time_ms: float,
+    window_size: int = 10,
+    miss_tolerance: float = 0.05,
+    latency_tolerance: float = 0.10,
+) -> tuple[dict | None, float | None]:
+    """Find the first qualifying A2 window; return time from A2 transition to its last completion."""
+    if baseline_median_latency_ms is None or len(return_tasks) < window_size:
+        return None, None
+    for start in range(0, len(return_tasks) - window_size + 1):
+        window = return_tasks[start:start + window_size]
+        done = [task for task in window if task["latency_ms"] is not None]
+        miss_rate = sum(task["outcome"] != "ON_TIME" for task in window) / window_size
+        median_latency = statistics.median(task["latency_ms"] for task in done) if done else None
+        if (len(done) == window_size
+                and miss_rate <= baseline_miss_rate + miss_tolerance
+                and median_latency <= baseline_median_latency_ms * (1.0 + latency_tolerance)):
+            recovered = {
+                "window_start_sequence": window[0]["sequence"],
+                "window_end_sequence": window[-1]["sequence"],
+                "window_end_completion_time_ms": max(task["terminal_time_ms"] for task in window),
+                "window_deadline_miss_rate": miss_rate,
+                "window_median_latency_ms": median_latency,
+            }
+            return recovered, max(0.0, recovered["window_end_completion_time_ms"] - transition_time_ms)
+    return None, None
+
+
 def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("--root", type=Path, required=True)
@@ -245,28 +276,10 @@ def main() -> int:
             baseline_median = baseline["median_latency_ms_completed_only"]
             return_tasks = [obs[k] for k in sorted(obs) if obs[k]["regime_index"] == 2]
             window_size, miss_tolerance, latency_tolerance = 10, 0.05, 0.10
-            recovered = None
-            if baseline_median is not None and len(return_tasks) >= window_size:
-                for start in range(0, len(return_tasks) - window_size + 1):
-                    window = return_tasks[start:start + window_size]
-                    done = [x for x in window if x["latency_ms"] is not None]
-                    miss_rate = sum(x["outcome"] != "ON_TIME" for x in window) / window_size
-                    median_latency = statistics.median(x["latency_ms"] for x in done) if done else None
-                    if (len(done) == window_size and
-                            miss_rate <= baseline["deadline_miss_rate"] + miss_tolerance and
-                            median_latency <= baseline_median * (1.0 + latency_tolerance)):
-                        recovered = {
-                            "window_start_sequence": window[0]["sequence"],
-                            "window_end_sequence": window[-1]["sequence"],
-                            "window_end_completion_time_ms": max(x["terminal_time_ms"] for x in window),
-                            "window_deadline_miss_rate": miss_rate,
-                            "window_median_latency_ms": median_latency,
-                        }
-                        break
             transition = next(r for r in transitions if int(r["regime_index"]) == 2)
-            recovery_time = (
-                max(0.0, recovered["window_end_completion_time_ms"] - float(transition["sim_time_ms"]))
-                if recovered else None
+            recovered, recovery_time = find_recovery_window(
+                baseline["deadline_miss_rate"], baseline_median, return_tasks,
+                float(transition["sim_time_ms"]), window_size, miss_tolerance, latency_tolerance,
             )
             regime_analysis[policy] = {
                 "phase_metrics": phases,
