@@ -20,14 +20,14 @@ def build(seed: int, tasks_per_phase: int) -> list[dict]:
             "task_mi": rng.choice([5000, 6000, 7000]),
             "input_bytes": rng.choice([12001, 24000]),
             "output_bytes": rng.choice([512, 1001, 2048]),
-            "deadline_ms": 4500.0,
-            "arrival_gap_ms": rng.choice([1200.0, 1400.0, 1600.0]),
+            "deadline_ms": 15000.0,
+            "arrival_gap_ms": rng.choice([4000.0, 4500.0, 5000.0]),
             "urgency_class": rng.choice(["normal", "high"]),
         })
 
     phases = [
         {"regime_id": "A", "regime_index": 0, "wan_latency_ms": 45.0, "scale": 1.0},
-        {"regime_id": "B", "regime_index": 1, "wan_latency_ms": 220.0, "scale": 2.4},
+        {"regime_id": "B", "regime_index": 1, "wan_latency_ms": 160.0, "scale": 1.8},
         {"regime_id": "A", "regime_index": 2, "wan_latency_ms": 45.0, "scale": 1.0},
     ]
     for phase in phases:
@@ -36,10 +36,10 @@ def build(seed: int, tasks_per_phase: int) -> list[dict]:
             base = template[i]
             stress = phase["regime_index"] == 1
             task_mi = int(round(base["task_mi"] * phase["scale"]))
-            input_bytes = int(round(base["input_bytes"] * (2.0 if stress else 1.0)))
+            input_bytes = int(round(base["input_bytes"] * (1.5 if stress else 1.0)))
             output_bytes = base["output_bytes"]
             if stress:
-                gap = rng.choice([450.0, 550.0, 650.0])
+                gap = rng.choice([2500.0, 3000.0, 3500.0])
             elif phase["regime_index"] == 2 and i == 0:
                 # The first A2 task follows B, so use the first ordinary A inter-arrival.
                 gap = template[1]["arrival_gap_ms"]
@@ -59,7 +59,7 @@ def build(seed: int, tasks_per_phase: int) -> list[dict]:
                 "output_profile": None if output_bytes == 1001 else f"o{output_bytes}",
                 "merge_mi": 1200,
                 "merge_output_bytes": 64,
-                "deadline_ms": 4500.0 if not stress else 7000.0,
+                "deadline_ms": 15000.0 if not stress else 20000.0,
                 "arrival_gap_ms": 0.0 if sequence == 1 else gap,
                 "urgency_class": base["urgency_class"],
                 "splittability": "DATA_PARALLEL_DIVISIBLE",
