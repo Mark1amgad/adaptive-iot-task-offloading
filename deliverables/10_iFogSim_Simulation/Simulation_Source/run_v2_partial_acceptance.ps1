@@ -8,7 +8,7 @@ param(
     [double]$PartitionOverheadMs = 3.0,
     [double]$MergeOverheadMs = 2.0,
     [double]$WanLatencyMs = 45.0,
-    [double]$WatchdogMs = 1000.0
+    [double]$WatchdogMs = 60000.0
 )
 $ErrorActionPreference = 'Stop'
 $simulationSource = $PSScriptRoot
