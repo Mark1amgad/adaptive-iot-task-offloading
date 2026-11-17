@@ -87,6 +87,13 @@ def _finite_number(value: Any, name: str, *, positive: bool = False) -> float:
         raise RiskError(f"{name} must be >= 0")
     return float(value)
 
+def _finite_signed_number(value: Any, name: str) -> float:
+    """Validate a finite signed value; prediction residuals may be negative."""
+    if (isinstance(value, bool) or not isinstance(value, (int, float))
+            or not math.isfinite(value)):
+        raise RiskError(f"{name} must be a finite number")
+    return float(value)
+
 
 @dataclass(frozen=True)
 class LinkHop:
@@ -382,7 +389,7 @@ class RiskCalibrator:
         for key, values in windows.items():
             if not isinstance(values, list) or len(values) > config.window_size:
                 raise RiskError(f"invalid residual window {key}")
-            parsed = [_finite_number(v, f"{key} residual") for v in values]
+            parsed = [_finite_signed_number(v, f"{key} residual") for v in values]
             result._windows[key] = deque(parsed, maxlen=config.window_size)
         updates = raw.get("updates")
         if isinstance(updates, bool) or not isinstance(updates, int) or updates < 0:
