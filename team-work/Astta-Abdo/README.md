@@ -14,3 +14,6 @@ No simulator decisions, completion times, rewards, energy values, or final task 
 
 
 Target topology contract: `v2_target_100iot_20edge_1cloud` = 100 logical IoT sources, 20 target Edge nodes and one target Cloud node, with five source IDs assigned to each target Edge. This is not an actual deployment assertion. `actual_topology_id=null` and `actual_topology_status=NOT_VERIFIED_PENDING_AYOUB_CONFIRMATION` remain until Ayoub verifies the simulator. Bandwidth units, uplink/downlink, IoT–Edge and Edge–Cloud links, latency and network-shift parameters remain BLOCKED pending his confirmation.
+
+
+Latest topology update verification: Development scenarios/manifests are regenerated with seed 1300 under the 100-IoT/20-Edge/1-Cloud target contract. The latest successful pipeline run reports 47 passing tests and 8/8 scenario-manifest validation passes. These checks validate the generator contract only; actual simulator topology and network parameters remain pending Ayoub confirmation.
