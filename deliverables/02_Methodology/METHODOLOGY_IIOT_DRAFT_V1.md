@@ -223,4 +223,22 @@ Accordingly, do not launch the final industrial seed batch until:
 
 ## 13. Related-work boundary
 
-Use the repository's existing References Index only. The industrial positioning should explicitly distinguish the study from the collected IIoT failure-aware method (ESFMTO), Edge-IIoT DQN conference study, reliability-aware adaptive offloading (RELTO), forecast-driven MEC contextual offloading, and hierarchical partial Device-Edge-Cloud offloading. The methodological claim is restricted to the intersection of the current risk-calibrated full/partial feasibility implementation, industrial task archetypes, and controlled shift evaluation. It remains a candidate empirical contribution pending close-paper comparison, not a guaranteed algorithmic novelty claim.
+Use `research/references/REFERENCES_INDEX.md` for the formal Core / Supporting / Conference classification and use the distinct Research Gap v29 workbook as a targeted 21-record, non-systematic method-overlap matrix. Do not merge the classifications. Mandatory close comparisons include E2DA (deadline-aware contextual neural bandit), LITO (continuum contextual-bandit feedback plus explicit feasibility filter/fallback), O2C/CCMAB (chance-constrained deadline reliability), H-DQAC (hybrid DQL/Actor-Critic and iFogSim2), hierarchical DDQN/PPO partial offloading, ESFMTO (IIoT failure-aware offloading), forecast-driven LinUCB, RELTO, and IEEE TMC paper 7 (MECTOS-MU/DGOLB).
+
+IEEE TMC paper 7 jointly optimizes task offloading and resource allocation in a multi-device / multi-MEC-server model under device-energy, wireless-channel, MEC-server-load, task-size/task-count uncertainty and per-task maximum latency. Its TOPRFM stage ranks tasks using the number of feasible allocation modes; TODC allocates tasks; DGOLB adds static game coordination and MEC-server load balancing/migration. It therefore precludes a generic novelty claim for uncertainty-aware feasibility, deadline-constrained offloading, resource allocation, or load balancing. Its task modes are local, MEC, cooperative-device execution, and task drop; the inspected manuscript does not describe our Local-plus-one-remote split/merge action catalogue or an explicit A1→B→A2 recovery protocol.
+
+The candidate study must be framed as a controlled empirical evaluation: quantify the incremental effect of per-action end-to-end completion-time residual calibration beyond an analytical feasibility screen and the same frozen contextual policy, with legal full/constrained partial execution on declared industrial task profiles and isolated workload/network/capacity shifts. This requires matched learner ablations, training-only calibration, paired exogenous traces, false-safe/fallback reporting, and fresh held-out seeds. The current five-arm runner does not isolate the risk filter because only the learner arm receives it. Until the equation-level comparison against LITO/E2DA/O2C and the supervisor's scope/contribution decision are complete, the result remains an empirical research question rather than a proven algorithmic novelty claim.
+
+The official IEEE bibliographic record for TMC paper 7 is in `REFERENCES_INDEX.md`. The technical audit currently uses accessible accepted-author-version text from a third-party repost because an official local copy is still pending. Do not cite the repost or claim it is the final IEEE version; obtain the authorized manuscript before submission.
+
+
+## 14. Research-positioning and TMC-7 integration note
+
+The controlling evidence for the revised research question is `docs/RESEARCH_POSITIONING_AND_TMC7_AUDIT_V1.md`. Use it together with the References Index and the Research Gap v29 workbook. The minimum direct ablation needed to support a residual-calibration-specific conclusion is:
+1. identical frozen contextual learner, no feasibility filter;
+2. the same learner with analytical completion-time feasibility and zero residual margin;
+3. the same learner with the frozen residual-calibrated margin.
+
+All three receive identical per-seed industrial workload and exogenous traces. If training provenance differs between arms, report the design as a test-time intervention rather than a fully matched end-to-end method comparison. The baseline runner currently does not implement these three arms; this is an engineering task, not an existing completed experiment.
+
+A1→B→A2 recovery with frozen V2 evaluation measures whether performance returns when exogenous conditions return to A. It does not establish online learning, model adaptation, or recalibration. Any online-update experiment must be pre-registered as a separate arm, with exact update events and model/calibrator versions logged.
