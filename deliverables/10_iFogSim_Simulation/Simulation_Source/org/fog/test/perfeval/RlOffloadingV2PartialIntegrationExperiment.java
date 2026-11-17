@@ -258,6 +258,8 @@ public final class RlOffloadingV2PartialIntegrationExperiment {
         private final InstrumentedFogDevice local, edge, cloud;
         private final TaskRegistry registry;
         private int emitted;
+        private String lastRegimeId;
+        private int lastRegimeIndex = -1;
         TaskEmitter(String name, InstrumentedFogDevice local, InstrumentedFogDevice edge,
                 InstrumentedFogDevice cloud, TaskRegistry registry) {
             super(name); this.local = local; this.edge = edge; this.cloud = cloud; this.registry = registry;
@@ -273,6 +275,14 @@ public final class RlOffloadingV2PartialIntegrationExperiment {
             if (emitted >= registry.options.tasks) throw new IllegalStateException("excess task emission");
             int sequence = ++emitted;
             WorkloadTask workload = registry.options.workload.get(sequence - 1);
+            edge.setUplinkLatency(workload.wanLatencyMs / 1000.0);
+            if (!workload.regimeId.equals(lastRegimeId) || workload.regimeIndex != lastRegimeIndex) {
+                registry.trace.record("regime_transition", mapOf("task_sequence", sequence,
+                        "regime_id", workload.regimeId, "regime_index", workload.regimeIndex,
+                        "wan_latency_ms", workload.wanLatencyMs, "sim_time_ms", simulationTimeMs()));
+                lastRegimeId = workload.regimeId;
+                lastRegimeIndex = workload.regimeIndex;
+            }
             TaskRecord task = registry.decide(sequence, local.getObservedUtilization(),
                     edge.getObservedUtilization(), cloud.getObservedUtilization(), workload);
             if (task.action.isPartial()) {
@@ -454,15 +464,26 @@ public final class RlOffloadingV2PartialIntegrationExperiment {
         final int sequence;
         final long taskMi, inputBytes, outputBytes, mergeMi, mergeOutputBytes;
         final double deadlineMs, arrivalGapMs;
-        final String urgencyClass, splittability, partitionModelId;
+        final String urgencyClass, splittability, partitionModelId, regimeId;
+        final double wanLatencyMs;
+        final int regimeIndex;
         WorkloadTask(int sequence, long taskMi, long inputBytes, long outputBytes,
                 long mergeMi, long mergeOutputBytes, double deadlineMs, double arrivalGapMs,
                 String urgencyClass, String splittability, String partitionModelId) {
+            this(sequence, taskMi, inputBytes, outputBytes, mergeMi, mergeOutputBytes,
+                    deadlineMs, arrivalGapMs, urgencyClass, splittability, partitionModelId,
+                    "stable", 0, WAN_LATENCY_MS);
+        }
+        WorkloadTask(int sequence, long taskMi, long inputBytes, long outputBytes,
+                long mergeMi, long mergeOutputBytes, double deadlineMs, double arrivalGapMs,
+                String urgencyClass, String splittability, String partitionModelId,
+                String regimeId, int regimeIndex, double wanLatencyMs) {
             this.sequence = sequence; this.taskMi = taskMi; this.inputBytes = inputBytes;
             this.outputBytes = outputBytes; this.mergeMi = mergeMi; this.mergeOutputBytes = mergeOutputBytes;
             this.deadlineMs = deadlineMs; this.arrivalGapMs = arrivalGapMs;
             this.urgencyClass = urgencyClass; this.splittability = splittability;
-            this.partitionModelId = partitionModelId;
+            this.partitionModelId = partitionModelId; this.regimeId = regimeId;
+            this.regimeIndex = regimeIndex; this.wanLatencyMs = wanLatencyMs;
         }
         boolean divisible() { return "DATA_PARALLEL_DIVISIBLE".equals(splittability); }
         String outputProfile() { return outputBytes == OUTPUT_BYTES ? null : "o" + outputBytes; }
@@ -482,8 +503,12 @@ public final class RlOffloadingV2PartialIntegrationExperiment {
             String split = String.valueOf(row.get("splittability"));
             Object partitionValue = row.get("partition_model_id");
             String partition = partitionValue == null ? null : String.valueOf(partitionValue);
+            String regimeId = row.get("regime_id") == null ? "stable" : String.valueOf(row.get("regime_id"));
+            int regimeIndex = row.get("regime_index") == null ? 0 : (int) number(row.get("regime_index"));
+            double wanLatency = row.get("wan_latency_ms") == null ? WAN_LATENCY_MS : decimal(row.get("wan_latency_ms"));
             if (sequence != expectedSequence || taskMi <= 0 || inputBytes <= 0 || deadline <= 0
-                    || gap < 0 || mergeOutputBytes <= 0 || !Double.isFinite(deadline) || !Double.isFinite(gap))
+                    || gap < 0 || mergeOutputBytes <= 0 || !Double.isFinite(deadline) || !Double.isFinite(gap)
+                    || regimeId.trim().isEmpty() || regimeIndex < 0 || !Double.isFinite(wanLatency) || wanLatency < 0)
                 throw new IllegalArgumentException("invalid workload values at sequence " + expectedSequence);
             if (outputBytes != 512 && outputBytes != OUTPUT_BYTES && outputBytes != 2048 && outputBytes != 8192)
                 throw new IllegalArgumentException("unsupported output_bytes at sequence " + sequence);
@@ -498,7 +523,8 @@ public final class RlOffloadingV2PartialIntegrationExperiment {
             if ("DATA_PARALLEL_DIVISIBLE".equals(split) && (partition == null || partition.isEmpty() || mergeMi <= 0))
                 throw new IllegalArgumentException("divisible task requires partition model and positive merge MI");
             return new WorkloadTask(sequence, taskMi, inputBytes, outputBytes, mergeMi,
-                    mergeOutputBytes, deadline, gap, urgency, split, partition);
+                    mergeOutputBytes, deadline, gap, urgency, split, partition,
+                    regimeId, regimeIndex, wanLatency);
         }
     }
 
@@ -549,7 +575,7 @@ public final class RlOffloadingV2PartialIntegrationExperiment {
             try {
                 Map<String, Object> features = mapOf("task_mi", workload.taskMi,
                         "input_bytes", workload.inputBytes, "output_bytes", workload.outputBytes,
-                        "wan_latency_ms", WAN_LATENCY_MS, "local_utilization", localUtil,
+                        "wan_latency_ms", workload.wanLatencyMs, "local_utilization", localUtil,
                         "edge_utilization", edgeUtil, "cloud_utilization", cloudUtil,
                         "deadline_ms", workload.deadlineMs,
                         "splittability", workload.divisible() ? 1 : 0);
@@ -567,9 +593,9 @@ public final class RlOffloadingV2PartialIntegrationExperiment {
                         mapOf("bandwidth_bytes_per_second", 10000.0, "latency_ms", 2.0));
                 List<Map<String, Object>> cloudUplinkPath = Arrays.asList(
                         mapOf("bandwidth_bytes_per_second", 10000.0, "latency_ms", 2.0),
-                        mapOf("bandwidth_bytes_per_second", 10000.0, "latency_ms", WAN_LATENCY_MS));
+                        mapOf("bandwidth_bytes_per_second", 10000.0, "latency_ms", workload.wanLatencyMs));
                 List<Map<String, Object>> cloudDownlinkPath = Arrays.asList(
-                        mapOf("bandwidth_bytes_per_second", 100000.0, "latency_ms", WAN_LATENCY_MS),
+                        mapOf("bandwidth_bytes_per_second", 100000.0, "latency_ms", workload.wanLatencyMs),
                         mapOf("bandwidth_bytes_per_second", 10000.0, "latency_ms", 2.0));
                 Map<String, Object> riskContext = mapOf(
                         "remaining_deadline_ms", workload.deadlineMs,
@@ -612,7 +638,8 @@ public final class RlOffloadingV2PartialIntegrationExperiment {
                         "cloud_utilization", cloudUtil, "deadline_ms", workload.deadlineMs,
                         "urgency_class", workload.urgencyClass,
                         "splittability", workload.splittability, "arrival_gap_ms", workload.arrivalGapMs,
-                        "sim_time_ms", simulationTimeMs()));
+                        "regime_id", workload.regimeId, "regime_index", workload.regimeIndex,
+                        "wan_latency_ms", workload.wanLatencyMs, "sim_time_ms", simulationTimeMs()));
                 return task;
             } catch (Exception error) {
                 failed = true;
