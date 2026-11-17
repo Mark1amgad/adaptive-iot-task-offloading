@@ -27,7 +27,8 @@ def main() -> int:
     parser.add_argument("--jdk-home", type=Path, required=True)
     parser.add_argument("--workload", type=Path, required=True)
     parser.add_argument("--model", type=Path, required=True)
-    parser.add_argument("--risk-state", type=Path, required=True)
+    parser.add_argument("--risk-state", type=Path, default=None)
+    parser.add_argument("--risk-mode", choices=("none", "analytical", "calibrated"), default="calibrated")
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--partition-overhead-ms", type=float, required=True)
     parser.add_argument("--merge-overhead-ms", type=float, required=True)
@@ -39,9 +40,12 @@ def main() -> int:
     simulation = args.simulation_source.resolve()
     rl_root = args.rl_root.resolve()
     ifogsim = args.ifogsim_root.resolve()
-    workload_path, model_path, risk_path = (
-        args.workload.resolve(), args.model.resolve(), args.risk_state.resolve()
-    )
+    workload_path, model_path = args.workload.resolve(), args.model.resolve()
+    risk_path = args.risk_state.resolve() if args.risk_state else None
+    if args.risk_mode in ("analytical", "calibrated") and risk_path is None:
+        raise ValueError(f"{args.risk_mode} risk mode requires --risk-state")
+    if risk_path is not None and not risk_path.is_file():
+        raise ValueError(f"risk state does not exist: {risk_path}")
     rows = [json.loads(line) for line in workload_path.read_text(encoding="utf-8").splitlines() if line.strip()]
     if not rows:
         raise ValueError("workload is empty")
@@ -97,12 +101,13 @@ def main() -> int:
         "schema_version": "v1",
         "experiment_id": args.output.name,
         "evaluation_split": "test",
+        "risk_filter_mode": args.risk_mode,
         "workload_seed": rows[0]["seed"],
         "workload_profile": rows[0]["profile"],
         "workload_file": workload_path.name,
         "workload_sha256": sha256(workload_path),
         "model_sha256": sha256(model_path),
-        "risk_state_sha256": sha256(risk_path),
+        "risk_state_sha256": sha256(risk_path) if risk_path else None,
         "source_git_commit": commit,
         "source_inventory": source_inventory,
         "java_version": java_version,
