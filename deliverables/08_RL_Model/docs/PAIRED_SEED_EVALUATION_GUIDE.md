@@ -69,7 +69,7 @@ Generate a deterministic 30-task-per-phase A→B→A workload (90 tasks total):
 
 Then run the ordinary five-arm comparison runner with this workload, a frozen model, and its matching risk sidecar. The runner and simulator now:
 - replay the same A task template in phases A1 and A2;
-- increase task MI/input volume and arrival pressure in B while WAN latency changes from 45 ms to 220 ms;
+- increase task MI/input volume and arrival pressure in B while WAN latency changes from 45 ms to 160 ms;
 - restore the A task template and WAN latency at A2;
 - record each phase transition and per-task regime/WAN identity.
 
