@@ -51,3 +51,16 @@ A fully isolated virtual environment was also attempted, but this execution envi
 All workload numbers not confirmed by the simulator audit remain explicitly `PROPOSED` or `BLOCKED` in the YAML and handoff report. No simulator execution sites, completion times, latency outcomes, deadline success, rewards, energy or resource outcomes are generated. The four simulator-owned tables remain empty header templates.
 
 No GitHub writes, commits or pushes were made.
+
+
+## Follow-up industrial-profile consistency verification — 17 November 2026
+
+A subsequent correction updated the workload YAML to use the industrial profile names consistently, added fail-fast validation for every task-mix profile/regime, and added regression tests. GitHub Actions run [44161175060](https://github.com/Mark1amgad/adaptive-iot-task-offloading/actions/runs/44161175060) completed successfully on implementation commit `df1f15be9acd0dc8f62b10a05cb30e6ca59ccc62`.
+
+Observed CI results:
+- All eight core scenario datasets regenerated.
+- All eight task/manifest pairs passed `validate_dataset.py --check-replay`.
+- Automated tests: **38 passed in 1.55s**.
+- Generated task CSVs use the industrial profile identifiers.
+
+The earlier 35-test result above is retained as the historical v1.1.1 package check; it is superseded by the 38-test CI result for this correction.

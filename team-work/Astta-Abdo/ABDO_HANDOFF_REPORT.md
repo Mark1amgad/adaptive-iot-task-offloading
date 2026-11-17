@@ -143,3 +143,17 @@ The original overlay archive was reported as incomplete by the recipient. The im
 - A fully empty virtualenv could not download dependencies because the package index was unreachable from this execution environment. The documented `pip install -r requirements.txt` command did complete successfully in the available Python environment, where both declared dependencies were already installed. Exact failure output is recorded in `reports/package_verification/fresh_venv_install_attempt.txt`.
 
 This is a packaging/verification correction only. All unverified numeric values retain their existing `PROPOSED` or `BLOCKED` designations. No simulator, policy, model, Git branch, commit or push was changed.
+
+
+## 11. Industrial profile consistency correction — 17 November 2026
+
+The current repository correction fixes the indentation of the industrial application-profile YAML keys and changes both workload mix definitions to reference the five configured industrial profile identifiers. The generator now validates all mix profiles and every regime weight mapping against the configured application profiles before it creates any task rows. Regression tests cover both the valid industrial profile references and rejection of an unknown profile.
+
+The GitHub Actions verification run for implementation commit `df1f15be9acd0dc8f62b10a05cb30e6ca59ccc62` completed successfully:
+- Python dependencies installed successfully.
+- All eight core development scenarios generated.
+- All eight task/manifest pairs passed validation with deterministic replay.
+- The expanded test suite passed: **38 passed in 1.55s**.
+- Regenerated industrial task CSVs now contain the industrial profile identifiers rather than the former generic identifiers.
+
+The numeric profile ranges, deadline classes, topology mappings, bandwidth interpretation, and partial-execution overheads retain their `PROPOSED` / `BLOCKED` status. This correction does not turn synthetic development inputs into measured workload or simulator outcomes.

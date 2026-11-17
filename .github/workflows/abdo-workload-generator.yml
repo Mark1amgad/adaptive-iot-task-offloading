@@ -61,8 +61,11 @@ jobs:
           done
           test "$count" -eq 8
 
-      - name: Run automated tests
-        run: python -m pytest -q
+      - name: Run automated tests and save the actual result
+        shell: bash
+        run: |
+          set -o pipefail
+          python -m pytest -q | tee reports/pytest_results.txt
 
       - name: Commit regenerated development datasets on the review branch
         if: github.event_name == 'push' && github.ref == 'refs/heads/abdo/industrial-workload-generator-fix'
@@ -70,7 +73,7 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add data/dev reports/dev_hashes_v1_1.json reports/*__seed_*_validation.json
+          git add data/dev reports/dev_hashes_v1_1.json reports/*__seed_*_validation.json reports/pytest_results.txt
           if git diff --cached --quiet; then
             echo "Generated development datasets are already up to date."
           else
