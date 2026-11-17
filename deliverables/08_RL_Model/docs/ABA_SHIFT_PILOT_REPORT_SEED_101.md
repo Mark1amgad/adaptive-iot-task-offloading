@@ -74,4 +74,4 @@ For RL, the qualifying A2 window had a 10% deadline-miss rate and 5.63 s median 
 - Workload: `aba_seed_101_tuned.jsonl`
 - Training model and risk sidecar were generated from a separate seed-909 A-only workload.
 
-The raw run output was produced in an isolated validation worktree on the connected Windows machine. The local original repository clone and its pre-existing uncommitted changes were not modified.
+The raw run output, frozen training model/risk sidecar, and both workload files were archived on the connected Windows machine under `audit_output/aba_pilot_seed_101_20261117/`. The original source working tree and its pre-existing uncommitted source changes were not modified.
