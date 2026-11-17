@@ -42,6 +42,7 @@ jobs:
           echo "WORKLOAD_STAGE=$RUNNER_TEMP/abdo-workload-$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT" >> "$GITHUB_ENV"
           mkdir -p "$RUNNER_TEMP/abdo-workload-$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT/data"
           mkdir -p "$RUNNER_TEMP/abdo-workload-$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT/reports"
+          if [ -d data/dev/schemas_only ]; then cp -a data/dev/schemas_only "$RUNNER_TEMP/abdo-workload-$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT/data/"; fi
 
       - name: Generate eight registered development scenarios in staging
         shell: bash
@@ -113,7 +114,7 @@ jobs:
         shell: bash
         run: |
           git config user.name "github-actions[bot]"
-          git config user.email "41898282+users.noreply.github.com"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add -A team-work/Astta-Abdo/data/dev/
           git add team-work/Astta-Abdo/reports/
           git add team-work/Astta-Abdo/v2_integration/reproducibility_report.json
