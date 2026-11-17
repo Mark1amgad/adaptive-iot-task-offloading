@@ -89,6 +89,9 @@ class PairedSeedInferenceTests(unittest.TestCase):
         first = summary(1)
         second = summary(2)
         second["provenance"]["model_sha256"] = "e" * 64
+        second["provenance_fingerprint"] = hashlib.sha256(
+            json.dumps(second["provenance"], sort_keys=True, separators=(",", ":")).encode("utf-8")
+        ).hexdigest()
         paths = [self.write("a.json", first), self.write("b.json", second)]
         with self.assertRaisesRegex(MODULE.AnalysisError, "mixed model/source/simulator provenance"):
             MODULE.analyze(paths)
