@@ -47,13 +47,13 @@ $common = @('--python',$PythonExe,'--rl-root',$rlRoot,'--workload',$WorkloadFile
 foreach ($policy in @('local','edge','cloud','random')) {
     $out = Join-Path $OutputRoot ('policy_' + $policy)
     New-Item -ItemType Directory -Force -Path $out | Out-Null
-    $args = @('-cp',$javaClasspath,'org.fog.test.perfeval.RlOffloadingV2PartialIntegrationExperiment','--output',$out,'--run-id',('paired-' + $policy),'--mode','baseline','--policy',$policy) + $common
+    $args = @('-cp',$javaClasspath,'org.fog.test.perfeval.RlOffloadingV2PartialIntegrationExperiment','--output',$out,'--run-id',('paired-' + $policy),'--mode','baseline','--policy',$policy,'--evaluation-mode') + $common
     & $java @args
     if ($LASTEXITCODE -ne 0) { throw "Baseline policy $policy failed: $LASTEXITCODE" }
 }
 $rlOut = Join-Path $OutputRoot 'policy_rl_eval'
 New-Item -ItemType Directory -Force -Path $rlOut | Out-Null
-$rlArgs = @('-cp',$javaClasspath,'org.fog.test.perfeval.RlOffloadingV2PartialIntegrationExperiment','--output',$rlOut,'--run-id','paired-rl-eval','--mode','eval','--model-in',$ModelIn) + $common + @('--risk-filter','--risk-state-in',$RiskStateIn)
+$rlArgs = @('-cp',$javaClasspath,'org.fog.test.perfeval.RlOffloadingV2PartialIntegrationExperiment','--output',$rlOut,'--run-id','paired-rl-eval','--mode','eval','--model-in',$ModelIn,'--evaluation-mode') + $common + @('--risk-filter','--risk-state-in',$RiskStateIn)
 & $java @rlArgs
 if ($LASTEXITCODE -ne 0) { throw "RL evaluation policy failed: $LASTEXITCODE" }
 & $PythonExe $analyzer --root $OutputRoot --workload $WorkloadFile
