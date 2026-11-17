@@ -81,7 +81,7 @@ urgency_classes:
 # These workload values intentionally retain the supplied development/smoke ranges.
 # They are NOT approved benchmark ranges and are not inferred from ECW or SMD.
 application_profiles:
-  SENSOR_INFERENCE:
+  PREDICTIVE_MAINTENANCE_INFERENCE:
     description: "Synthetic indivisible sensor/inference request; full placement only."
     splittability: INDIVISIBLE
     urgency_weights: {CRITICAL: 0.20, TIME_SENSITIVE: 0.50, DELAY_TOLERANT: 0.30}
@@ -90,8 +90,28 @@ application_profiles:
     output_size_bytes: {distribution: choice, values: [256, 1024, 2048]}
     numeric_status: PROPOSED_SMOKE_ONLY
     output_size_status: PROPOSED_SYNTHETIC_GENERATION_RULE
+  VISUAL_INSPECTION_SINGLE_IMAGE_INFERENCE:
+    description: "Synthetic single-product-image inference; one image is an indivisible task."
+    splittability: INDIVISIBLE
+    urgency_weights: {CRITICAL: 0.25, TIME_SENSITIVE: 0.50, DELAY_TOLERANT: 0.25}
+    required_mi: {distribution: choice, values: [1000, 4000]}
+    input_size_bytes: {distribution: choice, values: [10000, 50000, 100000]}
+    output_size_bytes: {distribution: choice, values: [256, 1024, 2048]}
+    numeric_status: PROPOSED_SYNTHETIC_ONLY
+    output_size_status: PROPOSED_SYNTHETIC_GENERATION_RULE
 
-  VIDEO_FRAME_BATCH:
+  PRODUCTION_MONITORING_SINGLE_EVENT:
+    description: "Synthetic single production event evaluation; an event is indivisible."
+    splittability: INDIVISIBLE
+    urgency_weights: {CRITICAL: 0.20, TIME_SENSITIVE: 0.50, DELAY_TOLERANT: 0.30}
+    required_mi: {distribution: choice, values: [200, 1000, 4000]}
+    input_size_bytes: {distribution: choice, values: [256, 1024, 2048]}
+    output_size_bytes: {distribution: choice, values: [64, 256, 1024]}
+    numeric_status: PROPOSED_SYNTHETIC_ONLY
+    output_size_status: PROPOSED_SYNTHETIC_GENERATION_RULE
+
+
+  VISUAL_INSPECTION_FRAME_BATCH:
     description: "Synthetic independent frame batch; explicitly data-parallel."
     splittability: DATA_PARALLEL_DIVISIBLE
     urgency_weights: {CRITICAL: 0.25, TIME_SENSITIVE: 0.50, DELAY_TOLERANT: 0.25}
@@ -113,7 +133,7 @@ application_profiles:
         output bytes are proportional to compute fraction alpha for this synthetic
         profile only.
 
-  PARALLEL_SENSOR_AGGREGATION:
+  PRODUCTION_MONITORING_AGGREGATION:
     description: "Synthetic independent sensor-window shards; explicitly data-parallel."
     splittability: DATA_PARALLEL_DIVISIBLE
     urgency_weights: {CRITICAL: 0.15, TIME_SENSITIVE: 0.50, DELAY_TOLERANT: 0.35}
@@ -134,7 +154,7 @@ application_profiles:
         Independent window shards with no cross-shard dependency; proportional
         byte partitioning is a declared synthetic assumption for this profile only.
 
-  BULK_VIDEO_FRAME_BATCH:
+  VISUAL_INSPECTION_BULK_FRAME_BATCH:
     description: "Larger synthetic independent frame batches used only in shifted mix B."
     splittability: DATA_PARALLEL_DIVISIBLE
     urgency_weights: {CRITICAL: 0.25, TIME_SENSITIVE: 0.50, DELAY_TOLERANT: 0.25}
@@ -153,7 +173,7 @@ application_profiles:
       partial_overheads_apply_only_when: "0 < offload_fraction < 1"
       assumption: "Independent frame batches only; proportional data/compute split is a synthetic assumption."
 
-  LARGE_PARALLEL_SENSOR_AGGREGATION:
+  PRODUCTION_MONITORING_LARGE_AGGREGATION:
     description: "Larger independent sensor-window shards used only in shifted mix B."
     splittability: DATA_PARALLEL_DIVISIBLE
     urgency_weights: {CRITICAL: 0.15, TIME_SENSITIVE: 0.50, DELAY_TOLERANT: 0.35}
@@ -175,9 +195,11 @@ application_profiles:
 mix_profiles:
   balanced_v1:
     application_profile_weights:
-      SENSOR_INFERENCE: 0.50
-      VIDEO_FRAME_BATCH: 0.25
-      PARALLEL_SENSOR_AGGREGATION: 0.25
+      PREDICTIVE_MAINTENANCE_INFERENCE: 0.20
+      VISUAL_INSPECTION_SINGLE_IMAGE_INFERENCE: 0.15
+      VISUAL_INSPECTION_FRAME_BATCH: 0.15
+      PRODUCTION_MONITORING_SINGLE_EVENT: 0.15
+      PRODUCTION_MONITORING_AGGREGATION: 0.35
     resulting_divisibility_assumption: {indivisible: 0.50, divisible: 0.50}
     status: PROPOSED
     rationale: >-
@@ -185,10 +207,14 @@ mix_profiles:
       divisibility assigned only to independent frame/window profiles.
   heavy_shift_B_v1:
     application_profile_weights:
-      SENSOR_INFERENCE: 0.20
-      BULK_VIDEO_FRAME_BATCH: 0.40
-      LARGE_PARALLEL_SENSOR_AGGREGATION: 0.40
-    resulting_divisibility_assumption: {indivisible: 0.20, divisible: 0.80}
+      PREDICTIVE_MAINTENANCE_INFERENCE: 0.10
+      VISUAL_INSPECTION_SINGLE_IMAGE_INFERENCE: 0.10
+      VISUAL_INSPECTION_FRAME_BATCH: 0.15
+      PRODUCTION_MONITORING_SINGLE_EVENT: 0.10
+      PRODUCTION_MONITORING_AGGREGATION: 0.15
+      VISUAL_INSPECTION_BULK_FRAME_BATCH: 0.20
+      PRODUCTION_MONITORING_LARGE_AGGREGATION: 0.20
+    resulting_divisibility_assumption: {indivisible: 0.30, divisible: 0.70}
     status: PROPOSED
     rationale: >-
       Deliberate held-out load shift toward larger independent data-parallel batches;

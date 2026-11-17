@@ -18,7 +18,7 @@ from typing import Any
 import yaml
 
 HERE = Path(__file__).resolve().parents[1]
-GENERATOR_VERSION = "1.1.0"
+GENERATOR_VERSION = "1.2.0"
 UNITS_VERSION = "SI-ms-bytes-MI-v1"
 TASK_FIELDS = [
     "task_id", "run_id", "seed", "scenario_id", "workload_profile_id",
@@ -34,10 +34,12 @@ MANIFEST_FIELDS = [
     "task_count", "generation_window_end_ms", "regime_timeline_json",
     "network_profile_id", "network_profile_json", "edge_capacity_profile_id",
     "edge_capacity_profile_json", "task_mix_profile_id", "task_mix_profile_json",
-    "topology_id", "dataset_split", "split_strategy_id", "paired_seed_plan_json",
+    "target_topology_id", "actual_topology_id", "actual_topology_status",
+    "dataset_split", "split_strategy_id", "paired_seed_plan_json",
     "config_hash", "generator_version", "policy_replay_contract",
 ]
-ALLOWED_SPLITS = {"train", "validation", "test"}
+ALLOWED_SPLITS = {"development", "train", "validation", "test"}
+DEFAULT_SEED_REGISTRY_PATH = HERE.parents[1] / "research" / "experiments" / "SEED_REGISTRY_V2.csv"
 URGENCY_LABELS = {"CRITICAL", "TIME_SENSITIVE", "DELAY_TOLERANT"}
 SPLIT_LABELS = {"INDIVISIBLE", "DATA_PARALLEL_DIVISIBLE"}
 
@@ -175,37 +177,106 @@ def resolve_task_mix(profile_id: str, fraction: float,
     return {str(k): float(v) for k, v in weights.items()}
 
 
-def scenario_split(scenario: dict[str, Any], seed: int, split_cfg: dict[str, Any]) -> str:
-    family = scenario["family"]
-    matches = [split for split in ("train", "validation", "test")
-               if family in split_cfg[f"{split}_families"]]
+
+def validate_seed_registry_rows(rows: list[dict[str, str]]) -> list[str]:
+    """Reject duplicate numeric seeds and any cross-split reuse in the registry."""
+    errors: list[str] = []
+    seen: dict[int, dict[str, str]] = {}
+    for line_number, row in enumerate(rows, start=2):
+        try:
+            seed = int(row.get("seed", ""))
+        except (TypeError, ValueError):
+            errors.append(f"seed registry row {line_number}: seed must be an integer")
+            continue
+        split = str(row.get("split", "")).strip()
+        if seed in seen:
+            previous = seen[seed]
+            if previous.get("split") != split:
+                errors.append(f"cross-split seed reuse: seed {seed} is assigned to {previous.get('split')} and {split}")
+            else:
+                errors.append(f"duplicate seed registry entry: seed {seed} ({split})")
+        else:
+            seen[seed] = row
+        if not row.get("experiment_family") or not row.get("status") or not row.get("source"):
+            errors.append(f"seed registry row {line_number}: experiment_family/status/source are required")
+    return errors
+
+
+def read_seed_registry(path: Path = DEFAULT_SEED_REGISTRY_PATH) -> list[dict[str, str]]:
+    if not path.exists():
+        raise ValueError(f"seed registry does not exist: {path}")
+    with path.open(newline="", encoding="utf-8-sig") as handle:
+        reader = csv.DictReader(handle)
+        rows = list(reader)
+        fields = set(reader.fieldnames or [])
+    missing = {"seed", "experiment_family", "split", "status", "source"} - fields
+    if missing:
+        raise ValueError(f"seed registry missing columns: {sorted(missing)}")
+    errors = validate_seed_registry_rows(rows)
+    if errors:
+        raise ValueError("invalid seed registry: " + "; ".join(errors))
+    return rows
+
+
+def validate_seed_allocation(seed: int, dataset_split: str,
+                             registry_rows: list[dict[str, str]]) -> list[str]:
+    matches = [row for row in registry_rows if str(row.get("seed", "")) == str(seed)]
+    if not matches:
+        return [f"seed {seed} is unregistered; register its purpose before generation"]
     if len(matches) != 1:
-        raise ValueError(f"scenario family {family!r} must belong to exactly one split")
-    split = matches[0]
-    low, high = map(int, split_cfg["seed_bands"][split])
-    if not low <= seed <= high:
-        raise ValueError(
-            f"seed {seed} is outside {split} band [{low}, {high}] for scenario family {family!r}"
-        )
-    return split
+        return [f"seed {seed} has multiple registry records"]
+    row = matches[0]
+    assigned_split = row.get("split", "")
+    status = row.get("status", "")
+    errors: list[str] = []
+    if assigned_split != dataset_split:
+        errors.append(f"seed {seed} is registered for {assigned_split}, not requested split {dataset_split}")
+    allowed = {"approved"} if dataset_split == "test" else {"allocated", "approved"}
+    if status not in allowed:
+        errors.append(f"seed {seed} is not eligible: registry status is {status!r}; {dataset_split} generation requires {sorted(allowed)}")
+    return errors
+
+
+def require_seed_allocation(seed: int, dataset_split: str,
+                            registry_path: Path = DEFAULT_SEED_REGISTRY_PATH) -> None:
+    rows = read_seed_registry(registry_path)
+    errors = validate_seed_allocation(seed, dataset_split, rows)
+    if errors:
+        raise ValueError("; ".join(errors))
+
+
+def scenario_split(scenario: dict[str, Any], seed: int, split_cfg: dict[str, Any],
+                   dataset_split: str = "development",
+                   seed_registry_path: Path = DEFAULT_SEED_REGISTRY_PATH) -> str:
+    if dataset_split not in ALLOWED_SPLITS:
+        raise ValueError(f"unsupported dataset split: {dataset_split}")
+    require_seed_allocation(seed, dataset_split, seed_registry_path)
+    if dataset_split != "development":
+        family = scenario["family"]
+        matches = [split for split in ("train", "validation", "test")
+                   if family in split_cfg.get(f"{split}_families", [])]
+        if matches != [dataset_split]:
+            raise ValueError(f"scenario family {family!r} is not allocated to {dataset_split}")
+    return dataset_split
 
 
 def seeds_for_scenario(scenario: dict[str, Any], split_cfg: dict[str, Any],
-                       base_seed: int, seed_count: int) -> list[int]:
-    family = scenario["family"]
-    matches = [split for split in ("train", "validation", "test")
-               if family in split_cfg[f"{split}_families"]]
-    if len(matches) != 1:
-        raise ValueError(f"scenario family {family!r} must belong to exactly one split")
-    split = matches[0]
-    low, high = map(int, split_cfg["seed_bands"][split])
+                       base_seed: int, seed_count: int,
+                       dataset_split: str = "development",
+                       seed_registry_path: Path = DEFAULT_SEED_REGISTRY_PATH) -> list[int]:
+    rows = read_seed_registry(seed_registry_path)
+    eligible = sorted(int(row["seed"]) for row in rows
+                      if row.get("split") == dataset_split
+                      and row.get("status") in ({"approved"} if dataset_split == "test" else {"allocated", "approved"}))
+    if seed_count < 1:
+        raise ValueError("seed_count must be >= 1")
     if seed_count == 1:
-        seed = base_seed if low <= base_seed <= high else low
-        return [seed]
-    seeds = list(range(low, min(high, low + seed_count - 1) + 1))
-    if len(seeds) != seed_count:
-        raise ValueError(f"requested {seed_count} seeds but {split} band has only {len(seeds)} seeds")
-    return seeds
+        require_seed_allocation(base_seed, dataset_split, seed_registry_path)
+        return [base_seed]
+    selected = [seed for seed in eligible if seed >= base_seed][:seed_count]
+    if len(selected) != seed_count:
+        raise ValueError(f"requested {seed_count} {dataset_split} seeds, but only {len(selected)} eligible seeds are available")
+    return selected
 
 
 def expand_regimes(regimes: list[dict[str, Any]], generation_end_ms: int) -> list[dict[str, Any]]:
@@ -276,7 +347,8 @@ def validate_configs(workload_cfg: dict[str, Any], scenario_cfg: dict[str, Any])
 
 def generate_one(scenario_id: str, seed: int, count: int, run_id: str,
                  workload_cfg: dict[str, Any], scenario_cfg: dict[str, Any],
-                 out_dir: Path) -> tuple[Path, Path, dict[str, str]]:
+                 out_dir: Path, dataset_split: str = "development",
+                 seed_registry_path: Path = DEFAULT_SEED_REGISTRY_PATH) -> tuple[Path, Path, dict[str, str]]:
     if count < 1:
         raise ValueError("task count must be >= 1")
     if scenario_id not in scenario_cfg["scenarios"]:
@@ -286,52 +358,37 @@ def generate_one(scenario_id: str, seed: int, count: int, run_id: str,
         raise ValueError(f"scenario {scenario_id} is blocked: {scenario['status']}")
     if seed < 0:
         raise ValueError("seed must be >= 0")
-    split_name = scenario_split(scenario, seed, scenario_cfg["split_strategy"])
+    split_name = scenario_split(scenario, seed, scenario_cfg["split_strategy"], dataset_split, seed_registry_path)
     validate_configs(workload_cfg, scenario_cfg)
-
-    arrival_rng = random.Random(derive_seed(seed, "arrivals"))
-    task_rng = random.Random(derive_seed(seed, "task_attributes"))
-    arrivals = arrival_times(arrival_rng, count, scenario["arrival_process"])
-    generation_end_ms = max(1, max(arrivals))
     config_hash = canonical_config_hash(workload_cfg, scenario_cfg)
     task_mix_id = scenario["task_mix_profile"]
     tasks: list[dict[str, Any]] = []
-
     urgency_default = {k: float(v["probability"]) for k, v in workload_cfg["urgency_classes"].items()}
-    for index, arrival_ms in enumerate(arrivals, start=1):
-        arrival_fraction = arrival_ms / generation_end_ms
-        profile_weights = resolve_task_mix(task_mix_id, arrival_fraction, scenario_cfg, workload_cfg)
-        app_name = weighted_choice(task_rng, profile_weights)
+
+    def build_task(index: int, local_index: int, arrival_ms: int, mix_fraction: float,
+                   task_rng: random.Random) -> dict[str, Any]:
+        weights = resolve_task_mix(task_mix_id, mix_fraction, scenario_cfg, workload_cfg)
+        app_name = weighted_choice(task_rng, weights)
         if app_name not in workload_cfg["application_profiles"]:
             raise ValueError(f"task mix references unknown application profile {app_name!r}")
         profile = workload_cfg["application_profiles"][app_name]
-        urgency_weights = profile.get("urgency_weights", urgency_default)
-        urgency = weighted_choice(task_rng, urgency_weights)
-        relative_deadline_ms = sample_spec(task_rng, workload_cfg["urgency_classes"][urgency]["relative_deadline_ms"])
+        urgency = weighted_choice(task_rng, profile.get("urgency_weights", urgency_default))
+        deadline = sample_spec(task_rng, workload_cfg["urgency_classes"][urgency]["relative_deadline_ms"])
         row: dict[str, Any] = {
             "task_id": f"{scenario_id}-s{seed:04d}-t{index:06d}",
-            "run_id": run_id,
-            "seed": seed,
-            "scenario_id": scenario_id,
+            "run_id": run_id, "seed": seed, "scenario_id": scenario_id,
             "workload_profile_id": task_mix_id,
-            "source_device_id": workload_cfg["source_devices"][(index - 1) % len(workload_cfg["source_devices"])],
-            "application_profile": app_name,
-            "urgency_class": urgency,
+            "source_device_id": workload_cfg["source_devices"][(local_index - 1) % len(workload_cfg["source_devices"])],
+            "application_profile": app_name, "urgency_class": urgency,
             "arrival_time_ms": arrival_ms,
             "input_size_bytes": sample_spec(task_rng, profile["input_size_bytes"]),
             "output_size_bytes": sample_spec(task_rng, profile["output_size_bytes"]),
             "required_mi": sample_spec(task_rng, profile["required_mi"]),
             "splittability": profile["splittability"],
-            "partition_model_id": None,
-            "partition_overhead_ms": None,
-            "merge_overhead_ms": None,
-            "input_partition_model": None,
-            "output_partition_model": None,
-            "relative_deadline_ms": relative_deadline_ms,
-            "absolute_deadline_ms": arrival_ms + relative_deadline_ms,
-            "units_version": UNITS_VERSION,
-            "config_hash": config_hash,
-            "generator_version": GENERATOR_VERSION,
+            "partition_model_id": None, "partition_overhead_ms": None, "merge_overhead_ms": None,
+            "input_partition_model": None, "output_partition_model": None,
+            "relative_deadline_ms": deadline, "absolute_deadline_ms": arrival_ms + deadline,
+            "units_version": UNITS_VERSION, "config_hash": config_hash, "generator_version": GENERATOR_VERSION,
         }
         if profile["splittability"] == "DATA_PARALLEL_DIVISIBLE":
             part = profile["partition"]
@@ -342,56 +399,77 @@ def generate_one(scenario_id: str, seed: int, count: int, run_id: str,
                 "input_partition_model": part["input_partition_model"],
                 "output_partition_model": part["output_partition_model"],
             })
-        tasks.append(row)
+        return row
+
+    if scenario_id in {"repeated_a_b_a", "repeated_aba_task_mix"}:
+        if count % 3 != 0:
+            raise ValueError("A-B-A exact replay requires task_count divisible by three")
+        phase_count = count // 3
+        arrival_template = arrival_times(
+            random.Random(derive_seed(seed, "aba_exogenous_arrivals")), phase_count,
+            scenario["arrival_process"]
+        )
+        phase_span_ms = max(1, max(arrival_template) + 1)
+        generation_end_ms = phase_span_ms * 3
+        phases = [("A", 0, 1.0 / 6.0), ("B", 1, 0.5), ("A", 2, 5.0 / 6.0)]
+        for phase_index, (regime, phase_number, mix_fraction) in enumerate(phases):
+            # Restarting A's independent RNG makes A2 an exact task-template replay.
+            phase_rng = random.Random(derive_seed(seed, f"task_attributes:{regime}"))
+            for local_index, relative_arrival in enumerate(arrival_template, start=1):
+                global_index = phase_index * phase_count + local_index
+                tasks.append(build_task(
+                    global_index, local_index, relative_arrival + phase_number * phase_span_ms,
+                    mix_fraction, phase_rng
+                ))
+    else:
+        arrivals = arrival_times(random.Random(derive_seed(seed, "arrivals")), count, scenario["arrival_process"])
+        generation_end_ms = max(1, max(arrivals))
+        task_rng = random.Random(derive_seed(seed, "task_attributes"))
+        for index, arrival_ms in enumerate(arrivals, start=1):
+            tasks.append(build_task(index, index, arrival_ms, arrival_ms / generation_end_ms, task_rng))
 
     network_profile_id = scenario["network_profile"]
     edge_profile_id = scenario["edge_capacity_profile"]
     task_mix_definition = scenario_cfg["task_mix_profiles"].get(task_mix_id)
     if task_mix_definition is None:
         task_mix_definition = workload_cfg["mix_profiles"][task_mix_id]
+    topology = scenario_cfg.get("topology_profiles", {}).get(scenario["target_topology_id"], {})
+    actual_topology_id = topology.get("actual_topology_id") or None
+    actual_topology_status = topology.get("actual_topology_status", "NOT_VERIFIED_PENDING_AYOUB_CONFIRMATION")
     manifest = {
-        "run_id": run_id,
-        "seed": seed,
-        "scenario_id": scenario_id,
-        "scenario_family": scenario["scenario_family"],
-        "scenario_status": scenario["status"],
+        "run_id": run_id, "seed": seed, "scenario_id": scenario_id,
+        "scenario_family": scenario["scenario_family"], "scenario_status": scenario["status"],
         "workload_profile_id": task_mix_id,
         "arrival_process_type": scenario["arrival_process"]["type"],
         "arrival_process_parameters_json": canonical_json(scenario["arrival_process"]),
-        "task_count": count,
-        "generation_window_end_ms": generation_end_ms,
+        "task_count": count, "generation_window_end_ms": generation_end_ms,
         "regime_timeline_json": canonical_json(expand_regimes(scenario["regimes"], generation_end_ms)),
         "network_profile_id": network_profile_id,
         "network_profile_json": canonical_json(scenario_cfg["network_profiles"][network_profile_id]),
         "edge_capacity_profile_id": edge_profile_id,
         "edge_capacity_profile_json": canonical_json(scenario_cfg["edge_capacity_profiles"][edge_profile_id]),
-        "task_mix_profile_id": task_mix_id,
-        "task_mix_profile_json": canonical_json(task_mix_definition),
-        "topology_id": scenario["topology_id"],
+        "task_mix_profile_id": task_mix_id, "task_mix_profile_json": canonical_json(task_mix_definition),
+        "target_topology_id": scenario["target_topology_id"],
+        "actual_topology_id": actual_topology_id,
+        "actual_topology_status": actual_topology_status,
         "dataset_split": split_name,
         "split_strategy_id": scenario_cfg["split_strategy"]["strategy_id"],
         "paired_seed_plan_json": canonical_json(scenario_cfg["split_strategy"]["paired_seed_plan"]),
-        "config_hash": config_hash,
-        "generator_version": GENERATOR_VERSION,
+        "config_hash": config_hash, "generator_version": GENERATOR_VERSION,
         "policy_replay_contract": (
-            "For each (run_id, scenario_id, seed), pass this exact tasks CSV and the same "
-            "exogenous simulator condition trace/config to every policy. Regime labels, "
-            "future boundaries and evaluation metadata are not policy observations."
+            "Replay this exact task CSV and the same exogenous simulator condition trace/config for every policy. "
+            "A1/A2 in A-B-A use identical task templates and relative arrival offsets; B uses a separate "
+            "workload RNG stream. Regime labels and future boundaries are metadata only."
         ),
     }
-
     out_dir.mkdir(parents=True, exist_ok=True)
     stem = f"{scenario_id}__seed_{seed:04d}"
     tasks_path = out_dir / f"{stem}_tasks.csv"
     manifest_path = out_dir / f"{stem}_scenario_manifest.csv"
     write_csv(tasks_path, TASK_FIELDS, tasks)
     write_csv(manifest_path, MANIFEST_FIELDS, [manifest])
-    hashes = {
-        "tasks_sha256": sha256_file(tasks_path),
-        "manifest_sha256": sha256_file(manifest_path),
-    }
+    hashes = {"tasks_sha256": sha256_file(tasks_path), "manifest_sha256": sha256_file(manifest_path)}
     return tasks_path, manifest_path, hashes
-
 
 def write_csv(path: Path, fields: list[str], rows: list[dict[str, Any]]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
@@ -418,9 +496,11 @@ def load_yaml(path: Path) -> dict[str, Any]:
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--scenario", default="all-core", help="Scenario ID or all-core")
-    parser.add_argument("--seed", type=int, default=7, help="Base seed for one-run dev generation")
+    parser.add_argument("--seed", type=int, default=1300, help="Explicit seed allocated in the registry")
     parser.add_argument("--seed-count", type=int, default=1,
-                        help="For all-core, generate N seeds per scenario from that split's seed band")
+                        help="Number of registry-approved seeds to generate")
+    parser.add_argument("--dataset-split", choices=sorted(ALLOWED_SPLITS), default="development")
+    parser.add_argument("--seed-registry", type=Path, default=DEFAULT_SEED_REGISTRY_PATH)
     parser.add_argument("--task-count", type=int, default=48)
     parser.add_argument("--run-id", default=None, help="Optional run ID prefix")
     parser.add_argument("--output", type=Path, default=HERE / "data" / "dev")
@@ -453,12 +533,14 @@ def main() -> int:
         scenario = scenario_cfg["scenarios"].get(scenario_id)
         if scenario is None:
             parser.error(f"unknown scenario: {scenario_id}")
-        seeds = seeds_for_scenario(scenario, scenario_cfg["split_strategy"], args.seed, args.seed_count)
+        seeds = seeds_for_scenario(scenario, scenario_cfg["split_strategy"], args.seed, args.seed_count,
+                                   args.dataset_split, args.seed_registry)
         for seed in seeds:
             run_id = (f"{args.run_id}-{scenario_id}-s{seed:04d}" if args.run_id
                       else f"{scenario_id}-seed-{seed:04d}")
             task_path, manifest_path, hashes = generate_one(
-                scenario_id, seed, args.task_count, run_id, workload_cfg, scenario_cfg, args.output
+                scenario_id, seed, args.task_count, run_id, workload_cfg, scenario_cfg, args.output,
+                args.dataset_split, args.seed_registry
             )
             item = {"scenario_id": scenario_id, "seed": seed, "run_id": run_id,
                     "tasks_path": str(task_path), "manifest_path": str(manifest_path), **hashes}
