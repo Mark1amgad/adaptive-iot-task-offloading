@@ -5,6 +5,7 @@ import math
 from typing import Any, Mapping
 
 from .offloading import ACTION_NAMES, N_OFFLOADING_ACTIONS, action_spec, legal_actions
+from .risk import RiskContext, RiskError
 
 PROTOCOL_VERSION_V2 = "2.0"
 
@@ -29,7 +30,7 @@ def _check_keys(msg: Mapping[str, Any], required: set[str], optional: set[str], 
 def parse_observation_v2(msg: Mapping[str, Any]) -> dict:
     _check_version(msg)
     _check_keys(msg, {"protocol_version", "type", "task_id", "features", "available_actions",
-                      "task_constraints"}, {"sim_time_ms"}, "observation")
+                      "task_constraints"}, {"sim_time_ms", "risk_context"}, "observation")
     if msg["type"] != "observation":
         raise V2ProtocolError("type must be observation")
     tid = msg["task_id"]
@@ -102,19 +103,27 @@ def parse_observation_v2(msg: Mapping[str, Any]) -> dict:
             value = constraints[name]
             if isinstance(value, bool) or not isinstance(value, (int, float)) or not math.isfinite(value) or value < 0:
                 raise V2ProtocolError(f"task_constraints.{name} must be finite and >= 0")
-    if msg.get("sim_time_ms") is not None:
-        value = msg["sim_time_ms"]
-        if isinstance(value, bool) or not isinstance(value, (int, float)) or not math.isfinite(value) or value < 0:
+    sim_time = msg.get("sim_time_ms")
+    if sim_time is not None:
+        if isinstance(sim_time, bool) or not isinstance(sim_time, (int, float)) or not math.isfinite(sim_time) or sim_time < 0:
             raise V2ProtocolError("sim_time_ms must be finite and >= 0")
+        sim_time = float(sim_time)
+    risk_context = None
+    if "risk_context" in msg:
+        try:
+            risk_context = RiskContext.from_dict(msg["risk_context"], features, constraints)
+        except RiskError as exc:
+            raise V2ProtocolError(f"invalid risk_context: {exc}") from exc
     return {"task_id": tid, "features": dict(features), "available_actions": tuple(ids),
-            "task_constraints": dict(constraints)}
+            "task_constraints": dict(constraints), "sim_time_ms": sim_time,
+            "risk_context": risk_context}
 
 
 def parse_action_v2(msg: Mapping[str, Any]) -> dict:
     _check_version(msg)
     _check_keys(msg, {"protocol_version", "type", "task_id", "action_id", "action",
                       "remote_tier", "remote_fraction", "local_fraction", "model_version",
-                      "mode", "epsilon"}, set(), "action")
+                      "mode", "epsilon"}, {"risk"}, "action")
     if msg["type"] != "action":
         raise V2ProtocolError("type must be action")
     try:
@@ -131,9 +140,11 @@ def parse_action_v2(msg: Mapping[str, Any]) -> dict:
             raise V2ProtocolError(f"{key} disagrees with action catalogue")
     if not isinstance(msg["task_id"], str) or not msg["task_id"]:
         raise V2ProtocolError("task_id must be non-empty")
+    if "risk" in msg and not isinstance(msg["risk"], dict):
+        raise V2ProtocolError("risk metadata must be an object")
     if not isinstance(msg["model_version"], str) or not msg["model_version"]:
         raise V2ProtocolError("model_version must be non-empty")
-    if msg["mode"] not in ("explore", "exploit", "greedy", "fallback", "baseline"):
+    if msg["mode"] not in ("explore", "exploit", "greedy", "fallback", "baseline", "risk_fallback"):
         raise V2ProtocolError("invalid action decision mode")
     eps = msg["epsilon"]
     if isinstance(eps, bool) or not isinstance(eps, (int, float)) or not math.isfinite(eps) or not 0 <= eps <= 1:
@@ -194,6 +205,8 @@ def parse_outcome_v2(msg: Mapping[str, Any]) -> dict:
         if isinstance(value, bool) or not isinstance(value, (int, float)) or not math.isfinite(value) or value < 0:
             raise V2ProtocolError(f"resource_metrics.{name} must be finite and >= 0")
         clean[name] = float(value)
+    sim_time = msg.get("sim_time_ms")
     return {"task_id": tid, "action_executed": int(spec.action), "failed": failed,
             "failure_reason": reason, "latency_ms": None if latency is None else float(latency),
-            "deadline_met": msg["deadline_met"], "resource_metrics": clean}
+            "deadline_met": msg["deadline_met"], "resource_metrics": clean,
+            "sim_time_ms": None if sim_time is None else float(sim_time)}
