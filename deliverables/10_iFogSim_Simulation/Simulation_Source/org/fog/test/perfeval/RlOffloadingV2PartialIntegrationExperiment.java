@@ -772,7 +772,10 @@ public final class RlOffloadingV2PartialIntegrationExperiment {
                 completedCount++;
                 trace.record("outcome_ack", mapOf("task_id", task.taskId,
                         "updated", ack.get("updated"), "reward", ack.get("reward"),
-                        "update_count", ack.get("update_count")));
+                        "update_count", ack.get("update_count"),
+                        "risk_calibration_updated", ack.get("risk_calibration_updated"),
+                        "risk_calibration_updates", ack.get("risk_calibration_updates"),
+                        "risk_residual_ms", ack.get("risk_residual_ms")));
             } catch (Exception error) {
                 failed = true;
                 failureReason = "outcome failed for " + task.taskId + ": " + error;
