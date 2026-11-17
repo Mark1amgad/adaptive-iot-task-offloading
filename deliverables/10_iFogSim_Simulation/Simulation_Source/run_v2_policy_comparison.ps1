@@ -56,7 +56,7 @@ $javaVersion = (Get-Content -LiteralPath (Join-Path $JdkHome 'release') |
 # Hash the actual source files used, not only Git HEAD: this also captures local edits
 # in a working tree whose commit may be behind the remote branch.
 $sourceFiles = @(
-    Get-Item -LiteralPath @($action,$plan,$contract,$experiment,$analyzer,$PSCommandPath)
+    Get-Item -LiteralPath @($action,$plan,$contract,$experiment,$analyzer,(Join-Path $simulationSource 'run_v2_policy_comparison.ps1'))
     Get-ChildItem -LiteralPath (Join-Path $rlRoot 'src') -Recurse -File -Filter '*.py'
     Get-ChildItem -LiteralPath (Join-Path $rlRoot 'config') -Recurse -File |
         Where-Object { $_.Extension -in @('.json','.yaml','.yml') }
