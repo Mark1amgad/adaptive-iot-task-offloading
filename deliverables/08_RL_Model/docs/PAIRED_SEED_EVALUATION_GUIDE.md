@@ -24,7 +24,7 @@ From the repository's Simulation_Source directory:
 
     .\run_v2_policy_comparison.ps1 -WorkloadFile $workload -ModelIn $model -RiskStateIn $risk -OutputRoot $out
 
-Repeat with a different test seed and a different immutable workload file. The runner produces one policy_comparison_summary.json per seed output root.
+Repeat with a different test seed and a different immutable workload file. The runner explicitly enables `--evaluation-mode` for every policy arm and produces one `policy_comparison_summary.json` per seed output root. In this mode, task-level failures and watchdog-censored tasks are reconciled and retained in the all-generated-task denominator; protocol errors, missing acknowledgements, and orphaned tasks still fail the run.
 
 Current policy arms are Local, Edge, Cloud, Random, and learned evaluation. This is a pilot subset; it does not implement all nine core arms in EXPERIMENT_PROTOCOL_V1.md.
 
@@ -55,7 +55,7 @@ For latency and bandwidth, negative differences mean the learner used less. For 
 - It does not yet execute A→B→A shifts or calculate recovery time / recovery miss burden.
 - It does not yet implement the full-only vs partial-enabled and risk-filter ablations.
 - The analyzer trusts the per-seed summaries' internal paired-workload checks. Preserve and inspect each raw trace and manifest; the summary file alone is not a complete provenance record.
-- Do not claim final statistical evidence until there are at least 20 distinct paired test seeds per principal scenario, all training/test boundaries are audited, and task lifecycle failures are handled without dropping tasks.
+- Do not claim final statistical evidence until there are at least 20 distinct paired test seeds per principal scenario and all training/test boundaries are audited.
 
 ## 5. Interpretation rule
 
