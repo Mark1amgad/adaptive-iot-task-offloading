@@ -56,8 +56,9 @@ $trainOutput = Join-Path $RunRoot 'train_policy'
 New-Item -ItemType Directory -Force -Path $trainOutput | Out-Null
 $trainArgs = @('-cp',$javaClasspath,'org.fog.test.perfeval.RlOffloadingV2PartialIntegrationExperiment',
     '--output',$trainOutput,'--python',$PythonExe,'--rl-root',$rlRoot,
-    '--run-id','v2-partial-learned-policy','--mode','train','--tasks','30','--inter-arrival-ms','1')
+    '--run-id','v2-partial-learned-policy','--mode','train','--tasks','30','--inter-arrival-ms','15000')
 $trainArgs += $scenarioArgs
+$trainArgs += @('--deadline-ms','20000','--watchdog-ms','1000000')
 $trainArgs += '--risk-filter'
 & $java @trainArgs
 if ($LASTEXITCODE -ne 0) { throw "iFogSim learned-policy training case failed: $LASTEXITCODE" }
