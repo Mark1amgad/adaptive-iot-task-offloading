@@ -4,7 +4,7 @@
 
 - `dev_hashes_v1_2.json`: SHA-256 values for the eight seed-1300 Development task/manifest files and canonical configuration hash.
 - `*_seed_1300_validation.json`: machine-readable validation and deterministic replay results for each current Development pair.
-- `pytest_results_v1_2.txt`: current automated test result (**41 passed**; runtime intentionally omitted so the report is reproducible).
+- `pytest_results_v1_2.txt`: current automated test result (**43 passed**; runtime intentionally omitted so the report is reproducible).
 - The matching CI workflow run is recorded in the branch's pull request and GitHub Actions.
 
 ## Historical records

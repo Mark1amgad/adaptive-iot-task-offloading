@@ -1,9 +1,10 @@
 # Abdo handoff report — synthetic workload inputs and schemas
 
 **Extension version:** 1.2.0  
-**Repository baseline:** `main` at `39d6cd448ba5a15e690ac67ff777017a445ce577` (2026-11-03 16:45:53 UTC)  
+**Historical repository baseline:** `main` at `39d6cd448ba5a15e690ac67ff777017a445ce577` (2026-11-03 16:45:53 UTC)  
+**Current integration base:** `mark/iiot-scope-transition-v1`  
 **Delivery form:** committed on `abdo/industrial-workload-replay-seed-v2`, based on `mark/iiot-scope-transition-v1`; not merged to `main`  
-**Status:** V1.2.0 implementation and generated Development samples are on the research-based feature branch; CI passed 41 tests. Actual topology verification and the complete historical seed archive audit remain external dependencies.
+**Status:** V1.2.0 implementation and generated Development samples are on the research-based feature branch; CI passed 43 tests. Actual topology verification and the complete historical seed archive audit remain external dependencies.
 
 ## 1. Completed work
 
@@ -18,7 +19,7 @@
 
 ## 2. Exact overlay files
 
-All paths below are relative to `team-work/Astta-Abdo/` in the repository and are new additive paths. Existing `README.md`, `adaptive_offloading/`, and old workspace files are not replaced.
+Paths below are scoped to `team-work/Astta-Abdo/`. The V1.2.0 branch modifies the workload configs, generator, validator, tests, schemas and documentation; regenerates the Development samples; and adds the seed registry and CI workflow. Existing simulator source, topology implementation, policy, training artifacts, ECW/SMD audit files, and other team workstreams are not replaced.
 
 ```text
 WORKLOAD_DATASET_README.md
@@ -46,11 +47,11 @@ provenance/*
 reports/*
 ```
 
-The full exact file list is recorded in `reports/OVERLAY_FILE_MANIFEST.txt` and the downloadable ZIP contains the same additive path structure.
+`reports/OVERLAY_FILE_MANIFEST.txt` is a historical V1.1 packaging inventory; use the GitHub branch comparison and pull-request file list as the authoritative V1.2 change list.
 
 ## 3. Reproduction commands
 
-Run from `team-work/Astta-Abdo/` after applying the overlay:
+Run from `team-work/Astta-Abdo/` on branch `abdo/industrial-workload-replay-seed-v2`:
 
 ```bash
 python -m pip install -r requirements.txt
@@ -72,12 +73,12 @@ Seed selection is registry-only. Seed 1300 is Development/CI only; historical se
 
 ## 4. Verification results
 
-- `pytest -q`: **41 passed** on CI for the V1.2.0 branch commit preceding the generated-data synchronization commit; the post-sync verification run is recorded in GitHub Actions.
+- `pytest -q`: **43 passed** on the V1.2.0 CI run. The workflow regenerates all eight Development pairs, validates each pair including exact A→B→A replay, runs the tests, then verifies that the committed Development inputs and reports already match the generated outputs.
 - Eight core scenarios generated; each development sample has 48 task rows and a one-row run manifest.
 - Each sample has a successful task/manifest validation and deterministic replay check; no outcome or decision records are generated.
 - All six JSON Schemas parse and validate structurally.
 - The precise task/manifest SHA-256 pairs and canonical config hash are in `reports/dev_hashes_v1_2.json`. Independent regeneration into two separate output directories reproduced all eight task hashes and all eight manifest hashes byte-for-byte; replay is also checked inside the automated tests. The canonical configuration hash is `68e2ba5ad5ab23fbbe32a418b81b14014791978eb3387a5aae3a7f6ed2641c64`.
-- The test suite includes a negative partial-action timeline check and confirms the validator rejects merge-before-branch-completion chronology. It also verifies exactly 20 unique, disjoint seed values per split band and rejects a 30-seed request while Validation remains limited to 20 seeds.
+- The test suite includes positive and negative A1/A2 replay checks, distinct B-stream checks, industrial divisibility coverage, cross-split duplicate rejection, exclusion of every historical registry seed from final Test, topology provenance validation, and the existing outcome/chronology and schema checks.
 
 `reports/pytest_results_v1_2.txt`, eight seed-1300 per-scenario validation JSON files, and `reports/dev_hashes_v1_2.json` retain the current V1.2.0 evidence. V1.1 report files remain archived and are not current inputs.
 
@@ -99,7 +100,7 @@ Seed selection is registry-only. Seed 1300 is Development/CI only; historical se
 | Network factor | Bandwidth scale 0.5; WAN uplink 90 ms vs prototype 45 ms | `PROPOSED` | Relative bandwidth factor is testable only after units established; 90 ms is a one-factor stress setting, not measured. |
 | Bandwidth units / downlink delay | raw 10,000/100,000 values have no confirmed unit; downlink unspecified | `BLOCKED` | Ayoub to verify iFogSim bandwidth unit, transfer calculation and child/downlink delay semantics. |
 | Edge capacity factor | 0.5 × 2,800 MIPS = 1,400 MIPS effective reference | `PROPOSED` | Capacity stress only on current single-edge reference; target two-Edge capacities need confirmation. |
-| Run repetitions | 20 paired seeds minimum; 30 preferred | `PROPOSED` experiment plan | Validation band currently 20; widening needed for preferred 30. No simulator runs included. |
+| Run repetitions | Not allocated | `BLOCKED` pending archive audit and approval | No Train/Validation/final Test seed is currently approved; seed 1300 is Development/CI only. No simulator runs included. |
 
 The 2,500 MI / 12,000-byte / 2,000-byte / 500-ms configuration is an existing **one-task input reference**, not an approved distribution. The pilot endpoint latencies are measurements from a one-task controlled run, not generated input parameters and not a deadline calibration dataset.
 
@@ -108,7 +109,7 @@ The 2,500 MI / 12,000-byte / 2,000-byte / 500-ms configuration is an existing **
 1. Approve or replace the proposed profile distributions, 50:50 divisibility mix, 20:50:30 urgency mix and per-class deadline brackets after Ayoub supplies nominal service-time evidence.
 2. Approve the 0.5 tasks/s steady and 2.0/0.15 tasks/s on/off load levels or provide a target offered-load range.
 3. Approve the 0.5 bandwidth/capacity stress multipliers and 90 ms one-way WAN-delay stress level.
-4. Decide whether the Validation seed band should be expanded to support 30 paired seeds; current fixed 61–80 yields the 20-seed minimum only.
+4. After local/team archive review, approve a fresh, non-overlapping Train/Validation/Test seed allocation in Registry V2; no old seed may be reused.
 5. Add the canonical `MARK_RESEARCH_SPECIFICATION_V2.md` to the repository root and confirm this extension's supplied handoff copy is the correct version.
 6. Select a project license before public distribution; repository `LICENSE_STATUS.md` currently records no selected license.
 
@@ -127,11 +128,11 @@ The 2,500 MI / 12,000-byte / 2,000-byte / 500-ms configuration is an existing **
 
 ECW and SMD are retained as separate versioned technical audit references and are not numerically sampled, concatenated, or relabelled as workload tasks. ECW channel mapping remains unknown; SMD anomaly labels remain telemetry anomaly labels, not task outcomes. Mostafa's dataset inventory is not reproduced here; its dataset audit remains the reference for candidate-source claims.
 
-## 9. Git / scope confirmation
+## 9. Git / integration scope confirmation
 
-No commits, pushes, staging, branch changes, simulator topology or queue modifications, policy changes, or model training were performed. The GitHub connection was used read-only to inspect `main`. Because the available GitHub write actions create commits and the request explicitly prohibits commits/pushes, the deliverable is supplied as an additive overlay ZIP for local application/review.
+The V1.2.0 changes are committed on `abdo/industrial-workload-replay-seed-v2`, based directly on `mark/iiot-scope-transition-v1`. The earlier PR #5 targeting `main` is not the integration route and must not be merged into `main`. A separate review PR targets the current research branch. No merge was performed. The change set does not alter simulator source, topology/queues, offloading policy, model training, or other team workstreams.
 
-## 10. Packaging correction addendum (v1.1.1)
+## 10. Historical packaging correction addendum (v1.1.1 — superseded)
 
 The original overlay archive was reported as incomplete by the recipient. The implementation was not rewritten. It has been re-extracted, checked against the complete file manifest, and repackaged with the entire additive tree plus fresh verification evidence. The corrected archive is `Astta-Abdo_Final_Workload_Dataset_Overlay_v1_1_1_COMPLETE.zip`.
 
@@ -142,7 +143,7 @@ The original overlay archive was reported as incomplete by the recipient. The im
 - Empty outcome/decision/calibration templates remain header-only. No simulator outcomes were added.
 - A fully empty virtualenv could not download dependencies because the package index was unreachable from this execution environment. The documented `pip install -r requirements.txt` command did complete successfully in the available Python environment, where both declared dependencies were already installed. Exact failure output is recorded in `reports/package_verification/fresh_venv_install_attempt.txt`.
 
-This is a packaging/verification correction only. All unverified numeric values retain their existing `PROPOSED` or `BLOCKED` designations. No simulator, policy, model, Git branch, commit or push was changed.
+This paragraph records the historical V1.1.1 local-overlay phase and is superseded by the V1.2.0 branch delivery above. All unverified numeric values retain their `PROPOSED` or `BLOCKED` designations.
 
 
 ## 12. V2 research-branch handoff correction — 17 November 2026
@@ -168,7 +169,7 @@ All workload ranges and mix proportions remain proposed synthetic configurations
 - Industrial archetypes: Predictive Maintenance indivisible inference; Visual Inspection indivisible single-image inference plus divisible frame batches; Production Monitoring indivisible single-event processing plus divisible aggregation windows.
 - Seed allocation: seed 1300 is allocated to Development/CI only. Seed 81, seeds 102–121, and other known previous-use seeds are retired. There are no approved final Test seeds; repository-visible inventory is incomplete pending local and team archive scans.
 - Topology: `target_topology_id` captures the proposed 4-IoT/2-Edge/1-Cloud target. `actual_topology_id` is null with `NOT_VERIFIED_PENDING_AYOUB_CONFIRMATION`; no implementation claim is made.
-- CI: eight scenario generation and validation, deterministic replay, and 41 automated tests passed before generated-data synchronization; the final post-synchronization run is linked in GitHub Actions and checks the same generated data commit.
+- CI: eight scenario generation and validation, deterministic replay, and 43 automated tests passed on the V1.2.0 CI run; generated Development inputs and reports are synchronized on the branch.
 - No simulator outcomes, execution decisions, performance measurements, latency, energy, or rewards are created by this workstream.
 
 All workload values remain proposed synthetic configurations, not factory measurements or industrial traces. Mark's approval of numerical profiles and Ayoub's verification of the actual topology remain prerequisites before benchmark use.
