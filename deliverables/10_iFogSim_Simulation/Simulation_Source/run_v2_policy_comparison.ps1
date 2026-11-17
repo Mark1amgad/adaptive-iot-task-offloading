@@ -63,9 +63,10 @@ $sourceFiles = @(
     Get-ChildItem -LiteralPath (Join-Path $rlRoot 'config') -Recurse -File |
         Where-Object { $_.Extension -in @('.json','.yaml','.yml') }
 ) | Sort-Object FullName -Unique
+$rootPrefix = $ProjectRoot.TrimEnd([char[]]@('\\','/')) + [IO.Path]::DirectorySeparatorChar
 $sourceInventory = @($sourceFiles | ForEach-Object {
     [ordered]@{
-        path = [IO.Path]::GetRelativePath($ProjectRoot, $_.FullName).Replace([IO.Path]::DirectorySeparatorChar, '/')
+        path = $_.FullName.Substring($rootPrefix.Length).Replace([IO.Path]::DirectorySeparatorChar, '/')
         sha256 = (Get-FileHash -Algorithm SHA256 -LiteralPath $_.FullName).Hash.ToLowerInvariant()
     }
 })
