@@ -285,7 +285,7 @@ public final class RlOffloadingV2PartialIntegrationExperiment {
         private void dispatchBranches(TaskRecord task) {
             if (task.action.isPartial())
                 registry.trace.record("partition_overhead_completed", mapOf("task_id", task.taskId,
-                        "sim_time_ms", CloudSim.clock()));
+                        "sim_time_ms", simulationTimeMs()));
             for (OffloadingActionV2ExecutionPlan.Branch branch : task.plan.branches) {
                 Tuple tuple = new Tuple(APP_ID, FogUtils.generateTupleId(), Tuple.UP,
                         branch.mi, 1, branch.inputBytes, branch.outputBytes,
@@ -383,21 +383,21 @@ public final class RlOffloadingV2PartialIntegrationExperiment {
                 TaskRecord task = registry.acceptBranchResult((Tuple) event.getData());
                 if (task != null) {
                     registry.trace.record("merge_overhead_started", mapOf("task_id", task.taskId,
-                            "duration_ms", MERGE_OVERHEAD_MS, "sim_time_ms", CloudSim.clock()));
+                            "duration_ms", MERGE_OVERHEAD_MS, "sim_time_ms", simulationTimeMs()));
                     send(getId(), MERGE_OVERHEAD_MS / 1000.0, Events.START_MERGE, task);
                 }
                 if (registry.completedCount == registry.options.tasks) registry.finishRun();
             } else if (event.getTag() == Events.START_MERGE) {
                 TaskRecord task = (TaskRecord) event.getData();
                 registry.trace.record("merge_overhead_completed", mapOf("task_id", task.taskId,
-                        "sim_time_ms", CloudSim.clock()));
+                        "sim_time_ms", simulationTimeMs()));
                 Tuple merge = registry.beginMerge(task);
                 sendNow(local.getId(), FogEvents.TUPLE_ARRIVAL, merge);
             } else if (event.getTag() == Events.MERGE_RESULT) {
                 registry.completeMerge((Tuple) event.getData());
                 if (registry.completedCount == registry.options.tasks) registry.finishRun();
             } else if (event.getTag() == Events.WATCHDOG) {
-                registry.trace.record("watchdog_fired", mapOf("sim_time_ms", CloudSim.clock()));
+                registry.trace.record("watchdog_fired", mapOf("sim_time_ms", simulationTimeMs()));
                 registry.failOutstanding("execution_horizon_exceeded");
                 if (registry.completedCount == registry.options.tasks) registry.finishRun();
             } else throw new IllegalStateException("unexpected coordinator event " + event.getTag());
@@ -586,7 +586,7 @@ public final class RlOffloadingV2PartialIntegrationExperiment {
                         "cloud_utilization", cloudUtil, "deadline_ms", workload.deadlineMs,
                         "urgency_class", workload.urgencyClass,
                         "splittability", workload.splittability, "arrival_gap_ms", workload.arrivalGapMs,
-                        "sim_time_ms", CloudSim.clock()));
+                        "sim_time_ms", simulationTimeMs()));
                 return task;
             } catch (Exception error) {
                 failed = true;
@@ -607,7 +607,7 @@ public final class RlOffloadingV2PartialIntegrationExperiment {
                     "tuple_id", branch.tupleId, "tier", branch.tier, "module", branch.module,
                     "tuple_type", spec.tupleType, "mi", branch.mi, "input_bytes", branch.inputBytes,
                     "output_bytes", branch.outputBytes,
-                    "sim_time_ms", CloudSim.clock()));
+                    "sim_time_ms", simulationTimeMs()));
         }
 
         private BranchRef resolve(Tuple tuple) {
@@ -629,7 +629,7 @@ public final class RlOffloadingV2PartialIntegrationExperiment {
                 throw new IllegalStateException("branch executed in wrong module: " + module + " expected " + branch.module);
             trace.record("execution", mapOf("task_id", ref.task.taskId, "branch", branch.name,
                     "tuple_id", branch.tupleId, "node", node, "module", module,
-                    "utilization", utilization, "sim_time_ms", CloudSim.clock()));
+                    "utilization", utilization, "sim_time_ms", simulationTimeMs()));
         }
 
         void transfer(Tuple tuple, String node, String direction, long bytes) {
@@ -640,7 +640,7 @@ public final class RlOffloadingV2PartialIntegrationExperiment {
             ref.task.transferCount++;
             trace.record("transfer", mapOf("task_id", ref.task.taskId, "branch", ref.branch.name,
                     "tuple_id", ref.branch.tupleId, "node", node, "direction", direction,
-                    "bytes", bytes, "sim_time_ms", CloudSim.clock()));
+                    "bytes", bytes, "sim_time_ms", simulationTimeMs()));
         }
 
         TaskRecord acceptBranchResult(Tuple tuple) {
@@ -657,7 +657,7 @@ public final class RlOffloadingV2PartialIntegrationExperiment {
             branch.resultArrival = CloudSim.clock();
             task.resultBranches++;
             trace.record("branch_result", mapOf("task_id", task.taskId, "branch", branch.name,
-                    "tuple_id", branch.tupleId, "sim_time_ms", CloudSim.clock()));
+                    "tuple_id", branch.tupleId, "sim_time_ms", simulationTimeMs()));
             if (!task.action.isPartial()) {
                 if (task.resultBranches != 1 || task.branches.size() != 1)
                     throw new IllegalStateException("full task branch cardinality mismatch");
@@ -668,7 +668,7 @@ public final class RlOffloadingV2PartialIntegrationExperiment {
                 if (task.mergeStarted) throw new IllegalStateException("partial barrier fired twice");
                 task.mergeStarted = true;
                 trace.record("merge_barrier", mapOf("task_id", task.taskId,
-                        "both_branches_arrived", true, "sim_time_ms", CloudSim.clock()));
+                        "both_branches_arrived", true, "sim_time_ms", simulationTimeMs()));
                 return task;
             }
             if (task.resultBranches > 2) throw new IllegalStateException("too many branch results");
@@ -694,7 +694,7 @@ public final class RlOffloadingV2PartialIntegrationExperiment {
             trace.record("merge_created", mapOf("task_id", task.taskId, "tuple_id", merge.tupleId,
                     "mi", task.workload.mergeMi, "input_bytes", task.workload.outputBytes,
                     "output_bytes", task.workload.mergeOutputBytes,
-                    "sim_time_ms", CloudSim.clock()));
+                    "sim_time_ms", simulationTimeMs()));
             return tuple;
         }
 
@@ -710,7 +710,7 @@ public final class RlOffloadingV2PartialIntegrationExperiment {
                 throw new IllegalStateException("merge result without execution or duplicated");
             merge.resultArrival = CloudSim.clock();
             trace.record("merge_result", mapOf("task_id", task.taskId, "tuple_id", merge.tupleId,
-                    "sim_time_ms", CloudSim.clock()));
+                    "sim_time_ms", simulationTimeMs()));
             double latestBranch = Math.max(task.branches.get("local").resultArrival,
                     task.branches.get(task.action.remoteTier.name().toLowerCase()).resultArrival);
             if (CloudSim.clock() < latestBranch) throw new IllegalStateException("merge completed before branch barrier");
@@ -738,7 +738,7 @@ public final class RlOffloadingV2PartialIntegrationExperiment {
                 JSONObject ack = python.request(mapOf("protocol_version", "2.0", "type", "outcome",
                         "task_id", task.taskId, "action_executed", task.action.id,
                         "status", "completed", "latency_ms", task.latency,
-                        "deadline_met", deadlineMet, "sim_time_ms", task.terminalTime,
+                        "deadline_met", deadlineMet, "sim_time_ms", task.terminalTime * 1000.0,
                         "resource_metrics", mapOf("bandwidth_bytes", task.bandwidthBytes,
                                 "energy_joules", null, "executing_node_utilization", meanUtil)));
                 requireType(ack, "outcome_ack");
@@ -775,12 +775,12 @@ public final class RlOffloadingV2PartialIntegrationExperiment {
             failedTaskCount++;
             completedCount++;
             trace.record("task_failed", mapOf("task_id", task.taskId, "action", task.action.wireName,
-                    "reason", reason, "deadline_met", false, "sim_time_ms", task.terminalTime));
+                    "reason", reason, "deadline_met", false, "sim_time_ms", task.terminalTime * 1000.0));
             try {
                 JSONObject ack = python.request(mapOf("protocol_version", "2.0", "type", "outcome",
                         "task_id", task.taskId, "action_executed", task.action.id,
                         "status", "failed", "deadline_met", false, "failure_reason", reason,
-                        "sim_time_ms", task.terminalTime,
+                        "sim_time_ms", task.terminalTime * 1000.0,
                         "resource_metrics", mapOf("bandwidth_bytes", task.bandwidthBytes,
                                 "executing_node_utilization", 0.0)));
                 requireType(ack, "outcome_ack");
