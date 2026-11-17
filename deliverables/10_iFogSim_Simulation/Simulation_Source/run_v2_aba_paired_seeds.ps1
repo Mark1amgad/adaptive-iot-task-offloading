@@ -15,6 +15,8 @@ param(
     [double]$WatchdogMs = 60000.0
 )
 $ErrorActionPreference = 'Stop'
+$rlPythonSource = Join-Path $ProjectRoot "deliverables\08_RL_Model\src"
+if ($env:PYTHONPATH) { $env:PYTHONPATH = $rlPythonSource + [IO.Path]::PathSeparator + $env:PYTHONPATH } else { $env:PYTHONPATH = $rlPythonSource }
 $simulationSource = $PSScriptRoot
 $generator = Join-Path $simulationSource 'generate_v2_aba_workload.py'
 $runner = Join-Path $simulationSource 'run_v2_policy_comparison.ps1'
