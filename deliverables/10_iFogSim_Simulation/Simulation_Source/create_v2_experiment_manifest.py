@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import argparse
+import csv
 import hashlib
 import json
 import subprocess
@@ -29,6 +30,8 @@ def main() -> int:
     parser.add_argument("--model", type=Path, required=True)
     parser.add_argument("--risk-state", type=Path, default=None)
     parser.add_argument("--risk-mode", choices=("none", "analytical", "calibrated"), default="calibrated")
+    parser.add_argument("--seed-registry", type=Path, required=True)
+    parser.add_argument("--experiment-family", required=True)
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--partition-overhead-ms", type=float, required=True)
     parser.add_argument("--merge-overhead-ms", type=float, required=True)
@@ -46,6 +49,12 @@ def main() -> int:
         raise ValueError(f"{args.risk_mode} risk mode requires --risk-state")
     if risk_path is not None and not risk_path.is_file():
         raise ValueError(f"risk state does not exist: {risk_path}")
+    registry_path = args.seed_registry.resolve()
+    if not registry_path.is_file():
+        raise ValueError(f"seed registry does not exist: {registry_path}")
+    if not args.experiment_family.strip():
+        raise ValueError("experiment family must be non-empty")
+
     rows = [json.loads(line) for line in workload_path.read_text(encoding="utf-8").splitlines() if line.strip()]
     if not rows:
         raise ValueError("workload is empty")
@@ -53,6 +62,31 @@ def main() -> int:
     profiles = {str(row.get("profile")) for row in rows}
     if len(seeds) != 1 or len(profiles) != 1:
         raise ValueError("workload rows must share one seed and one profile")
+    workload_seed = str(rows[0]["seed"])
+    with registry_path.open("r", encoding="utf-8", newline="") as handle:
+        registry_rows = list(csv.DictReader(handle))
+    required_registry_fields = {"seed", "experiment_family", "split", "status"}
+    if not registry_rows or not required_registry_fields.issubset(registry_rows[0]):
+        raise ValueError(f"seed registry must contain columns: {sorted(required_registry_fields)}")
+    family_rows = [r for r in registry_rows if r.get("experiment_family") == args.experiment_family]
+    family_seed_rows = [r for r in family_rows if r.get("seed") == workload_seed]
+    if len(family_seed_rows) != 1:
+        raise ValueError(
+            f"seed {workload_seed} must have exactly one allocation in family "
+            f"{args.experiment_family!r}; found {len(family_seed_rows)}"
+        )
+    allocation = family_seed_rows[0]
+    if allocation.get("split") != "test" or allocation.get("status") != "approved":
+        raise ValueError(
+            f"seed {workload_seed} is not approved for final test in {args.experiment_family!r}: "
+            f"split={allocation.get('split')!r}, status={allocation.get('status')!r}"
+        )
+    family_seed_counts = {}
+    for row in family_rows:
+        family_seed_counts[row.get("seed")] = family_seed_counts.get(row.get("seed"), 0) + 1
+    duplicates = sorted(seed for seed, count in family_seed_counts.items() if count > 1)
+    if duplicates:
+        raise ValueError(f"seed registry has duplicate allocations in family {args.experiment_family!r}: {duplicates}")
 
     commit = subprocess.run(
         ["git", "-C", str(root), "rev-parse", "HEAD"],
@@ -100,7 +134,10 @@ def main() -> int:
     manifest = {
         "schema_version": "v1",
         "experiment_id": args.output.name,
-        "evaluation_split": "test",
+        "evaluation_split": allocation["split"],
+        "experiment_family": args.experiment_family,
+        "seed_registry_version": registry_path.stem,
+        "seed_registry_sha256": sha256(registry_path),
         "risk_filter_mode": args.risk_mode,
         "workload_seed": rows[0]["seed"],
         "workload_profile": rows[0]["profile"],
