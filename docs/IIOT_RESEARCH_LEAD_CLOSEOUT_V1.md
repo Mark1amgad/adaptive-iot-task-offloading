@@ -234,3 +234,12 @@ The next integration action after those inputs arrive is to run the acceptance c
 
 ---
 *This document is a research-control artifact. It does not certify simulator behavior beyond the source and artifacts inspected on 2026-11-17.*
+
+
+## 13. Research-gap / TMC-7 audit update (2026-11-17)
+
+Mark has now inspected the Research Gap v29 workbook's 21-record matrix and completed a technical overlap audit of IEEE TMC paper 7 (MECTOS-MU/DGOLB) using accessible accepted-author-version text. The exact method and the limitations of the source are recorded in `docs/RESEARCH_POSITIONING_AND_TMC7_AUDIT_V1.md`.
+
+This materially narrows the claim boundary: contextual-bandit offloading, deadline-aware feasibility, load balancing under uncertainty, and partial offloading are all established directions. The proposed study should be framed as a matched empirical evaluation of the incremental value of residual calibration, unless the full equation comparison and supervisor review support a stronger contribution. The IEEE TMC final/authorized full text is still required for the project archive; the third-party repost is not an authorized substitute.
+
+The Research Gap v29 workbook is a targeted 21-record matrix, not a systematic review and not the same thing as the Core/Supporting classification in `REFERENCES_INDEX.md`.
