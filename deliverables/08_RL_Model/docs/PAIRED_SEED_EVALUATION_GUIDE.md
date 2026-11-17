@@ -61,7 +61,23 @@ The analyzer:
 
 For latency and bandwidth, negative differences mean the learner used less. For deadline-miss rate, a negative difference means fewer misses. Always interpret effect direction metric by metric. If any policy has zero completed tasks in any seed, latency inference is withheld for the entire paired batch rather than silently conditioning on a selected subset of seeds; deadline-miss and bandwidth inference remain available.
 
-## 5. What this does not yet solve
+## 5. A→B→A regime-shift pilot
+
+Generate a deterministic 30-task-per-phase A→B→A workload (90 tasks total):
+
+    python .\\generate_v2_aba_workload.py --seed 101 --tasks-per-phase 30 --output "..\\..\\..\\workloads\\test_aba_seed_101.jsonl"
+
+Then run the ordinary five-arm comparison runner with this workload, a frozen model, and its matching risk sidecar. The runner and simulator now:
+- replay the same A task template in phases A1 and A2;
+- increase task MI/input volume and arrival pressure in B while WAN latency changes from 45 ms to 220 ms;
+- restore the A task template and WAN latency at A2;
+- record each phase transition and per-task regime/WAN identity.
+
+The policy analyzer adds phase-specific deadline-miss rate, completion coverage, and completed-task latency. It reports A2 recovery as the first sliding 10-task window with all tasks completed, deadline-miss rate within 5 percentage points of A1, and median latency within 10% of A1. Recovery time runs from the A2 transition to the last completion in that qualifying window. A missing qualifying window is reported as not recovered within the observed A2 horizon.
+
+This is a joint workload/network stress pilot, not a network-only causal experiment. Run separate factor-isolation scenarios before attributing any observed effect to WAN latency alone. One seed validates execution only; the paired-seed protocol still requires at least 20 test seeds per principal scenario.
+
+## 6. What this does not yet solve
 
 - The current runner executes one seed per invocation and only the five policy arms listed above.
 - It does not yet execute A→B→A shifts or calculate recovery time / recovery miss burden.
@@ -69,6 +85,6 @@ For latency and bandwidth, negative differences mean the learner used less. For 
 - The analyzer validates each run against its manifest, but preserve and inspect raw traces and manifests; a summary alone is not a complete provenance record.
 - Do not claim final statistical evidence until there are at least 20 distinct paired test seeds per principal scenario and all training/test boundaries are audited.
 
-## 6. Interpretation rule
+## 7. Interpretation rule
 
 A lower mean latency is not sufficient if deadline misses or unresolved tasks rise. Compare on-time ratio and deadline-miss rate first, then latency conditional on completion with coverage reported beside it. The run/seed is the independent unit for inference; tasks within one simulation run are not independent replications.
