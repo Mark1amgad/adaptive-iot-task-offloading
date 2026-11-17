@@ -54,7 +54,7 @@ The registry inventory covers repository-visible history only and is marked inco
 ## Limitations
 
 - All task-size, compute, output-byte, arrival-rate, deadline and split/merge values are proposed assumptions, not validated workload measurements.
-- Four source-device IDs are logical identifiers only; mapping to four V2 IoT nodes is awaiting Ayoub's topology confirmation.
+- Four source-device IDs are logical identifiers only; the target 5-to-1 mapping across 20 V2 Edge nodes is awaiting Ayoub's topology confirmation.
 - The currently checked-in prototype describes one local, one Edge and one Cloud executor, not yet the V2 four-IoT/two-Edge/one-Cloud target.
 - Bandwidth raw-unit semantics and downlink latency are unresolved.
 - The current one-task pilot does not establish a service-time distribution or multi-task queue behaviour.
@@ -84,3 +84,10 @@ The current development dataset is generated with the registry-allocated develop
 A1 and A2 in each A-B-A generator scenario use identical task templates and relative arrival offsets, with matching A condition profiles; B uses an independent stream. The industrial profiles include indivisible image inference and indivisible production-event processing, alongside their divisible batch counterparts.
 
 The target topology is stored separately from the actual topology. The actual topology ID remains null until Ayoub confirms the deployed simulator topology. All generated parameters remain proposed synthetic configurations, not factory measurements, industrial traces or performance results. No simulator outcomes are generated.
+
+
+## 100/20/1 target topology and network contract boundary
+
+The target topology ID is `v2_target_100iot_20edge_1cloud`: logical source IDs `iot-001` through `iot-100`, 20 target Edge nodes `edge-001` through `edge-020`, and one target Cloud node `cloud-001`. The target mapping assigns five sequential IoT source IDs to each Edge node. This is a target contract only, not evidence of instantiated simulator devices or confirmed actual placement. `actual_topology_id` remains null and `actual_topology_status` remains `NOT_VERIFIED_PENDING_AYOUB_CONFIRMATION` until Ayoub verifies the implementation.
+
+Network contract items remain BLOCKED pending Ayoub confirmation: bandwidth physical units and transfer-time conversion; uplink/downlink semantics; IoT–Edge and Edge–Cloud link definitions; and measured/confirmed latency and network-shift parameters. No unconfirmed values or units are inferred.
