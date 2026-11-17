@@ -96,6 +96,20 @@ public final class OffloadingActionV2 {
             throw new IllegalArgumentException("remote_tier disagrees with action");
         requireFraction(response.get("remote_fraction"), action.remoteFraction, "remote_fraction");
         requireFraction(response.get("local_fraction"), action.localFraction(), "local_fraction");
+        Object riskRaw = response.get("risk");
+        if (riskRaw instanceof Map<?, ?>) {
+            Map<?, ?> risk = (Map<?, ?>) riskRaw;
+            if (Boolean.TRUE.equals(risk.get("filter_applied"))) {
+                if (Boolean.TRUE.equals(risk.get("no_feasible_action"))) {
+                    if (!"risk_fallback".equals(response.get("mode")))
+                        throw new IllegalArgumentException("no-feasible-site decision must use risk_fallback mode");
+                } else {
+                    Object candidates = risk.get("feasible_actions");
+                    if (!(candidates instanceof List<?>) || !((List<?>) candidates).contains(action.wireName))
+                        throw new IllegalArgumentException("selected action is outside risk-filtered feasibility mask");
+                }
+            }
+        }
         Object version = response.get("model_version");
         if (!(version instanceof String) || ((String) version).trim().isEmpty())
             throw new IllegalArgumentException("model_version must be non-empty");
