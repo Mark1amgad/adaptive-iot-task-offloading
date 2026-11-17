@@ -193,6 +193,7 @@ class V2Session:
                      **{name.lower(): index for index, name in enumerate(ACTION_NAMES)}}
             if self.policy == "random":
                 selected = self.agent.rng.choice(decision_mask)
+                mode = "baseline"
             else:
                 selected = fixed[self.policy]
                 if selected not in decision_mask:
