@@ -68,6 +68,9 @@ def main() -> int:
         simulation / "run_v2_policy_comparison.ps1",
         simulation / "generate_v2_aba_workload.py",
         simulation / "create_v2_experiment_manifest.py",
+        simulation / "analyze_v2_paired_seed_inference.py",
+        simulation / "run_v2_aba_paired_seeds.ps1",
+        simulation / "PAIRED_SEED_EVALUATION_GUIDE.md",
     ]
     source_paths.extend((rl_root / "src").rglob("*.py"))
     source_paths.extend(
