@@ -569,9 +569,11 @@ def test_manifest_keeps_target_and_actual_topology_separate(tmp_path, configs):
     assert "actual_topology_id" in header
     assert "actual_topology_status" in header
     assert "topology_id" not in header
-    assert manifest["target_topology_id"] == "v2_target_4iot_2edge_1cloud"
+    assert manifest["target_topology_id"] == "v2_target_100iot_20edge_1cloud"
     assert manifest["actual_topology_id"] == ""
     assert manifest["actual_topology_status"] == "NOT_VERIFIED_PENDING_AYOUB_CONFIRMATION"
+    assert json.loads(manifest["target_topology_tier_counts_json"]) == {"IOT": 100, "EDGE": 20, "CLOUD": 1}
+    assert len(json.loads(manifest["target_device_mapping_json"])) == 20
 
 def test_aba_validator_rejects_changed_network_or_workload_exogenous_inputs(tmp_path, configs):
     wc, sc = configs
@@ -592,3 +594,40 @@ def test_aba_validator_rejects_changed_network_or_workload_exogenous_inputs(tmp_
         manifest[profile_field] = json.dumps(profile)
         errors = val.validate_aba_exogenous_profiles(manifest)
         assert any("A1/A2" in error and "exogenous configuration values differ" in error for error in errors)
+
+
+def test_target_topology_contract_is_exactly_100_iot_20_edge_1_cloud(configs):
+    wc, sc = configs
+    gen.validate_configs(wc, sc)
+    target = sc["topology_profiles"]["v2_target_100iot_20edge_1cloud"]
+    expected_sources = [f"iot-{i:03d}" for i in range(1, 101)]
+    assert target["tier_counts"] == {"IOT": 100, "EDGE": 20, "CLOUD": 1}
+    assert target["source_devices"] == expected_sources
+    assert wc["source_devices"] == expected_sources
+    mapping = target["target_device_mapping"]
+    assert len(mapping) == 20
+    assert all(len(devices) == 5 for devices in mapping.values())
+    assert [device for devices in mapping.values() for device in devices] == expected_sources
+    assert target["actual_topology_id"] is None
+    assert target["actual_topology_status"] == "NOT_VERIFIED_PENDING_AYOUB_CONFIRMATION"
+    workload_target = wc["topology_references"]["v2_target_100iot_20edge_1cloud"]
+    assert workload_target["device_counts"] == {"iot_devices": 100, "edge_nodes": 20, "cloud_nodes": 1}
+    assert workload_target["target_device_mapping"] == mapping
+
+
+def test_generator_rejects_legacy_or_incorrect_topology_contract(configs):
+    wc, sc = configs
+    broken = json.loads(json.dumps(sc))
+    broken["topology_profiles"]["v2_target_100iot_20edge_1cloud"]["tier_counts"] = {
+        "IOT": 4, "EDGE": 2, "CLOUD": 1
+    }
+    with pytest.raises(ValueError, match="tier_counts must be exactly"):
+        gen.validate_configs(wc, broken)
+
+
+def test_generator_rejects_legacy_source_device_list(configs):
+    wc, sc = configs
+    broken = json.loads(json.dumps(wc))
+    broken["source_devices"] = ["iot-01", "iot-02", "iot-03", "iot-04"]
+    with pytest.raises(ValueError, match="exactly iot-001 through iot-100"):
+        gen.validate_configs(broken, sc)
