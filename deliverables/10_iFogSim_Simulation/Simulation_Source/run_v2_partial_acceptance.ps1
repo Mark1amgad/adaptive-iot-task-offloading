@@ -58,6 +58,7 @@ $trainArgs = @('-cp',$javaClasspath,'org.fog.test.perfeval.RlOffloadingV2Partial
     '--output',$trainOutput,'--python',$PythonExe,'--rl-root',$rlRoot,
     '--run-id','v2-partial-learned-policy','--mode','train','--tasks','30','--inter-arrival-ms','1')
 $trainArgs += $scenarioArgs
+$trainArgs += '--risk-filter'
 & $java @trainArgs
 if ($LASTEXITCODE -ne 0) { throw "iFogSim learned-policy training case failed: $LASTEXITCODE" }
 $faultOutput = Join-Path $RunRoot 'failure_drop_edge'
