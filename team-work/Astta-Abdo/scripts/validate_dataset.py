@@ -298,6 +298,16 @@ def validate_manifest(path: Path, task_rows: list[dict[str, str]],
         errors.append(f"seed registry validation failed: {exc}")
     if not manifest.get("target_topology_id"):
         errors.append("target_topology_id is required")
+    try:
+        target_counts = json.loads(manifest.get("target_topology_tier_counts_json", "{}"))
+        target_mapping = json.loads(manifest.get("target_device_mapping_json", "{}"))
+        expected_mapping = {f"edge-{index:03d}": [f"iot-{source:03d}" for source in range((index-1)*5+1, index*5+1)] for index in range(1, 21)}
+        if target_counts != {"IOT": 100, "EDGE": 20, "CLOUD": 1}:
+            errors.append("manifest target topology tier counts must be exactly 100/20/1")
+        if target_mapping != expected_mapping:
+            errors.append("manifest target device mapping must assign five IoT IDs to each of 20 Edge nodes")
+    except (TypeError, ValueError):
+        errors.append("manifest target topology contract JSON is invalid")
     if not manifest.get("actual_topology_status"):
         errors.append("actual_topology_status is required")
     if manifest.get("actual_topology_id", "") not in ("", "null") and not manifest.get("actual_topology_status", "").startswith("CONFIRMED"):
