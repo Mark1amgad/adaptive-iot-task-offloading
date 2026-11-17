@@ -222,7 +222,7 @@ class V2Session:
         self.pending[tid] = PendingV2(
             state_index=state,
             features=obs["features"],
-            mask=legal_mask,
+            mask=decision_mask,
             action_id=selected,
             model_version=version,
             predicted_completion_ms=predictions,
