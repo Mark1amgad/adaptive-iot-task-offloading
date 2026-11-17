@@ -243,3 +243,17 @@ Mark has now inspected the Research Gap v29 workbook's 21-record matrix and comp
 This materially narrows the claim boundary: contextual-bandit offloading, deadline-aware feasibility, load balancing under uncertainty, and partial offloading are all established directions. The proposed study should be framed as a matched empirical evaluation of the incremental value of residual calibration, unless the full equation comparison and supervisor review support a stronger contribution. The IEEE TMC final/authorized full text is still required for the project archive; the third-party repost is not an authorized substitute.
 
 The Research Gap v29 workbook is a targeted 21-record matrix, not a systematic review and not the same thing as the Core/Supporting classification in `REFERENCES_INDEX.md`.
+
+
+## 14. Historical A→B→A batch validity correction (2026-11-17)
+
+The archived 20-run A→B→A result bundle uses seed IDs 102–121. These IDs were already used in the earlier generic A→B→A work, so the bundle is now explicitly classified as **exploratory pilot evidence**, not an untouched confirmatory test set. Its original manifests still say `evaluation_split=test`, but the manifest builder hardcodes that field and does not consult a versioned seed registry. The label therefore does not establish split isolation.
+
+Mark added:
+- `docs/EXPERIMENTAL_EVIDENCE_VALIDITY_AUDIT_2026-11-17.md` — evidence classification, limitations, and required next steps;
+- `research/experiments/SEED_REGISTRY_V1.csv` — an initial historical seed-use inventory, not yet complete and with no approved final test allocation;
+- corrections to the A→B→A report, guide, and result-bundle README to prevent the reused IDs from being described as held-out test evidence.
+
+The batch's descriptive metrics and reproducibility checks are preserved. Its inferential outputs must be labelled exploratory. The PowerShell batch wrapper no longer defaults to seeds 102–121 and blocks known reused IDs for new runs. This is a partial safety guard, not a substitute for the remaining complete seed-registry gate: the experiment machine's local archive and all team run records must still be inventoried, the registry completed and hashed, and manifest/inference validation updated to enforce registry membership.
+
+The next Mark-owned implementation gate remains the matched frozen-learner P1/P2/P3 calibration ablation. The five-arm Local/Edge/Cloud/Random/RL bundle cannot isolate the incremental effect of residual calibration.
