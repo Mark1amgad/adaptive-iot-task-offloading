@@ -68,7 +68,8 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          python -m pytest -q 2>&1 | tee reports/pytest_results_v1_2.txt
+          python -m pytest -q 2>&1 | tee /tmp/pytest_results_v1_2.raw
+          tail -n 1 /tmp/pytest_results_v1_2.raw | sed -E 's/ in [0-9.]+s$//' > reports/pytest_results_v1_2.txt
 
       - name: Commit regenerated development-only dataset and verification reports
         if: success() && github.event_name == 'push' && github.ref == 'refs/heads/abdo/industrial-workload-replay-seed-v2'

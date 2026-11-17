@@ -72,7 +72,7 @@ Seed selection is registry-only. Seed 1300 is Development/CI only; historical se
 
 ## 4. Verification results
 
-- `pytest -q`: **41 passed in 1.99s** on CI for the V1.2.0 branch commit preceding the generated-data synchronization commit; the post-sync verification run is recorded in GitHub Actions.
+- `pytest -q`: **41 passed** on CI for the V1.2.0 branch commit preceding the generated-data synchronization commit; the post-sync verification run is recorded in GitHub Actions.
 - Eight core scenarios generated; each development sample has 48 task rows and a one-row run manifest.
 - Each sample has a successful task/manifest validation and deterministic replay check; no outcome or decision records are generated.
 - All six JSON Schemas parse and validate structurally.
