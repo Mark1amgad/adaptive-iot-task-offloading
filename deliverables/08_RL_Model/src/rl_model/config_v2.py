@@ -8,6 +8,7 @@ from pathlib import Path
 from .agent_v2 import V2AgentConfig
 from .config import FeatureConfig, RewardConfig
 from .state import StateSpace
+from .risk import RiskConfig
 
 
 @dataclass(frozen=True)
@@ -15,6 +16,7 @@ class V2RuntimeConfig:
     space: StateSpace
     agent: V2AgentConfig
     reward: RewardConfig
+    risk: RiskConfig
 
     @classmethod
     def load(cls, path: str | Path) -> "V2RuntimeConfig":
@@ -26,6 +28,7 @@ class V2RuntimeConfig:
             if "fallback_order" in agent_raw:
                 agent_raw["fallback_order"] = tuple(agent_raw["fallback_order"])
             return cls(StateSpace(features), V2AgentConfig(**agent_raw),
-                       RewardConfig.from_dict(raw["reward"]))
+                       RewardConfig.from_dict(raw["reward"]),
+                       RiskConfig.from_dict(raw.get("risk", {})))
         except (OSError, json.JSONDecodeError, KeyError, TypeError, ValueError) as exc:
             raise ValueError(f"invalid v2 configuration: {exc}") from exc
