@@ -10,6 +10,8 @@ param(
     [string]$OutputRoot = '',
     [int[]]$Seeds = @(102..121),
     [int]$TasksPerPhase = 30,
+    [ValidateSet('combined','network_only','workload_only')][string]$ShiftMode = 'combined',
+    [double]$FixedDeadlineMs = 0.0,
     [double]$PartitionOverheadMs = 3.0,
     [double]$MergeOverheadMs = 2.0,
     [double]$WanLatencyMs = 45.0,
@@ -20,13 +22,15 @@ $simulationSource = $PSScriptRoot
 $generator = Join-Path $simulationSource 'generate_v2_aba_workload.py'
 $runner = Join-Path $simulationSource 'run_v2_policy_comparison.ps1'
 $inference = Join-Path $simulationSource 'analyze_v2_paired_seed_inference.py'
+$regimeInference = Join-Path $simulationSource 'analyze_v2_aba_regime_inference.py'
 if (-not $RiskStateIn) { $RiskStateIn = "$ModelIn.risk.json" }
-foreach ($required in @($generator,$runner,$inference,$PythonExe,$InferencePythonExe,$ModelIn,$RiskStateIn,(Join-Path $JdkHome 'bin\javac.exe'),(Join-Path $IFogSimRoot 'jars'))) {
+foreach ($required in @($generator,$runner,$inference,$regimeInference,$PythonExe,$InferencePythonExe,$ModelIn,$RiskStateIn,(Join-Path $JdkHome 'bin\javac.exe'),(Join-Path $IFogSimRoot 'jars'))) {
     if (-not (Test-Path $required)) { throw "Required file not found: $required" }
 }
 if ($Seeds.Count -lt 2) { throw 'At least two distinct test seeds are required.' }
 if (($Seeds | Select-Object -Unique).Count -ne $Seeds.Count) { throw 'Seed list contains duplicates.' }
 if ($TasksPerPhase -lt 10) { throw 'TasksPerPhase must be at least 10.' }
+if ($FixedDeadlineMs -lt 0) { throw 'FixedDeadlineMs must be zero (legacy profile) or positive.' }
 if (-not $OutputRoot) {
     $OutputRoot = Join-Path $ProjectRoot ('audit_output\aba_paired_' + (Get-Date -Format 'yyyyMMdd_HHmmss'))
 }
@@ -40,8 +44,10 @@ foreach ($seed in $Seeds) {
     $runIndex++
     $workload = Join-Path $workloads ("aba_seed_{0}.jsonl" -f $seed)
     $evaluationRoot = Join-Path $evaluations ("seed_{0}" -f $seed)
-    Write-Host ("[{0}/{1}] Generating A-B-A workload for seed {2}" -f $runIndex,$Seeds.Count,$seed)
-    & $PythonExe $generator --seed $seed --tasks-per-phase $TasksPerPhase --output $workload
+    Write-Host ("[{0}/{1}] Generating {2} A-B-A workload for seed {3} (fixed deadline: {4} ms)" -f $runIndex,$Seeds.Count,$ShiftMode,$seed,$FixedDeadlineMs)
+    $generatorArgs = @('--seed',$seed,'--tasks-per-phase',$TasksPerPhase,'--output',$workload,'--shift-mode',$ShiftMode)
+    if ($FixedDeadlineMs -gt 0) { $generatorArgs += @('--fixed-deadline-ms',$FixedDeadlineMs) }
+    & $PythonExe $generator @generatorArgs
     if ($LASTEXITCODE -ne 0) { throw "Workload generation failed for seed $seed" }
     Write-Host ("[{0}/{1}] Running five paired policy arms for seed {2}" -f $runIndex,$Seeds.Count,$seed)
     & $runner -ProjectRoot $ProjectRoot -IFogSimRoot $IFogSimRoot -PythonExe $PythonExe -JdkHome $JdkHome -WorkloadFile $workload -ModelIn $ModelIn -RiskStateIn $RiskStateIn -OutputRoot $evaluationRoot -PartitionOverheadMs $PartitionOverheadMs -MergeOverheadMs $MergeOverheadMs -WanLatencyMs $WanLatencyMs -WatchdogMs $WatchdogMs
@@ -51,7 +57,10 @@ foreach ($seed in $Seeds) {
     $summaryPaths += $summary
 }
 $inferenceOutput = Join-Path $OutputRoot 'paired_seed_inference.json'
-Write-Host "All per-seed policy comparisons completed. Running paired-seed inference."
+$regimeOutput = Join-Path $OutputRoot 'aba_regime_inference.json'
+Write-Host "All per-seed policy comparisons completed. Running paired-seed and regime inference."
 & $InferencePythonExe $inference @summaryPaths --output $inferenceOutput
 if ($LASTEXITCODE -ne 0) { throw 'Paired-seed inference failed.' }
+& $InferencePythonExe $regimeInference @summaryPaths --output $regimeOutput
+if ($LASTEXITCODE -ne 0) { throw 'A-B-A regime inference failed.' }
 Write-Host "PASS: paired-seed A-B-A batch completed. Artifacts: $OutputRoot"

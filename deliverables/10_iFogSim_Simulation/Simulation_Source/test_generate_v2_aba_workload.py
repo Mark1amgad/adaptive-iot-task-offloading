@@ -37,6 +37,34 @@ class AbaWorkloadTests(unittest.TestCase):
         self.assertEqual(MODULE.build(123, 10), MODULE.build(123, 10))
         self.assertNotEqual(MODULE.build(123, 10), MODULE.build(124, 10))
 
+    def test_network_only_holds_task_workload_constant(self):
+        rows = MODULE.build(17, 10, shift_mode="network_only", fixed_deadline_ms=15000)
+        a, b, returned = rows[:10], rows[10:20], rows[20:30]
+        fields = ("task_mi", "input_bytes", "output_bytes", "deadline_ms", "urgency_class")
+        for left, middle, right in zip(a, b, returned):
+            self.assertEqual(tuple(left[k] for k in fields), tuple(middle[k] for k in fields))
+            self.assertEqual(tuple(left[k] for k in fields), tuple(right[k] for k in fields))
+        self.assertEqual({x["wan_latency_ms"] for x in a + returned}, {45.0})
+        self.assertEqual({x["wan_latency_ms"] for x in b}, {160.0})
+        self.assertEqual({x["profile"] for x in rows}, {"aba_network_only_fixed_deadline_v1"})
+
+    def test_workload_only_holds_network_constant(self):
+        rows = MODULE.build(17, 10, shift_mode="workload_only", fixed_deadline_ms=15000)
+        a, b = rows[:10], rows[10:20]
+        self.assertEqual({x["wan_latency_ms"] for x in rows}, {45.0})
+        self.assertEqual({x["deadline_ms"] for x in rows}, {15000.0})
+        self.assertGreater(sum(x["task_mi"] for x in b), sum(x["task_mi"] for x in a))
+        self.assertGreater(sum(x["input_bytes"] for x in b), sum(x["input_bytes"] for x in a))
+        self.assertLess(sum(x["arrival_gap_ms"] for x in b[1:]), sum(x["arrival_gap_ms"] for x in a[1:]))
+        self.assertEqual({x["profile"] for x in rows}, {"aba_workload_only_fixed_deadline_v1"})
+
+    def test_combined_fixed_deadline_removes_deadline_relaxation(self):
+        rows = MODULE.build(17, 10, shift_mode="combined", fixed_deadline_ms=15000)
+        self.assertEqual({x["deadline_ms"] for x in rows}, {15000.0})
+        self.assertEqual({x["wan_latency_ms"] for x in rows[:10]}, {45.0})
+        self.assertEqual({x["wan_latency_ms"] for x in rows[10:20]}, {160.0})
+        self.assertGreater(sum(x["task_mi"] for x in rows[10:20]), sum(x["task_mi"] for x in rows[:10]))
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -69,6 +69,9 @@ def main() -> int:
         simulation / "generate_v2_aba_workload.py",
         simulation / "create_v2_experiment_manifest.py",
         simulation / "analyze_v2_paired_seed_inference.py",
+        simulation / "analyze_v2_aba_regime_inference.py",
+        simulation / "test_aba_regime_inference.py",
+        simulation / "test_generate_v2_aba_workload.py",
         simulation / "run_v2_aba_paired_seeds.ps1",
         simulation / "PAIRED_SEED_EVALUATION_GUIDE.md",
     ]

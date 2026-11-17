@@ -27,3 +27,15 @@ The 20-seed minimum is a protocol floor, not a guarantee of adequate statistical
 ## Scope
 
 This batch tests the combined workload-and-network shift already defined by `aba_network_load_v1`. It does not isolate network-only and workload-only effects. Those require separate frozen workload profiles and should be reported as distinct experiments.
+
+## Controlled shift profiles
+
+The workload generator supports three controlled modes with an optional fixed deadline:
+
+- `combined`: workload and WAN shift together; with `--fixed-deadline-ms 15000`, deadline relaxation is removed.
+- `network_only`: task MI, input/output sizes, arrival pattern, urgency, and deadline remain fixed; only WAN latency changes A→B→A.
+- `workload_only`: MI, input bytes, and arrival gaps shift in B; WAN latency and deadline remain fixed.
+
+For controlled pilots use `run_v2_aba_paired_seeds.ps1 -ShiftMode network_only -FixedDeadlineMs 15000` or `workload_only`. Use a distinct output root per profile. The legacy default (`combined` with no fixed deadline) preserves the original profile for reproducibility.
+
+The batch wrapper now writes both `paired_seed_inference.json` and `aba_regime_inference.json`; the latter analyzes A1/B/A2 deadline misses and paired A2 recovery times.
