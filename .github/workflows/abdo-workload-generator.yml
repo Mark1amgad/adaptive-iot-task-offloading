@@ -87,7 +87,7 @@ jobs:
         with:
           name: abdo-industrial-workload-dev
           path: |
-            team-work/Astta-Abdo/data/dev/
-            team-work/Astta-Abdo/reports/dev_hashes_v1_1.json
-            team-work/Astta-Abdo/reports/*__seed_*_validation.json
+            team-work/Astta-Abdo/
+          if-no-files-found: error
+          include-hidden-files: true
           if-no-files-found: error
