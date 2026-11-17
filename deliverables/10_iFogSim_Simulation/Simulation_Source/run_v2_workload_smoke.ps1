@@ -44,8 +44,11 @@ $javaClasspath = "$classes;$classpath"
 if ($LASTEXITCODE -ne 0) { throw "Java contract tests failed: $LASTEXITCODE" }
 $runOutput = Join-Path $OutputRoot 'train_policy'
 New-Item -ItemType Directory -Force -Path $runOutput | Out-Null
-& $java -cp $javaClasspath org.fog.test.perfeval.RlOffloadingV2PartialIntegrationExperiment --output $runOutput --python $PythonExe --rl-root $rlRoot --run-id ("v2-workload-seed-" + $Seed) --mode train --workload $workloadFile --partition-overhead-ms $PartitionOverheadMs --merge-overhead-ms $MergeOverheadMs --wan-latency-ms $WanLatencyMs --watchdog-ms $WatchdogMs
+& $java -cp $javaClasspath org.fog.test.perfeval.RlOffloadingV2PartialIntegrationExperiment --output $runOutput --python $PythonExe --rl-root $rlRoot --run-id ("v2-workload-seed-" + $Seed) --mode train --workload $workloadFile --partition-overhead-ms $PartitionOverheadMs --merge-overhead-ms $MergeOverheadMs --wan-latency-ms $WanLatencyMs --watchdog-ms $WatchdogMs --risk-filter
 if ($LASTEXITCODE -ne 0) { throw "Variable-workload iFogSim run failed: $LASTEXITCODE" }
+if (-not (Test-Path (Join-Path $runOutput 'python_model.json.risk.json'))) {
+    throw "Risk calibration state was not saved by the training run."
+}
 & $PythonExe $validator --root $OutputRoot
 if ($LASTEXITCODE -ne 0) { throw "Variable-workload validation failed: $LASTEXITCODE" }
 Write-Host "PASS: variable workload run completed. Artifacts: $OutputRoot"
