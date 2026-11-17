@@ -3,6 +3,7 @@ param(
     [string]$ProjectRoot = (Resolve-Path (Join-Path $PSScriptRoot '..\..\..')).Path,
     [string]$IFogSimRoot = 'C:\Users\DELL\OneDrive\Desktop\Research\iFogSim',
     [string]$PythonExe = 'C:\Users\DELL\AppData\Roaming\uv\python\cpython-3.15.0b1-windows-x86_64-none\python.exe',
+    [string]$InferencePythonExe = 'C:\Users\DELL\Python313\python.exe',
     [string]$JdkHome = 'C:\Program Files\Eclipse Adoptium\jdk-25.0.3.9-hotspot',
     [string]$ModelIn = 'C:\Users\DELL\OneDrive\Desktop\Research\adaptive-iot-task-offloading\audit_output\aba_pilot_seed_101_20261117\training\python_model.json',
     [string]$RiskStateIn = '',
