@@ -853,7 +853,7 @@ public final class RlOffloadingV2PartialIntegrationExperiment {
                     Branch merge = task.branches.get("merge");
                     if (local == null || remote == null || merge == null || !task.mergeStarted)
                         throw new IllegalStateException("partial merge lifecycle missing");
-                    if (merge.executionStart + 1e-9 < Math.max(local.resultArrival, remote.resultArrival) + MERGE_OVERHEAD_MS)
+                    if (merge.executionStart + 1e-9 < Math.max(local.resultArrival, remote.resultArrival) + MERGE_OVERHEAD_MS / 1000.0)
                         throw new IllegalStateException("merge started before both branch results");
                 }
             }
