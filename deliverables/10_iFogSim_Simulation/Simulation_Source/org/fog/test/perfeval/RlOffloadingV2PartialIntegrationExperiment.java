@@ -552,8 +552,8 @@ public final class RlOffloadingV2PartialIntegrationExperiment {
                                         "downlink_path", cloudPath)));
                 Map<String, Object> observation = mapOf("protocol_version", "2.0", "type", "observation",
                         "task_id", taskId, "features", features, "available_actions", mask,
-                        "task_constraints", constraints, "risk_context", riskContext,
-                        "sim_time_ms", CloudSim.clock());
+                        "task_constraints", constraints, "sim_time_ms", CloudSim.clock());
+                if (options.riskFilter) observation.put("risk_context", riskContext);
                 JSONObject response = python.request(observation);
                 requireType(response, "action");
                 OffloadingActionV2.Action action = OffloadingActionV2.validateResponse(
@@ -913,6 +913,9 @@ public final class RlOffloadingV2PartialIntegrationExperiment {
             if ("eval".equals(options.mode)) {
                 command.add("--model-in"); command.add(options.modelIn.toString());
             }
+            if (options.riskStateIn != null) {
+                command.add("--risk-state-in"); command.add(options.riskStateIn.toString());
+            }
             command.add("--model-out"); command.add(options.output.resolve("python_model.json").toString());
             ProcessBuilder pb = new ProcessBuilder(command);
             pb.directory(options.rlRoot.toFile());
@@ -984,7 +987,8 @@ public final class RlOffloadingV2PartialIntegrationExperiment {
     }
 
     private static final class Options {
-        Path output, python, rlRoot, workloadFile, modelIn;
+        Path output, python, rlRoot, workloadFile, modelIn, riskStateIn;
+        boolean riskFilter;
         List<WorkloadTask> workload = new ArrayList<WorkloadTask>();
         boolean tasksExplicit;
         String runId;
@@ -1008,9 +1012,11 @@ public final class RlOffloadingV2PartialIntegrationExperiment {
             o.rlRoot = cwd.resolve("deliverables/08_RL_Model");
             o.runId = "v2-partial";
             o.action = null;
-            for (int i = 0; i < args.length; i += 2) {
-                if (i + 1 >= args.length) throw new IllegalArgumentException("missing value for " + args[i]);
-                String key = args[i], value = args[i + 1];
+            for (int i = 0; i < args.length;) {
+                String key = args[i++];
+                if ("--risk-filter".equals(key)) { o.riskFilter = true; continue; }
+                if (i >= args.length) throw new IllegalArgumentException("missing value for " + key);
+                String value = args[i++];
                 if ("--output".equals(key)) o.output = Path.of(value).toAbsolutePath();
                 else if ("--python".equals(key)) o.python = Path.of(value).toAbsolutePath();
                 else if ("--rl-root".equals(key)) o.rlRoot = Path.of(value).toAbsolutePath();
@@ -1019,6 +1025,7 @@ public final class RlOffloadingV2PartialIntegrationExperiment {
                 else if ("--action".equals(key)) o.action = OffloadingActionV2.Action.fromName(value);
                 else if ("--policy".equals(key)) o.policy = value.toLowerCase();
                 else if ("--model-in".equals(key)) o.modelIn = Path.of(value).toAbsolutePath();
+                else if ("--risk-state-in".equals(key)) o.riskStateIn = Path.of(value).toAbsolutePath();
                 else if ("--drop-branch".equals(key)) o.dropBranch = value;
                 else if ("--tasks".equals(key)) { o.tasks = Integer.parseInt(value); o.tasksExplicit = true; }
                 else if ("--workload".equals(key)) o.workloadFile = Path.of(value).toAbsolutePath();
