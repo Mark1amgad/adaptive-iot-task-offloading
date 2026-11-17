@@ -22,7 +22,7 @@ def configs():
 @pytest.fixture
 def generated(tmp_path, configs):
     workload_cfg, scenario_cfg = configs
-    return gen.generate_one("stable_steady", 17, 80, "stable_steady-seed-0017", workload_cfg, scenario_cfg, tmp_path)
+    return gen.generate_one("stable_steady", 1300, 80, "stable_steady-seed-01300", workload_cfg, scenario_cfg, tmp_path)
 
 
 def rows_for(path: Path):
@@ -39,7 +39,7 @@ def test_deterministic_replay_hashes_and_validator(generated, configs):
     task_path, manifest_path, expected = generated
     workload_cfg, scenario_cfg = configs
     replay_tasks, replay_manifest, actual = gen.generate_one(
-        "stable_steady", 17, 80, "stable_steady-seed-0017", workload_cfg, scenario_cfg,
+        "stable_steady", 1300, 80, "stable_steady-seed-01300", workload_cfg, scenario_cfg,
         task_path.parent / "replay"
     )
     assert actual == expected
@@ -50,52 +50,52 @@ def test_deterministic_replay_hashes_and_validator(generated, configs):
                                ROOT / "configs/scenario_profiles.yaml") == []
 
 
-def test_all_principal_scenarios_generate_and_split_by_family_seed(tmp_path, configs):
+def test_all_principal_scenarios_generate_in_registered_development_split(tmp_path, configs):
     workload_cfg, scenario_cfg = configs
-    split_seed = {"train": 19, "validation": 61, "test": 81}
-    seen_splits = set()
-    seen_divisibility = set()
     scenario_ids = [k for k, v in scenario_cfg["scenarios"].items()
                     if not k.endswith("_optional") and not v["status"].startswith("BLOCKED")]
     assert len(scenario_ids) == 8
     for scenario_id in scenario_ids:
-        scenario = scenario_cfg["scenarios"][scenario_id]
-        split = next(x for x in ("train", "validation", "test")
-                     if scenario["family"] in scenario_cfg["split_strategy"][f"{x}_families"])
-        seed = split_seed[split]
         task_path, manifest_path, _ = gen.generate_one(
-            scenario_id, seed, 120, f"{scenario_id}-s{seed}", workload_cfg, scenario_cfg,
-            tmp_path / scenario_id
+            scenario_id, 1300, 48, f"{scenario_id}-s01300", workload_cfg, scenario_cfg,
+            tmp_path / scenario_id, "development"
         )
         _, task_rows = val.read_csv(task_path)
         _, manifest_rows = val.read_csv(manifest_path)
-        errors, summary = val.validate_tasks(task_path)
-        assert not errors, errors
+        task_errors, _ = val.validate_tasks(task_path)
+        assert not task_errors
         assert not val.validate_manifest(manifest_path, task_rows)
-        seen_divisibility.update(r["splittability"] for r in task_rows)
-        seen_splits.add(manifest_rows[0]["dataset_split"])
-    assert seen_divisibility == {"INDIVISIBLE", "DATA_PARALLEL_DIVISIBLE"}
-    assert seen_splits == {"train", "validation", "test"}
+        assert manifest_rows[0]["dataset_split"] == "development"
+        assert manifest_rows[0]["seed"] == "1300"
 
 
-def test_seed_schedule_has_twenty_disjoint_seeds_per_split(configs):
-    _, scenario_cfg = configs
-    bands = scenario_cfg["split_strategy"]
-    examples = {
-        "train": scenario_cfg["scenarios"]["stable_steady"],
-        "validation": scenario_cfg["scenarios"]["reduced_bandwidth"],
-        "test": scenario_cfg["scenarios"]["task_size_compute_shift"],
-    }
-    all_seeds = []
-    for split, scenario in examples.items():
-        seeds = gen.seeds_for_scenario(scenario, bands, 0, 20)
-        low, high = bands["seed_bands"][split]
-        assert len(seeds) == 20
-        assert seeds == list(range(low, low+20))
-        all_seeds.extend(seeds)
-    assert len(all_seeds) == len(set(all_seeds))
-    with pytest.raises(ValueError, match="only 20 seeds"):
-        gen.seeds_for_scenario(examples["validation"], bands, 0, 30)
+def test_seed_registry_rejects_cross_split_reuse():
+    rows = [
+        {"seed": "777", "experiment_family": "dev", "split": "development", "status": "allocated", "source": "test"},
+        {"seed": "777", "experiment_family": "heldout", "split": "test", "status": "approved", "source": "test"},
+    ]
+    assert any("cross-split seed reuse" in error for error in gen.validate_seed_registry_rows(rows))
+
+
+def test_historical_seed_81_is_not_eligible_for_final_test():
+    registry = gen.read_seed_registry()
+    row = next(item for item in registry if item["seed"] == "81")
+    assert row["split"] == "development"
+    assert row["status"] == "retired"
+    errors = gen.validate_seed_allocation(81, "test", registry)
+    assert errors and any("registered for development" in error for error in errors)
+
+
+def test_no_final_test_seed_is_approved_yet():
+    registry = gen.read_seed_registry()
+    assert not any(row["split"] == "test" and row["status"] == "approved" for row in registry)
+
+
+def test_proposed_calibration_seed_range_is_not_allocated_or_approved():
+    registry = gen.read_seed_registry()
+    proposed = [row for row in registry if 2050 <= int(row["seed"]) <= 2069]
+    assert proposed == []
+    assert not any(row["split"] == "test" and row["status"] == "approved" for row in registry)
 
 
 def test_deadlines_are_positive_predecision_and_profile_urgency_based(generated):
@@ -128,20 +128,20 @@ def test_both_divisibility_classes_and_declared_partition_rules(generated):
 def test_task_mix_shift_really_contains_heavier_profile_mix(tmp_path, configs):
     wc, sc = configs
     task_path, manifest_path, _ = gen.generate_one(
-        "task_size_compute_shift", 81, 300, "task-size-shift-81", wc, sc, tmp_path
+        "task_size_compute_shift", 1300, 300, "task-size-shift-1300", wc, sc, tmp_path
     )
     _, rows = val.read_csv(task_path)
     _, manifest = val.read_csv(manifest_path)
     profiles = {r["application_profile"] for r in rows}
-    assert "BULK_VIDEO_FRAME_BATCH" in profiles
-    assert "LARGE_PARALLEL_SENSOR_AGGREGATION" in profiles
+    assert "VISUAL_INSPECTION_BULK_FRAME_BATCH" in profiles
+    assert "PRODUCTION_MONITORING_LARGE_AGGREGATION" in profiles
     assert json.loads(manifest[0]["regime_timeline_json"])[1]["policy_observation"] is False
 
 
 def test_aba_scenario_manifest_is_a_b_a(tmp_path, configs):
     wc, sc = configs
     _, manifest_path, _ = gen.generate_one(
-        "repeated_a_b_a", 82, 120, "repeated-aba-82", wc, sc, tmp_path
+        "repeated_a_b_a", 1300, 120, "repeated-aba-1300", wc, sc, tmp_path
     )
     _, rows = val.read_csv(manifest_path)
     regimes = json.loads(rows[0]["regime_timeline_json"])
@@ -461,13 +461,13 @@ def test_partial_outcome_event_order_is_enforced(tmp_path, generated):
 def test_optional_blocked_scenario_cannot_generate(tmp_path, configs):
     wc, sc = configs
     with pytest.raises(ValueError, match="blocked"):
-        gen.generate_one("unseen_topology_optional", 81, 10, "blocked", wc, sc, tmp_path)
+        gen.generate_one("unseen_topology_optional", 1300, 10, "blocked", wc, sc, tmp_path)
 
 
 def test_schema_required_fields_match_generated_and_header_only_csvs():
     mappings = {
-        "tasks": ROOT / "data/dev/stable_steady__seed_0007_tasks.csv",
-        "scenario_manifest": ROOT / "data/dev/stable_steady__seed_0007_scenario_manifest.csv",
+        "tasks": ROOT / "data/dev/stable_steady__seed_1300_tasks.csv",
+        "scenario_manifest": ROOT / "data/dev/stable_steady__seed_1300_scenario_manifest.csv",
         "decision_contexts": ROOT / "data/dev/schemas_only/decision_contexts.csv",
         "decisions": ROOT / "data/dev/schemas_only/decisions.csv",
         "task_outcomes": ROOT / "data/dev/schemas_only/task_outcomes.csv",
@@ -487,10 +487,154 @@ def test_json_schemas_are_valid_json_and_present():
 def test_generator_cli_all_core_is_reproducible(tmp_path):
     import subprocess
     args = [sys.executable, str(ROOT / "scripts/generate_workloads.py"), "--scenario", "all-core",
-            "--task-count", "12", "--seed", "7", "--output", str(tmp_path)]
+            "--task-count", "12", "--seed", "1300", "--dataset-split", "development", "--output", str(tmp_path)]
     first = subprocess.run(args, capture_output=True, text=True, check=True)
     hashes_first = sorted(line.split("sha256=")[-1] for line in first.stdout.splitlines() if "sha256=" in line)
     second = subprocess.run(args, capture_output=True, text=True, check=True)
     hashes_second = sorted(line.split("sha256=")[-1] for line in second.stdout.splitlines() if "sha256=" in line)
     assert hashes_first == hashes_second
     assert len(hashes_first) == 16  # eight core scenarios x tasks + manifests
+
+@pytest.mark.parametrize("scenario_id", ["repeated_a_b_a", "repeated_aba_task_mix"])
+def test_aba_a1_a2_are_exact_task_and_exogenous_replays(tmp_path, configs, scenario_id):
+    wc, sc = configs
+    task_path, manifest_path, _ = gen.generate_one(
+        scenario_id, 1300, 120, f"{scenario_id}-exact-aba", wc, sc, tmp_path
+    )
+    _, tasks = val.read_csv(task_path)
+    _, manifests = val.read_csv(manifest_path)
+    regimes = json.loads(manifests[0]["regime_timeline_json"])
+    assert [item["regime_id"] for item in regimes] == ["A", "B", "A"]
+    assert val.validate_aba_exact_replay(tasks, regimes) == []
+    assert val.validate_aba_exogenous_profiles(manifests[0]) == []
+    phase_rows = [[row for row in tasks if int(item["start_time_ms"]) <= int(row["arrival_time_ms"]) < int(item["end_time_ms"])] for item in regimes]
+    a1, b, a2 = phase_rows
+    assert len(a1) == len(b) == len(a2) == 40
+    for left, right in zip(a1, a2):
+        for field in ("source_device_id", "application_profile", "urgency_class", "input_size_bytes",
+                      "output_size_bytes", "required_mi", "splittability", "partition_model_id",
+                      "partition_overhead_ms", "merge_overhead_ms", "input_partition_model",
+                      "output_partition_model", "relative_deadline_ms"):
+            assert left[field] == right[field]
+        assert int(left["arrival_time_ms"]) - int(regimes[0]["start_time_ms"]) == (
+            int(right["arrival_time_ms"]) - int(regimes[2]["start_time_ms"])
+        )
+    assert regimes[0]["condition_profile_id"] == regimes[2]["condition_profile_id"]
+    assert [(r["application_profile"], r["required_mi"]) for r in a1] != [
+        (r["application_profile"], r["required_mi"]) for r in b
+    ]
+    if scenario_id == "repeated_aba_task_mix":
+        b_profiles = {row["application_profile"] for row in b}
+        assert "VISUAL_INSPECTION_BULK_FRAME_BATCH" in b_profiles
+        assert "PRODUCTION_MONITORING_LARGE_AGGREGATION" in b_profiles
+
+
+def test_aba_validator_detects_changed_a2_task_template(tmp_path, configs):
+    wc, sc = configs
+    tasks_path, manifest_path, _ = gen.generate_one(
+        "repeated_a_b_a", 1300, 120, "aba-negative-replay", wc, sc, tmp_path
+    )
+    _, tasks = val.read_csv(tasks_path)
+    _, manifests = val.read_csv(manifest_path)
+    regimes = json.loads(manifests[0]["regime_timeline_json"])
+    a2_start = int(regimes[2]["start_time_ms"])
+    next(row for row in tasks if int(row["arrival_time_ms"]) >= a2_start)["input_size_bytes"] = "999999"
+    assert any("A1/A2 task templates" in err for err in val.validate_aba_exact_replay(tasks, regimes))
+
+
+def test_industrial_archetypes_cover_indivisible_and_divisible_forms(configs):
+    profiles = configs[0]["application_profiles"]
+    expected = {
+        "PREDICTIVE_MAINTENANCE_INFERENCE": "INDIVISIBLE",
+        "VISUAL_INSPECTION_SINGLE_IMAGE_INFERENCE": "INDIVISIBLE",
+        "VISUAL_INSPECTION_FRAME_BATCH": "DATA_PARALLEL_DIVISIBLE",
+        "PRODUCTION_MONITORING_SINGLE_EVENT": "INDIVISIBLE",
+        "PRODUCTION_MONITORING_AGGREGATION": "DATA_PARALLEL_DIVISIBLE",
+        "VISUAL_INSPECTION_BULK_FRAME_BATCH": "DATA_PARALLEL_DIVISIBLE",
+        "PRODUCTION_MONITORING_LARGE_AGGREGATION": "DATA_PARALLEL_DIVISIBLE",
+    }
+    for name, kind in expected.items():
+        assert profiles[name]["splittability"] == kind
+
+def test_every_historical_seed_is_excluded_from_final_test():
+    registry = gen.read_seed_registry()
+    historical = [row for row in registry if row["status"] == "retired"]
+    assert historical
+    for row in historical:
+        errors = gen.validate_seed_allocation(int(row["seed"]), "test", registry)
+        assert errors, f"historical seed {row['seed']} was unexpectedly eligible for final Test"
+
+
+def test_manifest_keeps_target_and_actual_topology_separate(tmp_path, configs):
+    wc, sc = configs
+    _, manifest_path, _ = gen.generate_one(
+        "stable_steady", 1300, 12, "topology-provenance-check", wc, sc, tmp_path
+    )
+    header, manifests = val.read_csv(manifest_path)
+    manifest = manifests[0]
+    assert "target_topology_id" in header
+    assert "actual_topology_id" in header
+    assert "actual_topology_status" in header
+    assert "topology_id" not in header
+    assert manifest["target_topology_id"] == "v2_target_100iot_20edge_1cloud"
+    assert manifest["actual_topology_id"] == ""
+    assert manifest["actual_topology_status"] == "NOT_VERIFIED_PENDING_AYOUB_CONFIRMATION"
+    assert json.loads(manifest["target_topology_tier_counts_json"]) == {"IOT": 100, "EDGE": 20, "CLOUD": 1}
+    assert len(json.loads(manifest["target_device_mapping_json"])) == 20
+
+def test_aba_validator_rejects_changed_network_or_workload_exogenous_inputs(tmp_path, configs):
+    wc, sc = configs
+    for scenario_id, profile_field, nested_key in (
+        ("repeated_a_b_a", "network_profile_json", "bandwidth_scale"),
+        ("repeated_aba_task_mix", "task_mix_profile_json", "weights"),
+    ):
+        _, manifest_path, _ = gen.generate_one(
+            scenario_id, 1300, 120, f"{scenario_id}-exogenous-negative", wc, sc, tmp_path
+        )
+        _, rows = val.read_csv(manifest_path)
+        manifest = rows[0]
+        profile = json.loads(manifest[profile_field])
+        if nested_key == "bandwidth_scale":
+            profile["regimes"][2][nested_key] = 0.75
+        else:
+            profile["regimes"][2][nested_key]["PREDICTIVE_MAINTENANCE_INFERENCE"] += 0.01
+        manifest[profile_field] = json.dumps(profile)
+        errors = val.validate_aba_exogenous_profiles(manifest)
+        assert any("A1/A2" in error and "exogenous configuration values differ" in error for error in errors)
+
+
+def test_target_topology_contract_is_exactly_100_iot_20_edge_1_cloud(configs):
+    wc, sc = configs
+    gen.validate_configs(wc, sc)
+    target = sc["topology_profiles"]["v2_target_100iot_20edge_1cloud"]
+    expected_sources = [f"iot-{i:03d}" for i in range(1, 101)]
+    assert target["tier_counts"] == {"IOT": 100, "EDGE": 20, "CLOUD": 1}
+    assert target["source_devices"] == expected_sources
+    assert wc["source_devices"] == expected_sources
+    mapping = target["target_device_mapping"]
+    assert len(mapping) == 20
+    assert all(len(devices) == 5 for devices in mapping.values())
+    assert [device for devices in mapping.values() for device in devices] == expected_sources
+    assert target["actual_topology_id"] is None
+    assert target["actual_topology_status"] == "NOT_VERIFIED_PENDING_AYOUB_CONFIRMATION"
+    workload_target = wc["topology_references"]["v2_target_100iot_20edge_1cloud"]
+    assert workload_target["device_counts"] == {"iot_devices": 100, "edge_nodes": 20, "cloud_nodes": 1}
+    assert workload_target["target_device_mapping"] == mapping
+
+
+def test_generator_rejects_legacy_or_incorrect_topology_contract(configs):
+    wc, sc = configs
+    broken = json.loads(json.dumps(sc))
+    broken["topology_profiles"]["v2_target_100iot_20edge_1cloud"]["tier_counts"] = {
+        "IOT": 4, "EDGE": 2, "CLOUD": 1
+    }
+    with pytest.raises(ValueError, match="tier_counts must be exactly"):
+        gen.validate_configs(wc, broken)
+
+
+def test_generator_rejects_legacy_source_device_list(configs):
+    wc, sc = configs
+    broken = json.loads(json.dumps(wc))
+    broken["source_devices"] = ["iot-01", "iot-02", "iot-03", "iot-04"]
+    with pytest.raises(ValueError, match="exactly iot-001 through iot-100"):
+        gen.validate_configs(broken, sc)

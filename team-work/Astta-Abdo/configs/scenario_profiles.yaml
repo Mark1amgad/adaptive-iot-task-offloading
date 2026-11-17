@@ -1,12 +1,13 @@
 spec_version: "1.1.0"
 config_status: PROPOSED_UNTIL_MARK_APPROVAL
 split_strategy:
-  strategy_id: disjoint_scenario_family_and_seed_bands_v2
-  method: disjoint_scenario_family_and_seed_bands
+  strategy_id: explicit_seed_registry_no_reuse_v3
+  method: registry_only_explicit_allocation
   train_families: [stable, bursty]
   validation_families: [network_bandwidth, network_wan_delay, edge_capacity]
   test_families: [task_mix_shift, repeated_aba, combined_stress, unseen_topology]
-  seed_bands: {train: [1, 60], validation: [61, 80], test: [81, 120]}
+  seed_registry_path: ../../research/experiments/SEED_REGISTRY_V2.csv
+  final_test_allocation_status: NONE_APPROVED
   paired_seed_plan:
     minimum_paired_seeds_per_principal_scenario: 20
     preferred_paired_seeds_per_principal_scenario: 30
@@ -18,13 +19,156 @@ split_strategy:
 
 # The V2 target layout is not yet demonstrated in the checked-in one-task prototype.
 topology_profiles:
-  v2_target_4iot_2edge_1cloud:
-    topology_id: v2_target_4iot_2edge_1cloud
-    status: PROPOSED_PENDING_AYOUB_VERIFICATION
-    source_devices: [iot-01, iot-02, iot-03, iot-04]
-    tier_counts: {LOCAL: 4, EDGE: 2, CLOUD: 1}
-    capacity_mips: BLOCKED_NOT_SUPPLIED_FOR_V2_TARGET
-    note: "Target specification only; not asserted to be implemented in current simulator source."
+  v2_target_100iot_20edge_1cloud:
+    target_topology_id: v2_target_100iot_20edge_1cloud
+    actual_topology_id: null
+    actual_topology_status: NOT_VERIFIED_PENDING_AYOUB_CONFIRMATION
+    status: PROPOSED_TARGET_CONTRACT_PENDING_AYOUB_VERIFICATION
+    tier_counts: {IOT: 100, EDGE: 20, CLOUD: 1}
+    source_devices:
+      - iot-001
+      - iot-002
+      - iot-003
+      - iot-004
+      - iot-005
+      - iot-006
+      - iot-007
+      - iot-008
+      - iot-009
+      - iot-010
+      - iot-011
+      - iot-012
+      - iot-013
+      - iot-014
+      - iot-015
+      - iot-016
+      - iot-017
+      - iot-018
+      - iot-019
+      - iot-020
+      - iot-021
+      - iot-022
+      - iot-023
+      - iot-024
+      - iot-025
+      - iot-026
+      - iot-027
+      - iot-028
+      - iot-029
+      - iot-030
+      - iot-031
+      - iot-032
+      - iot-033
+      - iot-034
+      - iot-035
+      - iot-036
+      - iot-037
+      - iot-038
+      - iot-039
+      - iot-040
+      - iot-041
+      - iot-042
+      - iot-043
+      - iot-044
+      - iot-045
+      - iot-046
+      - iot-047
+      - iot-048
+      - iot-049
+      - iot-050
+      - iot-051
+      - iot-052
+      - iot-053
+      - iot-054
+      - iot-055
+      - iot-056
+      - iot-057
+      - iot-058
+      - iot-059
+      - iot-060
+      - iot-061
+      - iot-062
+      - iot-063
+      - iot-064
+      - iot-065
+      - iot-066
+      - iot-067
+      - iot-068
+      - iot-069
+      - iot-070
+      - iot-071
+      - iot-072
+      - iot-073
+      - iot-074
+      - iot-075
+      - iot-076
+      - iot-077
+      - iot-078
+      - iot-079
+      - iot-080
+      - iot-081
+      - iot-082
+      - iot-083
+      - iot-084
+      - iot-085
+      - iot-086
+      - iot-087
+      - iot-088
+      - iot-089
+      - iot-090
+      - iot-091
+      - iot-092
+      - iot-093
+      - iot-094
+      - iot-095
+      - iot-096
+      - iot-097
+      - iot-098
+      - iot-099
+      - iot-100
+    edge_node_ids: [edge-001, edge-002, edge-003, edge-004, edge-005, edge-006, edge-007, edge-008, edge-009, edge-010, edge-011, edge-012, edge-013, edge-014, edge-015, edge-016, edge-017, edge-018, edge-019, edge-020]
+    target_device_mapping:
+      edge-001: [iot-001, iot-002, iot-003, iot-004, iot-005]
+      edge-002: [iot-006, iot-007, iot-008, iot-009, iot-010]
+      edge-003: [iot-011, iot-012, iot-013, iot-014, iot-015]
+      edge-004: [iot-016, iot-017, iot-018, iot-019, iot-020]
+      edge-005: [iot-021, iot-022, iot-023, iot-024, iot-025]
+      edge-006: [iot-026, iot-027, iot-028, iot-029, iot-030]
+      edge-007: [iot-031, iot-032, iot-033, iot-034, iot-035]
+      edge-008: [iot-036, iot-037, iot-038, iot-039, iot-040]
+      edge-009: [iot-041, iot-042, iot-043, iot-044, iot-045]
+      edge-010: [iot-046, iot-047, iot-048, iot-049, iot-050]
+      edge-011: [iot-051, iot-052, iot-053, iot-054, iot-055]
+      edge-012: [iot-056, iot-057, iot-058, iot-059, iot-060]
+      edge-013: [iot-061, iot-062, iot-063, iot-064, iot-065]
+      edge-014: [iot-066, iot-067, iot-068, iot-069, iot-070]
+      edge-015: [iot-071, iot-072, iot-073, iot-074, iot-075]
+      edge-016: [iot-076, iot-077, iot-078, iot-079, iot-080]
+      edge-017: [iot-081, iot-082, iot-083, iot-084, iot-085]
+      edge-018: [iot-086, iot-087, iot-088, iot-089, iot-090]
+      edge-019: [iot-091, iot-092, iot-093, iot-094, iot-095]
+      edge-020: [iot-096, iot-097, iot-098, iot-099, iot-100]
+    mapping_status: TARGET_CONTRACT_NOT_ACTUAL_PENDING_AYOUB_CONFIRMATION
+    capacity_by_device: BLOCKED_NOT_SUPPLIED
+    note: >-
+      Target contract only. Five logical IoT sources are assigned to each target
+      Edge node. This is not an assertion of instantiated simulator devices or
+      confirmed actual placement; Ayoub must verify implementation.
+
+network_contract:
+  status: BLOCKED_PENDING_AYOUB_CONFIRMATION
+  bandwidth_physical_unit: BLOCKED_NOT_CONFIRMED
+  bandwidth_transfer_time_conversion: BLOCKED_NOT_CONFIRMED
+  uplink_semantics: BLOCKED_NOT_CONFIRMED
+  downlink_semantics: BLOCKED_NOT_CONFIRMED
+  iot_edge_link_definition: BLOCKED_NOT_CONFIRMED
+  edge_cloud_link_definition: BLOCKED_NOT_CONFIRMED
+  target_link_latency_values: BLOCKED_NOT_CONFIRMED
+  network_shift_parameters: BLOCKED_NOT_CONFIRMED
+  note: >-
+    Existing 2 ms / 45 ms values and scenario shift factors are prototype/reference
+    or proposed synthetic settings only. They are not confirmed V2 target link
+    parameters and must not be assigned physical bandwidth units without Ayoub.
 
 scenarios:
   stable_steady:
@@ -34,7 +178,7 @@ scenarios:
     network_profile: nominal_reference_v1
     edge_capacity_profile: nominal_reference_v1
     task_mix_profile: balanced_v1
-    topology_id: v2_target_4iot_2edge_1cloud
+    target_topology_id: v2_target_100iot_20edge_1cloud
     regimes: [{regime_id: A, start_fraction: 0.0, end_fraction: 1.0, condition_profile_id: nominal_reference_v1}]
     status: PROPOSED
   bursty_on_off:
@@ -44,7 +188,7 @@ scenarios:
     network_profile: nominal_reference_v1
     edge_capacity_profile: nominal_reference_v1
     task_mix_profile: balanced_v1
-    topology_id: v2_target_4iot_2edge_1cloud
+    target_topology_id: v2_target_100iot_20edge_1cloud
     regimes: [{regime_id: A, start_fraction: 0.0, end_fraction: 1.0, condition_profile_id: nominal_reference_v1}]
     status: PROPOSED
   reduced_bandwidth:
@@ -54,7 +198,7 @@ scenarios:
     network_profile: reduced_bandwidth_B_v1
     edge_capacity_profile: nominal_reference_v1
     task_mix_profile: balanced_v1
-    topology_id: v2_target_4iot_2edge_1cloud
+    target_topology_id: v2_target_100iot_20edge_1cloud
     regimes: [{regime_id: B, start_fraction: 0.0, end_fraction: 1.0, condition_profile_id: reduced_bandwidth_B_v1}]
     status: PROPOSED
   increased_wan_delay:
@@ -64,7 +208,7 @@ scenarios:
     network_profile: increased_wan_delay_B_v1
     edge_capacity_profile: nominal_reference_v1
     task_mix_profile: balanced_v1
-    topology_id: v2_target_4iot_2edge_1cloud
+    target_topology_id: v2_target_100iot_20edge_1cloud
     regimes: [{regime_id: B, start_fraction: 0.0, end_fraction: 1.0, condition_profile_id: increased_wan_delay_B_v1}]
     status: PROPOSED
   reduced_edge_capacity:
@@ -74,7 +218,7 @@ scenarios:
     network_profile: nominal_reference_v1
     edge_capacity_profile: reduced_edge_capacity_B_v1
     task_mix_profile: balanced_v1
-    topology_id: v2_target_4iot_2edge_1cloud
+    target_topology_id: v2_target_100iot_20edge_1cloud
     regimes: [{regime_id: B, start_fraction: 0.0, end_fraction: 1.0, condition_profile_id: reduced_edge_capacity_B_v1}]
     status: PROPOSED
   task_size_compute_shift:
@@ -84,7 +228,7 @@ scenarios:
     network_profile: nominal_reference_v1
     edge_capacity_profile: nominal_reference_v1
     task_mix_profile: task_size_compute_A_B_v1
-    topology_id: v2_target_4iot_2edge_1cloud
+    target_topology_id: v2_target_100iot_20edge_1cloud
     regimes: [{regime_id: A, start_fraction: 0.0, end_fraction: 0.5, condition_profile_id: nominal_reference_v1}, {regime_id: B, start_fraction: 0.5, end_fraction: 1.0, condition_profile_id: heavy_shift_B_v1}]
     status: PROPOSED
   repeated_a_b_a:
@@ -94,7 +238,7 @@ scenarios:
     network_profile: repeated_aba_bandwidth_v1
     edge_capacity_profile: nominal_reference_v1
     task_mix_profile: balanced_v1
-    topology_id: v2_target_4iot_2edge_1cloud
+    target_topology_id: v2_target_100iot_20edge_1cloud
     regimes: [{regime_id: A, start_fraction: 0.0, end_fraction: 0.3333333333, condition_profile_id: nominal_reference_v1}, {regime_id: B, start_fraction: 0.3333333333, end_fraction: 0.6666666667, condition_profile_id: reduced_bandwidth_B_v1}, {regime_id: A, start_fraction: 0.6666666667, end_fraction: 1.0, condition_profile_id: nominal_reference_v1}]
     status: PROPOSED
   repeated_aba_task_mix:
@@ -104,7 +248,7 @@ scenarios:
     network_profile: nominal_reference_v1
     edge_capacity_profile: nominal_reference_v1
     task_mix_profile: repeated_aba_task_mix_v1
-    topology_id: v2_target_4iot_2edge_1cloud
+    target_topology_id: v2_target_100iot_20edge_1cloud
     regimes: [{regime_id: A, start_fraction: 0.0, end_fraction: 0.3333333333, condition_profile_id: balanced_v1}, {regime_id: B, start_fraction: 0.3333333333, end_fraction: 0.6666666667, condition_profile_id: heavy_shift_B_v1}, {regime_id: A, start_fraction: 0.6666666667, end_fraction: 1.0, condition_profile_id: balanced_v1}]
     status: PROPOSED
   combined_stress_optional:
@@ -114,7 +258,7 @@ scenarios:
     network_profile: reduced_bandwidth_B_v1
     edge_capacity_profile: reduced_edge_capacity_B_v1
     task_mix_profile: task_size_compute_A_B_v1
-    topology_id: v2_target_4iot_2edge_1cloud
+    target_topology_id: v2_target_100iot_20edge_1cloud
     regimes: [{regime_id: STRESS, start_fraction: 0.0, end_fraction: 1.0, condition_profile_id: combined_stress_optional}
     ]
     status: PROPOSED_OPTIONAL
@@ -125,7 +269,7 @@ scenarios:
     network_profile: nominal_reference_v1
     edge_capacity_profile: unseen_capacity_BLOCKED_v1
     task_mix_profile: balanced_v1
-    topology_id: unseen_topology_not_instantiated
+    target_topology_id: unseen_topology_not_instantiated
     regimes: [{regime_id: UNSEEN, start_fraction: 0.0, end_fraction: 1.0, condition_profile_id: unseen_capacity_BLOCKED_v1}]
     status: BLOCKED_TOPOLOGY_NOT_VERIFIED
 
@@ -175,19 +319,19 @@ edge_capacity_profiles:
 # A/B profiles intentionally change characteristics only; regime IDs remain manifest-only.
 task_mix_profiles:
   balanced_v1:
-    profile_weights: {SENSOR_INFERENCE: 0.50, VIDEO_FRAME_BATCH: 0.25, PARALLEL_SENSOR_AGGREGATION: 0.25}
+    profile_weights: {PREDICTIVE_MAINTENANCE_INFERENCE: 0.20, VISUAL_INSPECTION_SINGLE_IMAGE_INFERENCE: 0.15, VISUAL_INSPECTION_FRAME_BATCH: 0.15, PRODUCTION_MONITORING_SINGLE_EVENT: 0.15, PRODUCTION_MONITORING_AGGREGATION: 0.35}
     status: PROPOSED
   heavy_shift_B_v1:
-    profile_weights: {SENSOR_INFERENCE: 0.20, BULK_VIDEO_FRAME_BATCH: 0.40, LARGE_PARALLEL_SENSOR_AGGREGATION: 0.40}
+    profile_weights: {PREDICTIVE_MAINTENANCE_INFERENCE: 0.10, VISUAL_INSPECTION_SINGLE_IMAGE_INFERENCE: 0.10, VISUAL_INSPECTION_FRAME_BATCH: 0.15, PRODUCTION_MONITORING_SINGLE_EVENT: 0.10, PRODUCTION_MONITORING_AGGREGATION: 0.15, VISUAL_INSPECTION_BULK_FRAME_BATCH: 0.20, PRODUCTION_MONITORING_LARGE_AGGREGATION: 0.20}
     status: PROPOSED
   task_size_compute_A_B_v1:
     regimes:
-      - {from_fraction: 0.0, to_fraction: 0.5, weights: {SENSOR_INFERENCE: 0.50, VIDEO_FRAME_BATCH: 0.25, PARALLEL_SENSOR_AGGREGATION: 0.25}}
-      - {from_fraction: 0.5, to_fraction: 1.0, weights: {SENSOR_INFERENCE: 0.20, BULK_VIDEO_FRAME_BATCH: 0.40, LARGE_PARALLEL_SENSOR_AGGREGATION: 0.40}}
+      - {from_fraction: 0.0, to_fraction: 0.5, weights: {PREDICTIVE_MAINTENANCE_INFERENCE: 0.20, VISUAL_INSPECTION_SINGLE_IMAGE_INFERENCE: 0.15, VISUAL_INSPECTION_FRAME_BATCH: 0.15, PRODUCTION_MONITORING_SINGLE_EVENT: 0.15, PRODUCTION_MONITORING_AGGREGATION: 0.35}}
+      - {from_fraction: 0.5, to_fraction: 1.0, weights: {PREDICTIVE_MAINTENANCE_INFERENCE: 0.10, VISUAL_INSPECTION_SINGLE_IMAGE_INFERENCE: 0.10, VISUAL_INSPECTION_FRAME_BATCH: 0.15, PRODUCTION_MONITORING_SINGLE_EVENT: 0.10, PRODUCTION_MONITORING_AGGREGATION: 0.15, VISUAL_INSPECTION_BULK_FRAME_BATCH: 0.20, PRODUCTION_MONITORING_LARGE_AGGREGATION: 0.20}}
     status: PROPOSED
   repeated_aba_task_mix_v1:
     regimes:
-      - {from_fraction: 0.0, to_fraction: 0.3333333333, weights: {SENSOR_INFERENCE: 0.50, VIDEO_FRAME_BATCH: 0.25, PARALLEL_SENSOR_AGGREGATION: 0.25}}
-      - {from_fraction: 0.3333333333, to_fraction: 0.6666666667, weights: {SENSOR_INFERENCE: 0.20, BULK_VIDEO_FRAME_BATCH: 0.40, LARGE_PARALLEL_SENSOR_AGGREGATION: 0.40}}
-      - {from_fraction: 0.6666666667, to_fraction: 1.0, weights: {SENSOR_INFERENCE: 0.50, VIDEO_FRAME_BATCH: 0.25, PARALLEL_SENSOR_AGGREGATION: 0.25}}
+      - {from_fraction: 0.0, to_fraction: 0.3333333333, weights: {PREDICTIVE_MAINTENANCE_INFERENCE: 0.20, VISUAL_INSPECTION_SINGLE_IMAGE_INFERENCE: 0.15, VISUAL_INSPECTION_FRAME_BATCH: 0.15, PRODUCTION_MONITORING_SINGLE_EVENT: 0.15, PRODUCTION_MONITORING_AGGREGATION: 0.35}}
+      - {from_fraction: 0.3333333333, to_fraction: 0.6666666667, weights: {PREDICTIVE_MAINTENANCE_INFERENCE: 0.10, VISUAL_INSPECTION_SINGLE_IMAGE_INFERENCE: 0.10, VISUAL_INSPECTION_FRAME_BATCH: 0.15, PRODUCTION_MONITORING_SINGLE_EVENT: 0.10, PRODUCTION_MONITORING_AGGREGATION: 0.15, VISUAL_INSPECTION_BULK_FRAME_BATCH: 0.20, PRODUCTION_MONITORING_LARGE_AGGREGATION: 0.20}}
+      - {from_fraction: 0.6666666667, to_fraction: 1.0, weights: {PREDICTIVE_MAINTENANCE_INFERENCE: 0.20, VISUAL_INSPECTION_SINGLE_IMAGE_INFERENCE: 0.15, VISUAL_INSPECTION_FRAME_BATCH: 0.15, PRODUCTION_MONITORING_SINGLE_EVENT: 0.15, PRODUCTION_MONITORING_AGGREGATION: 0.35}}
     status: PROPOSED

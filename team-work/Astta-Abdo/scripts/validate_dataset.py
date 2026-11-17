@@ -172,7 +172,78 @@ def _check_json_field(row: dict[str, str], field: str, errors: list[str], expect
         return None
 
 
-def validate_manifest(path: Path, task_rows: list[dict[str, str]]) -> list[str]:
+def validate_aba_exact_replay(task_rows: list[dict[str, str]],
+                              regimes: list[dict[str, Any]]) -> list[str]:
+    """Require exact A1/A2 task-template and relative-arrival replay."""
+    if len(regimes) != 3 or [r.get("regime_id") for r in regimes] != ["A", "B", "A"]:
+        return ["A-B-A replay requires exactly A, B, A regimes"]
+    errors: list[str] = []
+    phases: list[list[dict[str, str]]] = []
+    for regime in regimes:
+        start, end = int(regime["start_time_ms"]), int(regime["end_time_ms"])
+        phases.append([r for r in task_rows if start <= int(r["arrival_time_ms"]) < end])
+    a1, b, a2 = phases
+    if not a1 or not b or not a2:
+        return ["A-B-A replay requires non-empty A1, B and A2 task phases"]
+    if len(a1) != len(a2):
+        errors.append("A1/A2 task counts differ")
+    fields = ("source_device_id", "application_profile", "urgency_class", "input_size_bytes",
+              "output_size_bytes", "required_mi", "splittability", "partition_model_id",
+              "partition_overhead_ms", "merge_overhead_ms", "input_partition_model",
+              "output_partition_model", "relative_deadline_ms")
+    def signature(row: dict[str, str], regime: dict[str, Any]) -> tuple[Any, ...]:
+        return tuple(row.get(field, "") for field in fields) + (
+            int(row["arrival_time_ms"]) - int(regime["start_time_ms"]),
+        )
+    if len(a1) == len(a2) and [signature(r, regimes[0]) for r in a1] != [
+        signature(r, regimes[2]) for r in a2
+    ]:
+        errors.append("A1/A2 task templates or relative exogenous arrival inputs differ")
+    if regimes[0].get("condition_profile_id") != regimes[2].get("condition_profile_id"):
+        errors.append("A1/A2 exogenous condition profiles differ")
+    if [signature(r, regimes[0]) for r in a1] == [signature(r, regimes[1]) for r in b]:
+        errors.append("B workload must use a separate task-template stream from A")
+    return errors
+
+
+def validate_aba_exogenous_profiles(manifest: dict[str, str]) -> list[str]:
+    """Verify that any explicit A/B/A configuration schedules restore the same A inputs."""
+    errors: list[str] = []
+    profile_fields = (
+        ("network_profile_json", "network"),
+        ("edge_capacity_profile_json", "edge-capacity"),
+        ("task_mix_profile_json", "task-mix"),
+    )
+    ignored_timeline_fields = {
+        "from_fraction", "to_fraction", "start_fraction", "end_fraction",
+        "start_time_ms", "end_time_ms", "regime_id",
+    }
+    for field, label in profile_fields:
+        raw = manifest.get(field, "")
+        if not raw:
+            errors.append(f"A-B-A manifest is missing {field}")
+            continue
+        try:
+            profile = json.loads(raw)
+        except (TypeError, json.JSONDecodeError) as exc:
+            errors.append(f"A-B-A {label} profile is not valid JSON: {exc}")
+            continue
+        schedule = profile.get("regimes") if isinstance(profile, dict) else None
+        if schedule is None:
+            continue
+        if not isinstance(schedule, list) or len(schedule) != 3:
+            errors.append(f"A-B-A {label} schedule must contain exactly three A/B/A entries")
+            continue
+        first, last = schedule[0], schedule[2]
+        first_values = {k: v for k, v in first.items() if k not in ignored_timeline_fields}
+        last_values = {k: v for k, v in last.items() if k not in ignored_timeline_fields}
+        if first_values != last_values:
+            errors.append(f"A1/A2 {label} exogenous configuration values differ")
+    return errors
+
+
+def validate_manifest(path: Path, task_rows: list[dict[str, str]],
+                       seed_registry_path: Path = gen.DEFAULT_SEED_REGISTRY_PATH) -> list[str]:
     errors: list[str] = []
     fields, rows = read_csv(path)
     errors.extend(f"manifest missing required column: {f}" for f in sorted(MANIFEST_REQUIRED - set(fields)))
@@ -218,8 +289,32 @@ def validate_manifest(path: Path, task_rows: list[dict[str, str]]) -> list[str]:
             errors.append(f"manifest/task mismatch for {field}")
     if task_rows and any(row.get("config_hash") != manifest.get("config_hash") for row in task_rows):
         errors.append("manifest config_hash does not match task records")
-    if manifest.get("dataset_split") not in {"train", "validation", "test"}:
-        errors.append("dataset_split must be train, validation or test")
+    if manifest.get("dataset_split") not in {"development", "train", "validation", "test"}:
+        errors.append("dataset_split must be development, train, validation or test")
+    try:
+        registry = gen.read_seed_registry(seed_registry_path)
+        errors.extend(gen.validate_seed_allocation(int(manifest.get("seed", -1)), manifest.get("dataset_split", ""), registry))
+    except Exception as exc:
+        errors.append(f"seed registry validation failed: {exc}")
+    if not manifest.get("target_topology_id"):
+        errors.append("target_topology_id is required")
+    try:
+        target_counts = json.loads(manifest.get("target_topology_tier_counts_json", "{}"))
+        target_mapping = json.loads(manifest.get("target_device_mapping_json", "{}"))
+        expected_mapping = {f"edge-{index:03d}": [f"iot-{source:03d}" for source in range((index-1)*5+1, index*5+1)] for index in range(1, 21)}
+        if target_counts != {"IOT": 100, "EDGE": 20, "CLOUD": 1}:
+            errors.append("manifest target topology tier counts must be exactly 100/20/1")
+        if target_mapping != expected_mapping:
+            errors.append("manifest target device mapping must assign five IoT IDs to each of 20 Edge nodes")
+    except (TypeError, ValueError):
+        errors.append("manifest target topology contract JSON is invalid")
+    if not manifest.get("actual_topology_status"):
+        errors.append("actual_topology_status is required")
+    if manifest.get("actual_topology_id", "") not in ("", "null") and not manifest.get("actual_topology_status", "").startswith("CONFIRMED"):
+        errors.append("actual_topology_id cannot be asserted without confirmed topology status")
+    if isinstance(regimes, list) and [item.get("regime_id") for item in regimes] == ["A", "B", "A"]:
+        errors.extend(validate_aba_exact_replay(task_rows, regimes))
+        errors.extend(validate_aba_exogenous_profiles(manifest))
     return errors
 
 
@@ -679,7 +774,8 @@ def validate_paired_inputs(paths: list[Path]) -> list[str]:
 
 
 def validate_replay(tasks_path: Path, manifest_path: Path,
-                    workload_config: Path, scenario_config: Path) -> list[str]:
+                    workload_config: Path, scenario_config: Path,
+                    seed_registry_path: Path = gen.DEFAULT_SEED_REGISTRY_PATH) -> list[str]:
     errors: list[str] = []
     _, task_rows = read_csv(tasks_path)
     _, manifest_rows = read_csv(manifest_path)
@@ -692,7 +788,8 @@ def validate_replay(tasks_path: Path, manifest_path: Path,
         with tempfile.TemporaryDirectory(prefix="abdo-replay-") as tmp:
             replay_tasks, replay_manifest, _ = gen.generate_one(
                 manifest["scenario_id"], int(manifest["seed"]), len(task_rows),
-                manifest["run_id"], workload_cfg, scenario_cfg, Path(tmp)
+                manifest["run_id"], workload_cfg, scenario_cfg, Path(tmp),
+                manifest.get("dataset_split", "development"), seed_registry_path
             )
             expected_tasks = hashlib.sha256(tasks_path.read_bytes()).hexdigest()
             expected_manifest = hashlib.sha256(manifest_path.read_bytes()).hexdigest()
@@ -740,12 +837,17 @@ def main() -> int:
     parser.add_argument("--workload-config", type=Path, default=ROOT / "configs" / "workload_profiles.yaml")
     parser.add_argument("--scenario-config", type=Path, default=ROOT / "configs" / "scenario_profiles.yaml")
     parser.add_argument("--schema-dir", type=Path, default=ROOT / "schemas")
+    parser.add_argument("--seed-registry", type=Path, default=gen.DEFAULT_SEED_REGISTRY_PATH)
     parser.add_argument("--report", type=Path)
     args = parser.parse_args()
 
     errors, summary = validate_tasks(args.tasks)
     _, task_rows = read_csv(args.tasks)
-    errors += validate_manifest(args.manifest, task_rows)
+    errors += validate_manifest(args.manifest, task_rows, args.seed_registry)
+    try:
+        errors += gen.validate_seed_registry_rows(gen.read_seed_registry(args.seed_registry))
+    except Exception as exc:
+        errors.append(f"seed registry invalid: {exc}")
     outcome_summary: dict[str, Any] | None = None
     if args.decisions:
         errors += validate_decisions(args.decisions, task_rows)
@@ -759,7 +861,7 @@ def main() -> int:
     if args.paired_inputs:
         errors += validate_paired_inputs(args.paired_inputs)
     if args.check_replay:
-        errors += validate_replay(args.tasks, args.manifest, args.workload_config, args.scenario_config)
+        errors += validate_replay(args.tasks, args.manifest, args.workload_config, args.scenario_config, args.seed_registry)
     errors += validate_schemas(args.schema_dir)
 
     report = {

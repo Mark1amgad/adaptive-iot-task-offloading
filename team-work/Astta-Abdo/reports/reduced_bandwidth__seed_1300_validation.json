@@ -1,0 +1,28 @@
+{
+  "errors": [],
+  "outcome_reconciliation": null,
+  "scope_note": "Generated files contain synthetic task inputs and scenario metadata only. Decision contexts, decisions, task outcomes and calibration logs must be produced by the simulator/policy integration; no such records are fabricated.",
+  "task_summary": {
+    "application_profile_counts": {
+      "PREDICTIVE_MAINTENANCE_INFERENCE": 7,
+      "PRODUCTION_MONITORING_AGGREGATION": 20,
+      "PRODUCTION_MONITORING_SINGLE_EVENT": 5,
+      "VISUAL_INSPECTION_FRAME_BATCH": 8,
+      "VISUAL_INSPECTION_SINGLE_IMAGE_INFERENCE": 8
+    },
+    "divisibility_counts": {
+      "DATA_PARALLEL_DIVISIBLE": 28,
+      "INDIVISIBLE": 20
+    },
+    "errors": [],
+    "max_arrival_time_ms": 94144.0,
+    "rows": 48,
+    "runs": 1,
+    "urgency_counts": {
+      "CRITICAL": 12,
+      "DELAY_TOLERANT": 16,
+      "TIME_SENSITIVE": 20
+    }
+  },
+  "validation_status": "PASS"
+}

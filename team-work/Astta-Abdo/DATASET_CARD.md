@@ -1,4 +1,4 @@
-# Dataset Card — Synthetic IoT Task Inputs (Development v1.1.0)
+# Dataset Card — Synthetic IoT Task Inputs (Development v1.2.0)
 
 ## Summary
 
@@ -32,7 +32,7 @@ Use Python 3.10+ with `PyYAML` and `pytest`. From the workload-workstream direct
 
 ```bash
 python -m pip install -r requirements.txt
-python scripts/generate_workloads.py --scenario all-core --seed 7 --seed-count 1 --task-count 48 --output data/dev --hash-report reports/dev_hashes_v1_1.json
+python scripts/generate_workloads.py --scenario all-core --seed 1300 --seed-count 1 --task-count 48 --output data/dev --hash-report reports/dev_hashes_v1_2.json
 pytest -q
 ```
 
@@ -40,19 +40,21 @@ Same seed/config/scenario/run ID/task count produces byte-identical CSVs. The de
 
 ```bash
 python scripts/validate_dataset.py \
-  --tasks data/dev/stable_steady__seed_0007_tasks.csv \
-  --manifest data/dev/stable_steady__seed_0007_scenario_manifest.csv \
+  --tasks data/dev/stable_steady__seed_1300_tasks.csv \
+  --manifest data/dev/stable_steady__seed_1300_scenario_manifest.csv \
   --check-replay --report reports/stable_steady_validation.json
 ```
 
-## Train / validation / test split
+## Development and benchmark split policy
 
-Disjoint split by scenario family and seed band. Train: seeds 1–60 (`stable`, `bursty`); validation: 61–80 (`network_bandwidth`, `network_wan_delay`, `edge_capacity`); test: 81–120 (`task_mix_shift`, `repeated_aba`, combined stress and unseen topology if later approved). This prevents random-row leakage between regimes and seed groups. Each principal scenario is planned for at least 20 paired seeds. The validation band must be widened before a 30-seed validation plan can be claimed.
+The current checked-in files under `data/dev/` are Development-only and use seed 1300 from `research/experiments/SEED_REGISTRY_V2.csv`. Seed 1300 is not eligible for Train, Validation or Test. All known historical seeds are retired, including seed 81 (prior Development use) and seeds 102–121 (earlier A→B→A runs). The registry currently contains no approved Train, Validation or final held-out Test seeds. Generation for those splits fails closed until new, unused seeds are approved in the registry.
+
+The registry inventory covers repository-visible history only and is marked incomplete until local experiment archives and all team workstreams have been audited. Do not assume an unlisted seed is unused. A numeric seed cannot be assigned to more than one split; duplicate or cross-split reuse is a validation error.
 
 ## Limitations
 
 - All task-size, compute, output-byte, arrival-rate, deadline and split/merge values are proposed assumptions, not validated workload measurements.
-- Four source-device IDs are logical identifiers only; mapping to four V2 IoT nodes is awaiting Ayoub's topology confirmation.
+- Four source-device IDs are logical identifiers only; the target 5-to-1 mapping across 20 V2 Edge nodes is awaiting Ayoub's topology confirmation.
 - The currently checked-in prototype describes one local, one Edge and one Cloud executor, not yet the V2 four-IoT/two-Edge/one-Cloud target.
 - Bandwidth raw-unit semantics and downlink latency are unresolved.
 - The current one-task pilot does not establish a service-time distribution or multi-task queue behaviour.
@@ -62,7 +64,7 @@ Disjoint split by scenario family and seed band. Train: seeds 1–60 (`stable`, 
 
 ## Provenance
 
-Controlled by `configs/workload_profiles.yaml`, `configs/scenario_profiles.yaml`, generator version `1.1.0`, units version `SI-ms-bytes-MI-v1`, and per-run `config_hash`. Related source limitations are preserved under `provenance/`. Mostafa's dataset inventory remains in `team-work/Mostafa/Dataset/` and is not duplicated here.
+Controlled by `configs/workload_profiles.yaml`, `configs/scenario_profiles.yaml`, generator version `1.2.0`, units version `SI-ms-bytes-MI-v1`, and per-run `config_hash`. Related source limitations are preserved under `provenance/`. Mostafa's dataset inventory remains in `team-work/Mostafa/Dataset/` and is not duplicated here.
 
 ## License and access
 
@@ -70,6 +72,22 @@ The repository's `LICENSE_STATUS.md` states that no project license has been sel
 
 ## Version
 
-- Dataset / pipeline version: 1.1.0
+- Dataset / pipeline version: 1.2.0
 - Status: development-only; numerical parameters awaiting Mark approval
 - Base repository revision inspected: `main` at `39d6cd448ba5a15e690ac67ff777017a445ce577` (pushed 2026-11-03)
+
+
+## V2 correction: archetypes, seed leakage and topology provenance
+
+The current development dataset is generated with the registry-allocated development seed 1300. Seed 81 is historical development use and is retired; seeds 102-121 were used in prior test-labelled A-B-A experiments and are also retired. No Train, Validation or final Test seed is currently approved. The repository registry remains incomplete pending local/team archive review.
+
+A1 and A2 in each A-B-A generator scenario use identical task templates and relative arrival offsets, with matching A condition profiles; B uses an independent stream. The industrial profiles include indivisible image inference and indivisible production-event processing, alongside their divisible batch counterparts.
+
+The target topology is stored separately from the actual topology. The actual topology ID remains null until Ayoub confirms the deployed simulator topology. All generated parameters remain proposed synthetic configurations, not factory measurements, industrial traces or performance results. No simulator outcomes are generated.
+
+
+## 100/20/1 target topology and network contract boundary
+
+The target topology ID is `v2_target_100iot_20edge_1cloud`: logical source IDs `iot-001` through `iot-100`, 20 target Edge nodes `edge-001` through `edge-020`, and one target Cloud node `cloud-001`. The target mapping assigns five sequential IoT source IDs to each Edge node. This is a target contract only, not evidence of instantiated simulator devices or confirmed actual placement. `actual_topology_id` remains null and `actual_topology_status` remains `NOT_VERIFIED_PENDING_AYOUB_CONFIRMATION` until Ayoub verifies the implementation.
+
+Network contract items remain BLOCKED pending Ayoub confirmation: bandwidth physical units and transfer-time conversion; uplink/downlink semantics; IoT–Edge and Edge–Cloud link definitions; and measured/confirmed latency and network-shift parameters. No unconfirmed values or units are inferred.

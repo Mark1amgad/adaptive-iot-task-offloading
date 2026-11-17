@@ -15,6 +15,21 @@ units:
   link_delay: ms
   bandwidth: NOT_LOCKED_UNIT_PENDING_AYOUB
 
+network_contract:
+  status: BLOCKED_PENDING_AYOUB_CONFIRMATION
+  bandwidth_physical_unit: BLOCKED_NOT_CONFIRMED
+  bandwidth_transfer_time_conversion: BLOCKED_NOT_CONFIRMED
+  uplink_semantics: BLOCKED_NOT_CONFIRMED
+  downlink_semantics: BLOCKED_NOT_CONFIRMED
+  iot_edge_link_definition: BLOCKED_NOT_CONFIRMED
+  edge_cloud_link_definition: BLOCKED_NOT_CONFIRMED
+  target_link_latency_values: BLOCKED_NOT_CONFIRMED
+  network_shift_parameters: BLOCKED_NOT_CONFIRMED
+  note: >-
+    Existing 2 ms / 45 ms values and scenario shift factors are prototype/reference
+    or proposed synthetic settings only. They are not confirmed V2 target link
+    parameters and must not be assigned physical bandwidth units without Ayoub.
+
 # Existing prototype evidence, recorded for calibration context only. The values
 # below do not imply the V2 target topology is implemented.
 topology_references:
@@ -35,22 +50,143 @@ topology_references:
       The numeric bandwidth values are retained as raw configured values only;
       they must not be labelled bytes/s or bits/s until Ayoub confirms the iFogSim
       bandwidth unit semantics and the transfer-time conversion.
-  v2_target_topology:
-    status: PROPOSED_PENDING_AYOUB_VERIFICATION
-    device_counts: {iot_devices: 4, edge_nodes: 2, cloud_nodes: 1}
+  v2_target_100iot_20edge_1cloud:
+    target_topology_id: v2_target_100iot_20edge_1cloud
+    status: PROPOSED_TARGET_CONTRACT_PENDING_AYOUB_VERIFICATION
+    device_counts: {iot_devices: 100, edge_nodes: 20, cloud_nodes: 1}
+    tier_counts: {IOT: 100, EDGE: 20, CLOUD: 1}
+    edge_node_ids: [edge-001, edge-002, edge-003, edge-004, edge-005, edge-006, edge-007, edge-008, edge-009, edge-010, edge-011, edge-012, edge-013, edge-014, edge-015, edge-016, edge-017, edge-018, edge-019, edge-020]
+    target_device_mapping:
+      edge-001: [iot-001, iot-002, iot-003, iot-004, iot-005]
+      edge-002: [iot-006, iot-007, iot-008, iot-009, iot-010]
+      edge-003: [iot-011, iot-012, iot-013, iot-014, iot-015]
+      edge-004: [iot-016, iot-017, iot-018, iot-019, iot-020]
+      edge-005: [iot-021, iot-022, iot-023, iot-024, iot-025]
+      edge-006: [iot-026, iot-027, iot-028, iot-029, iot-030]
+      edge-007: [iot-031, iot-032, iot-033, iot-034, iot-035]
+      edge-008: [iot-036, iot-037, iot-038, iot-039, iot-040]
+      edge-009: [iot-041, iot-042, iot-043, iot-044, iot-045]
+      edge-010: [iot-046, iot-047, iot-048, iot-049, iot-050]
+      edge-011: [iot-051, iot-052, iot-053, iot-054, iot-055]
+      edge-012: [iot-056, iot-057, iot-058, iot-059, iot-060]
+      edge-013: [iot-061, iot-062, iot-063, iot-064, iot-065]
+      edge-014: [iot-066, iot-067, iot-068, iot-069, iot-070]
+      edge-015: [iot-071, iot-072, iot-073, iot-074, iot-075]
+      edge-016: [iot-076, iot-077, iot-078, iot-079, iot-080]
+      edge-017: [iot-081, iot-082, iot-083, iot-084, iot-085]
+      edge-018: [iot-086, iot-087, iot-088, iot-089, iot-090]
+      edge-019: [iot-091, iot-092, iot-093, iot-094, iot-095]
+      edge-020: [iot-096, iot-097, iot-098, iot-099, iot-100]
+    mapping_status: TARGET_CONTRACT_NOT_ACTUAL_PENDING_AYOUB_CONFIRMATION
+    actual_topology_id: null
+    actual_topology_status: NOT_VERIFIED_PENDING_AYOUB_CONFIRMATION
     capacity_by_device: BLOCKED_NOT_SUPPLIED
     mapping_note: >-
-      The V2 specification describes 4 IoT devices, 2 Edge nodes and 1 Cloud node.
-      The current checked-in topology evidence above instantiates only one local,
-      one edge and one cloud executor. Four source IDs below are workload identities,
-      not proof that four distinct IoT FogDevices currently exist.
+      Target contract only: five logical IoT sources per target Edge node.
+      Actual instantiation and site mapping await Ayoub confirmation.
 
 source_devices:
-  - iot-01
-  - iot-02
-  - iot-03
-  - iot-04
-source_device_mapping_status: PROPOSED_PENDING_AYOUB_MAPPING
+  - iot-001
+  - iot-002
+  - iot-003
+  - iot-004
+  - iot-005
+  - iot-006
+  - iot-007
+  - iot-008
+  - iot-009
+  - iot-010
+  - iot-011
+  - iot-012
+  - iot-013
+  - iot-014
+  - iot-015
+  - iot-016
+  - iot-017
+  - iot-018
+  - iot-019
+  - iot-020
+  - iot-021
+  - iot-022
+  - iot-023
+  - iot-024
+  - iot-025
+  - iot-026
+  - iot-027
+  - iot-028
+  - iot-029
+  - iot-030
+  - iot-031
+  - iot-032
+  - iot-033
+  - iot-034
+  - iot-035
+  - iot-036
+  - iot-037
+  - iot-038
+  - iot-039
+  - iot-040
+  - iot-041
+  - iot-042
+  - iot-043
+  - iot-044
+  - iot-045
+  - iot-046
+  - iot-047
+  - iot-048
+  - iot-049
+  - iot-050
+  - iot-051
+  - iot-052
+  - iot-053
+  - iot-054
+  - iot-055
+  - iot-056
+  - iot-057
+  - iot-058
+  - iot-059
+  - iot-060
+  - iot-061
+  - iot-062
+  - iot-063
+  - iot-064
+  - iot-065
+  - iot-066
+  - iot-067
+  - iot-068
+  - iot-069
+  - iot-070
+  - iot-071
+  - iot-072
+  - iot-073
+  - iot-074
+  - iot-075
+  - iot-076
+  - iot-077
+  - iot-078
+  - iot-079
+  - iot-080
+  - iot-081
+  - iot-082
+  - iot-083
+  - iot-084
+  - iot-085
+  - iot-086
+  - iot-087
+  - iot-088
+  - iot-089
+  - iot-090
+  - iot-091
+  - iot-092
+  - iot-093
+  - iot-094
+  - iot-095
+  - iot-096
+  - iot-097
+  - iot-098
+  - iot-099
+  - iot-100
+source_device_mapping_status: TARGET_CONTRACT_NOT_ACTUAL_PENDING_AYOUB_CONFIRMATION
 
 # Probabilities are design assumptions. Profile-specific urgency mixtures are
 # stable across all regime changes; deadline distributions depend on urgency only.
@@ -81,7 +217,7 @@ urgency_classes:
 # These workload values intentionally retain the supplied development/smoke ranges.
 # They are NOT approved benchmark ranges and are not inferred from ECW or SMD.
 application_profiles:
-  SENSOR_INFERENCE:
+  PREDICTIVE_MAINTENANCE_INFERENCE:
     description: "Synthetic indivisible sensor/inference request; full placement only."
     splittability: INDIVISIBLE
     urgency_weights: {CRITICAL: 0.20, TIME_SENSITIVE: 0.50, DELAY_TOLERANT: 0.30}
@@ -90,8 +226,28 @@ application_profiles:
     output_size_bytes: {distribution: choice, values: [256, 1024, 2048]}
     numeric_status: PROPOSED_SMOKE_ONLY
     output_size_status: PROPOSED_SYNTHETIC_GENERATION_RULE
+  VISUAL_INSPECTION_SINGLE_IMAGE_INFERENCE:
+    description: "Synthetic single-product-image inference; one image is an indivisible task."
+    splittability: INDIVISIBLE
+    urgency_weights: {CRITICAL: 0.25, TIME_SENSITIVE: 0.50, DELAY_TOLERANT: 0.25}
+    required_mi: {distribution: choice, values: [1000, 4000]}
+    input_size_bytes: {distribution: choice, values: [10000, 50000, 100000]}
+    output_size_bytes: {distribution: choice, values: [256, 1024, 2048]}
+    numeric_status: PROPOSED_SYNTHETIC_ONLY
+    output_size_status: PROPOSED_SYNTHETIC_GENERATION_RULE
 
-  VIDEO_FRAME_BATCH:
+  PRODUCTION_MONITORING_SINGLE_EVENT:
+    description: "Synthetic single production event evaluation; an event is indivisible."
+    splittability: INDIVISIBLE
+    urgency_weights: {CRITICAL: 0.20, TIME_SENSITIVE: 0.50, DELAY_TOLERANT: 0.30}
+    required_mi: {distribution: choice, values: [200, 1000, 4000]}
+    input_size_bytes: {distribution: choice, values: [256, 1024, 2048]}
+    output_size_bytes: {distribution: choice, values: [64, 256, 1024]}
+    numeric_status: PROPOSED_SYNTHETIC_ONLY
+    output_size_status: PROPOSED_SYNTHETIC_GENERATION_RULE
+
+
+  VISUAL_INSPECTION_FRAME_BATCH:
     description: "Synthetic independent frame batch; explicitly data-parallel."
     splittability: DATA_PARALLEL_DIVISIBLE
     urgency_weights: {CRITICAL: 0.25, TIME_SENSITIVE: 0.50, DELAY_TOLERANT: 0.25}
@@ -113,7 +269,7 @@ application_profiles:
         output bytes are proportional to compute fraction alpha for this synthetic
         profile only.
 
-  PARALLEL_SENSOR_AGGREGATION:
+  PRODUCTION_MONITORING_AGGREGATION:
     description: "Synthetic independent sensor-window shards; explicitly data-parallel."
     splittability: DATA_PARALLEL_DIVISIBLE
     urgency_weights: {CRITICAL: 0.15, TIME_SENSITIVE: 0.50, DELAY_TOLERANT: 0.35}
@@ -134,7 +290,7 @@ application_profiles:
         Independent window shards with no cross-shard dependency; proportional
         byte partitioning is a declared synthetic assumption for this profile only.
 
-  BULK_VIDEO_FRAME_BATCH:
+  VISUAL_INSPECTION_BULK_FRAME_BATCH:
     description: "Larger synthetic independent frame batches used only in shifted mix B."
     splittability: DATA_PARALLEL_DIVISIBLE
     urgency_weights: {CRITICAL: 0.25, TIME_SENSITIVE: 0.50, DELAY_TOLERANT: 0.25}
@@ -153,7 +309,7 @@ application_profiles:
       partial_overheads_apply_only_when: "0 < offload_fraction < 1"
       assumption: "Independent frame batches only; proportional data/compute split is a synthetic assumption."
 
-  LARGE_PARALLEL_SENSOR_AGGREGATION:
+  PRODUCTION_MONITORING_LARGE_AGGREGATION:
     description: "Larger independent sensor-window shards used only in shifted mix B."
     splittability: DATA_PARALLEL_DIVISIBLE
     urgency_weights: {CRITICAL: 0.15, TIME_SENSITIVE: 0.50, DELAY_TOLERANT: 0.35}
@@ -175,9 +331,11 @@ application_profiles:
 mix_profiles:
   balanced_v1:
     application_profile_weights:
-      SENSOR_INFERENCE: 0.50
-      VIDEO_FRAME_BATCH: 0.25
-      PARALLEL_SENSOR_AGGREGATION: 0.25
+      PREDICTIVE_MAINTENANCE_INFERENCE: 0.20
+      VISUAL_INSPECTION_SINGLE_IMAGE_INFERENCE: 0.15
+      VISUAL_INSPECTION_FRAME_BATCH: 0.15
+      PRODUCTION_MONITORING_SINGLE_EVENT: 0.15
+      PRODUCTION_MONITORING_AGGREGATION: 0.35
     resulting_divisibility_assumption: {indivisible: 0.50, divisible: 0.50}
     status: PROPOSED
     rationale: >-
@@ -185,10 +343,14 @@ mix_profiles:
       divisibility assigned only to independent frame/window profiles.
   heavy_shift_B_v1:
     application_profile_weights:
-      SENSOR_INFERENCE: 0.20
-      BULK_VIDEO_FRAME_BATCH: 0.40
-      LARGE_PARALLEL_SENSOR_AGGREGATION: 0.40
-    resulting_divisibility_assumption: {indivisible: 0.20, divisible: 0.80}
+      PREDICTIVE_MAINTENANCE_INFERENCE: 0.10
+      VISUAL_INSPECTION_SINGLE_IMAGE_INFERENCE: 0.10
+      VISUAL_INSPECTION_FRAME_BATCH: 0.15
+      PRODUCTION_MONITORING_SINGLE_EVENT: 0.10
+      PRODUCTION_MONITORING_AGGREGATION: 0.15
+      VISUAL_INSPECTION_BULK_FRAME_BATCH: 0.20
+      PRODUCTION_MONITORING_LARGE_AGGREGATION: 0.20
+    resulting_divisibility_assumption: {indivisible: 0.30, divisible: 0.70}
     status: PROPOSED
     rationale: >-
       Deliberate held-out load shift toward larger independent data-parallel batches;

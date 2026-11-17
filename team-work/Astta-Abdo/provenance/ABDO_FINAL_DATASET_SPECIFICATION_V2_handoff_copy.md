@@ -325,3 +325,6 @@ This task is complete when:
 8. No execution outcome, reward, or energy value has been invented.
 
 **Important boundary:** this deliverable creates the workload input dataset and the schema for full/partial experiment traces. It does not implement the task partitioner, branch scheduler, synchronization, or join logic inside iFogSim2. The final task-offloading results dataset is produced only after the simulator executes the tasks and records actual decisions and outcomes.
+
+
+Target topology contract: `v2_target_100iot_20edge_1cloud` = 100 logical IoT sources, 20 target Edge nodes and one target Cloud node, with five source IDs assigned to each target Edge. This is not an actual deployment assertion. `actual_topology_id=null` and `actual_topology_status=NOT_VERIFIED_PENDING_AYOUB_CONFIRMATION` remain until Ayoub verifies the simulator. Bandwidth units, uplink/downlink, IoT–Edge and Edge–Cloud links, latency and network-shift parameters remain BLOCKED pending his confirmation.

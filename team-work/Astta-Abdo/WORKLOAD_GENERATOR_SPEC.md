@@ -2,7 +2,7 @@
 
 **Project:** Risk-Calibrated Adaptive Task Partitioning and Offloading under Repeated Workload and Network Shifts in the IoT–Edge–Cloud Continuum  
 **Workstream:** Synthetic task-input dataset and simulator handoff contracts  
-**Specification version:** 1.1.0  
+**Specification version:** 1.2.0  
 **Status:** Implementation complete for reproducible development inputs; numerical benchmark values remain `PROPOSED` / `BLOCKED` pending approval and simulator evidence.
 
 ## 1. Scope and data boundary
@@ -43,7 +43,7 @@ The `MEASUREMENT_CONTRACT_V1.md` provides a one-task event/measurement contract 
 - deadline classes and workload ranges remain `PROPOSED`;
 - split/merge overheads remain `PROPOSED` until the adapter can account for them;
 - network bandwidth's physical unit is `BLOCKED` pending Ayoub's confirmation;
-- the two-Edge selection/site mapping and 4-IoT source mapping are `BLOCKED` pending topology verification;
+- the two-Edge selection/site mapping and 100-IoT source mapping are `BLOCKED` pending topology verification;
 - energy is omitted from the outcome schema because current evidence says cumulative device energy is not defensible as per-task energy.
 
 ## 4. Task record semantics
@@ -54,7 +54,7 @@ Each row in `data/dev/*_tasks.csv` is one task before a policy decision.
 - `(run_id, task_id)` is the primary task key. The task ID string is not required to be globally unique across different run IDs.
 - `application_profile` describes workload semantics; `urgency_class` describes the deadline class. They are separate fields.
 - `workload_profile_id` names the configured task-mix profile used by the scenario.
-- `source_device_id` cycles through `iot-01` to `iot-04` as logical task sources.
+- `source_device_id` cycles through `iot-001` to `iot-100` as logical task sources.
 - `required_mi` is the total compute demand before any action is chosen.
 - `output_size_bytes` is present only because each synthetic application profile defines an output-byte generation rule. It is a workload assumption, not a measured simulator output.
 
@@ -90,8 +90,8 @@ For the two explicitly named frame/window data-parallel profiles, input and outp
 
 ### Workload mix assumptions
 
-- `balanced_v1`: 50% indivisible `SENSOR_INFERENCE`, 25% divisible `VIDEO_FRAME_BATCH`, 25% divisible `PARALLEL_SENSOR_AGGREGATION`; resulting target mix 50% indivisible / 50% divisible.
-- `heavy_shift_B_v1`: 20% indivisible `SENSOR_INFERENCE`, 40% divisible `BULK_VIDEO_FRAME_BATCH`, 40% divisible `LARGE_PARALLEL_SENSOR_AGGREGATION`; resulting target mix 20% indivisible / 80% divisible.
+- `balanced_v1`: 50% indivisible `PREDICTIVE_MAINTENANCE_INFERENCE`, 25% divisible `VISUAL_INSPECTION_FRAME_BATCH`, 25% divisible `PRODUCTION_MONITORING_AGGREGATION`; resulting target mix 50% indivisible / 50% divisible.
+- `heavy_shift_B_v1`: 20% indivisible `PREDICTIVE_MAINTENANCE_INFERENCE`, 40% divisible `VISUAL_INSPECTION_BULK_FRAME_BATCH`, 40% divisible `PRODUCTION_MONITORING_LARGE_AGGREGATION`; resulting target mix 20% indivisible / 80% divisible.
 
 These are synthetic experimental design assumptions, not frequencies estimated from ECW, SMD, or Mostafa's dataset inventory.
 
@@ -101,11 +101,11 @@ All task-size/compute values below are smoke-test or shift-stress values. They a
 
 | Application profile | Divisibility | Required MI values / range | Input bytes values / range | Output bytes values / range | Partition / merge overhead | Status |
 |---|---|---|---|---|---|---|
-| `SENSOR_INFERENCE` | Indivisible | 200, 1,000, 4,000 | 2,000, 10,000, 50,000 | 256, 1,024, 2,048 | n/a | `PROPOSED_SMOKE_ONLY` |
-| `VIDEO_FRAME_BATCH` | Divisible | 1,000, 4,000 | 10,000, 50,000 | 1,024, 2,048, 4,096 | 5 / 5 ms | `PROPOSED_SMOKE_ONLY` |
-| `PARALLEL_SENSOR_AGGREGATION` | Divisible | 1,000, 4,000 | 2,000, 10,000, 50,000 | 256, 1,024, 2,048 | 3 / 4 ms | `PROPOSED_SMOKE_ONLY` |
-| `BULK_VIDEO_FRAME_BATCH` | Divisible | 4,000, 8,000, 16,000 | 50,000, 100,000, 250,000 | 2,048, 4,096, 8,192 | 5 / 5 ms | `PROPOSED_SHIFT_SMOKE_ONLY` |
-| `LARGE_PARALLEL_SENSOR_AGGREGATION` | Divisible | 4,000, 8,000, 16,000 | 10,000, 50,000, 100,000 | 1,024, 2,048, 4,096 | 3 / 4 ms | `PROPOSED_SHIFT_SMOKE_ONLY` |
+| `PREDICTIVE_MAINTENANCE_INFERENCE` | Indivisible | 200, 1,000, 4,000 | 2,000, 10,000, 50,000 | 256, 1,024, 2,048 | n/a | `PROPOSED_SMOKE_ONLY` |
+| `VISUAL_INSPECTION_FRAME_BATCH` | Divisible | 1,000, 4,000 | 10,000, 50,000 | 1,024, 2,048, 4,096 | 5 / 5 ms | `PROPOSED_SMOKE_ONLY` |
+| `PRODUCTION_MONITORING_AGGREGATION` | Divisible | 1,000, 4,000 | 2,000, 10,000, 50,000 | 256, 1,024, 2,048 | 3 / 4 ms | `PROPOSED_SMOKE_ONLY` |
+| `VISUAL_INSPECTION_BULK_FRAME_BATCH` | Divisible | 4,000, 8,000, 16,000 | 50,000, 100,000, 250,000 | 2,048, 4,096, 8,192 | 5 / 5 ms | `PROPOSED_SHIFT_SMOKE_ONLY` |
+| `PRODUCTION_MONITORING_LARGE_AGGREGATION` | Divisible | 4,000, 8,000, 16,000 | 10,000, 50,000, 100,000 | 1,024, 2,048, 4,096 | 3 / 4 ms | `PROPOSED_SHIFT_SMOKE_ONLY` |
 
 Deadlines are assigned before any policy action. Profile urgency weights are stored beside each application profile; deadline sampling uses only the resulting urgency class and its versioned distribution. No action, future shift, policy, outcome or test metric affects a deadline.
 
@@ -149,15 +149,13 @@ Scenario arrival rates, shift factors and task mixes are configurable assumption
 
 ## 8. Split protocol and paired policy replay
 
-The split is assigned by **scenario family and seed band**, never by random rows:
+Seed allocation is controlled only by research/experiments/SEED_REGISTRY_V2.csv; historical numeric bands are no longer allocation authority. Every seed must have a unique registry entry, an explicit purpose/source, and a permitted status. A seed cannot be assigned to more than one of Development, Train, Validation or Test. Test generation requires status APPROVED. Historical development, pilot, debug, training and prior test-labelled seeds are retired and cannot be recycled.
 
-- train families: `stable`, `bursty`; seeds 1–60;
-- validation families: `network_bandwidth`, `network_wan_delay`, `edge_capacity`; seeds 61–80;
-- test families: `task_mix_shift`, `repeated_aba`, `combined_stress`, `unseen_topology`; seeds 81–120.
+The current checked-in data/dev samples are Development only and use seed 1300. Seed 81 was already used during development and is not eligible for final testing. The earlier generic A-B-A batch used seeds 102–121; all are retired. The initial registry records repository-visible usage but remains incomplete pending inspection of local experiment archives and every team workstream. No Train, Validation or final Test allocations are currently approved. The generator fails closed when a requested split has no eligible registered seed.
 
-A scenario family cannot be assigned to more than one split. The all-core CLI's `--seed-count 20` uses seeds 1–20 for train scenarios, 61–80 for validation scenarios and 81–100 for test scenarios. `--seed-count 30` uses 1–30, 61–80 (validation has a 20-seed band, so the current split definition must be expanded by Mark before requesting 30 validation seeds), and 81–110 for test. The automated tests verify that the 20-seed schedule is disjoint and reproducible and reject a 30-seed validation request against the current band. Thus the config currently guarantees 20 paired seeds per principal validation scenario; 30 requires Mark's approval to widen validation's seed band and adjust split ranges.
+For every paired policy comparison, each policy must receive the exact same task CSV and the same exogenous network/resource condition trace/config for the corresponding run. Policy randomness is separate from workload generation. Future regime IDs, boundaries, test labels and outcome-derived values are evaluation metadata, never policy observations.
 
-Every policy in a paired comparison must receive the exact same `tasks.csv` and exogenous network/resource trace/config for its `(run_id, scenario_id, seed)`. Policy random seeds are separate from workload-generation seeds. No policy may receive future `regime_id`, regime boundaries, test labels, or outcome-derived data as observations.
+For A→B→A recovery experiments, A1 and A2 are exact paired workload replays: identical application profile, task urgency, input/output bytes, processing demand, splittability, partition parameters, relative deadlines, logical source ID and relative arrival offsets. The A1/A2 condition-profile IDs also match. Absolute event/deadline timestamps are offset by phase. B uses an independent task-template stream; for the workload-mix shift scenario it additionally uses the configured heavier B distribution.
 
 ## 9. Six data contracts and join keys
 
@@ -188,6 +186,29 @@ A no-feasible-site or fallback decision belongs in the decision record/reason. I
 
 ## 11. Unresolved evidence needed before benchmark approval
 
-Ayoub must provide: (1) current V2 topology code and actual counts/site IDs for 4 IoT, 2 Edge, 1 Cloud; (2) local/edge/cloud MIPS and RAM per device; (3) explicit bandwidth raw-unit and transfer-time conversion; (4) uplink and downlink one-way latency semantics; (5) queue length/wait and available-capacity observation hooks; (6) per-task stable ID/correlation hooks; (7) measured nominal execution/transfer/E2E service-time distributions for each proposed task profile at each tier, including queueing under the nominated baseline load; (8) implemented partial branch concurrency, input/output transfer, split/merge, join timing and branch failure/unresolved behaviour; and (9) power model/per-task attribution evidence before energy can be added.
+Ayoub must provide: (1) current V2 topology code and actual counts/site IDs for 100 IoT, 20 Edge, 1 Cloud; (2) local/edge/cloud MIPS and RAM per device; (3) explicit bandwidth raw-unit and transfer-time conversion; (4) uplink and downlink one-way latency semantics; (5) queue length/wait and available-capacity observation hooks; (6) per-task stable ID/correlation hooks; (7) measured nominal execution/transfer/E2E service-time distributions for each proposed task profile at each tier, including queueing under the nominated baseline load; (8) implemented partial branch concurrency, input/output transfer, split/merge, join timing and branch failure/unresolved behaviour; and (9) power model/per-task attribution evidence before energy can be added.
 
 Mark must approve: workload mix proportions, profile distributions and output-byte rules, deadline class ranges, scenario rates, shift magnitudes, partition overheads, split/merge model assumptions, seed bands, and the exact held-out profiles/scenarios. Until then, `data/dev/` remains development-only.
+
+
+## 20. Industrial archetypes and proposed-only parameters
+
+The industrial input set represents three archetypes with explicit task indivisibility:
+- Predictive Maintenance: indivisible inference.
+- Visual Inspection: indivisible single-product-image inference, plus divisible frame batches (including a heavier bulk-batch variant).
+- Production Monitoring: indivisible single production event, plus divisible sensor-window aggregation batches (including a larger aggregation variant).
+
+The new single-image and single-event numeric brackets are synthetic design assumptions and are marked PROPOSED_SYNTHETIC_ONLY. All earlier task sizes, compute demand, output bytes, urgency proportions, deadline brackets, arrival rates and partition/merge parameters also remain proposed synthetic configurations. None is a factory measurement, an industrial trace, or measured performance evidence.
+
+## 21. Topology metadata separation
+
+Every scenario manifest distinguishes target_topology_id from actual_topology_id. The target references the proposed 100-IoT / 20-Edge / 1-Cloud design. The actual field remains null with NOT_VERIFIED_PENDING_AYOUB_CONFIRMATION until Ayoub verifies the simulator source/topology. Four logical source IDs must not be described as four instantiated IoT FogDevices.
+
+The generator produces input tasks and scenario metadata only. No simulator outcomes, latency, deadline-success, energy, rewards, execution destinations or resource measurements are produced.
+
+
+## 100/20/1 target topology and network contract boundary
+
+The target topology ID is `v2_target_100iot_20edge_1cloud`: logical source IDs `iot-001` through `iot-100`, 20 target Edge nodes `edge-001` through `edge-020`, and one target Cloud node `cloud-001`. The target mapping assigns five sequential IoT source IDs to each Edge node. This is a target contract only, not evidence of instantiated simulator devices or confirmed actual placement. `actual_topology_id` remains null and `actual_topology_status` remains `NOT_VERIFIED_PENDING_AYOUB_CONFIRMATION` until Ayoub verifies the implementation.
+
+Network contract items remain BLOCKED pending Ayoub confirmation: bandwidth physical units and transfer-time conversion; uplink/downlink semantics; IoT–Edge and Edge–Cloud link definitions; and measured/confirmed latency and network-shift parameters. No unconfirmed values or units are inferred.
