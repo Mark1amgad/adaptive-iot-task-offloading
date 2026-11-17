@@ -97,6 +97,17 @@ class PairedSeedInferenceTests(unittest.TestCase):
         with self.assertRaisesRegex(MODULE.AnalysisError, "mixed model/source/simulator provenance"):
             MODULE.analyze(paths)
 
+    def test_zero_completion_disables_conditional_latency_without_dropping_seed(self):
+        first = summary(1)
+        second = summary(2)
+        second["policy_metrics"]["cloud"]["mean_latency_ms"] = None
+        paths = [self.write("a.json", first), self.write("b.json", second)]
+        result = MODULE.analyze(paths)
+        self.assertEqual(result["n_paired_seeds"], 2)
+        self.assertIn("mean_latency_ms", result["unavailable_metrics"])
+        self.assertNotIn("rl_eval_minus_cloud__mean_latency_ms", result["comparisons"])
+        self.assertIn("rl_eval_minus_cloud__deadline_miss_rate", result["comparisons"])
+
     def test_missing_policy_metric_is_rejected(self):
         bad = summary(1)
         del bad["policy_metrics"]["rl_eval"]["deadline_miss_rate"]
