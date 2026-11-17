@@ -12,9 +12,9 @@ The deterministic generator is `deliverables/10_iFogSim_Simulation/Simulation_So
 
 | Phase | Regime | Workload | WAN latency |
 |---|---|---|---:|
-| A1 | A | Baseline task-size distribution and arrival gaps | 45 ms |
-| B | B | 1.8× task MI, 1.5× input bytes, shorter 2.5–3.5 s arrival gaps | 160 ms |
-| A2 | A | Exact replay of A1's per-task compute, input/output, deadline, urgency and arrival-gap profile | 45 ms |
+| A1 | A | 5,000–7,000 MI; 12–24 KB input; 4.0–5.0 s arrival gaps; 15 s deadline | 45 ms |
+| B | B | 1.8× task MI, 1.5× input bytes, 2.5–3.5 s arrival gaps; 20 s deadline | 160 ms |
+| A2 | A | Exact replay of A1's per-task compute, input/output, deadline, urgency and within-phase arrival-gap profile | 45 ms |
 
 The generator uses one seeded baseline template and replays it in A2. This avoids confusing recovery with a newly sampled workload. B is a joint workload-and-network shift, so results must not be described as isolating network latency alone.
 
@@ -42,7 +42,7 @@ Stress burden:
 
 Recovery:
 - reference is the A1 phase for the same policy;
-- inspect consecutive, non-overlapping-by-search 10-task windows in A2, sliding one task at a time;
+- inspect consecutive 10-task windows in A2, sliding one task at a time;
 - a window qualifies only if all 10 tasks complete, its deadline-miss rate is no more than A1 + 5 percentage points, and its median completed latency is no more than 110% of A1's median;
 - recovery time is the final task completion time of the first qualifying window minus the A2 transition simulation time;
 - if no qualifying window exists before A2 ends, report recovery as not observed, not as zero or an extrapolated value.
