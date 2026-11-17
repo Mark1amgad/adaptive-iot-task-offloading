@@ -66,7 +66,7 @@ For latency and bandwidth, negative differences mean the learner used less. For 
 - The current runner executes one seed per invocation and only the five policy arms listed above.
 - It does not yet execute A→B→A shifts or calculate recovery time / recovery miss burden.
 - It does not yet implement the full-only vs partial-enabled and risk-filter ablations.
-- The analyzer trusts the per-seed summaries' internal paired-workload checks. Preserve and inspect each raw trace and manifest; the summary file alone is not a complete provenance record.
+- The analyzer validates each run against its manifest, but preserve and inspect raw traces and manifests; a summary alone is not a complete provenance record.
 - Do not claim final statistical evidence until there are at least 20 distinct paired test seeds per principal scenario and all training/test boundaries are audited.
 
 ## 6. Interpretation rule
