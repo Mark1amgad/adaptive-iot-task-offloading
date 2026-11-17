@@ -247,7 +247,7 @@ def test_risk_filter_rejects_inconsistent_context_before_policy_selection(tmp_pa
     obs["risk_context"]["resources"]["EDGE"]["utilization"] = 0.9
     result = send(s, obs)
     assert result["type"] == "error"
-    assert result["code"] == "invalid_outcome"
+    assert result["code"] == "invalid_message"
     assert "disagrees" in result["message"]
     assert s.pending == {}
 
@@ -267,7 +267,7 @@ def test_invalid_outcome_timestamp_is_rejected_before_any_state_update(tmp_path)
     result = send(s, invalid)
 
     assert result["type"] == "error"
-    assert result["code"] == "invalid_message"
+    assert result["code"] == "invalid_outcome"
     assert "precedes its decision" in result["message"]
     assert s.agent.updates == 0
     assert s.risk_calibrator.updates == 0
