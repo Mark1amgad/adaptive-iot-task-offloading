@@ -145,10 +145,10 @@ def test_calibrator_uses_finite_sample_upper_rank_and_clips_negative_margin():
     assert margin["margin_ms"] == 0
 
 
-def test_feasibility_filter_excludes_unsafe_actions_and_marks_uncalibrated():
+def test_feasibility_filter_excludes_unsafe_actions_and_uses_pooled_backoff():
     config = RiskConfig(epsilon=0.2, window_size=20, min_samples=4)
     calibrator = RiskCalibrator(config)
-    predictions = {"LOCAL": 90.0, "EDGE_FULL": 70.0, "CLOUD_FULL": 120.0}
+    predictions = {"LOCAL": 40.0, "EDGE_FULL": 70.0, "CLOUD_FULL": 120.0}
     for residual in (50, 60, 70, 80):
         calibrator.observe("EDGE_FULL", 70, 70 + residual)
     result = filter_feasible_actions(
@@ -160,7 +160,9 @@ def test_feasibility_filter_excludes_unsafe_actions_and_marks_uncalibrated():
     assert 4 not in result.allowed_actions
     assert 0 in result.allowed_actions
     assert result.estimates["EDGE_FULL"]["calibrated"] is True
-    assert result.estimates["LOCAL"]["calibrated"] is False
+    assert 0 in result.allowed_actions
+    assert result.estimates["LOCAL"]["calibrated"] is True
+    assert result.estimates["LOCAL"]["group"] == "pooled"
 
 
 def test_no_feasible_action_uses_minimum_conservative_violation():
