@@ -15,6 +15,10 @@ on:
 permissions:
   contents: write
 
+concurrency:
+  group: abdo-workload-generator-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   verify-and-generate:
     runs-on: ubuntu-latest
@@ -43,6 +47,7 @@ jobs:
           mkdir -p "$RUNNER_TEMP/abdo-workload-$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT/data"
           mkdir -p "$RUNNER_TEMP/abdo-workload-$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT/reports"
           if [ -d data/dev/schemas_only ]; then cp -a data/dev/schemas_only "$RUNNER_TEMP/abdo-workload-$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT/data/"; fi
+          if [ -f data/dev/README.md ]; then cp data/dev/README.md "$RUNNER_TEMP/abdo-workload-$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT/data/README.md"; fi
 
       - name: Generate eight registered development scenarios in staging
         shell: bash
