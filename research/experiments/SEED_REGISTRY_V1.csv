@@ -41,6 +41,7 @@ seed,experiment_family,split,status,first_known_use,source,notes
 403,omar_simulator_stress,development,used,2026-11-17,team-work/Omar/deliverables/Omar_iFogSim_Experiment_Results_v26,Separate team simulation workstream; inspect before reuse
 404,omar_simulator_stress,development,used,2026-11-17,team-work/Omar/deliverables/Omar_iFogSim_Experiment_Results_v26,Separate team simulation workstream; inspect before reuse
 405,omar_simulator_stress,development,used,2026-11-17,team-work/Omar/deliverables/Omar_iFogSim_Experiment_Results_v26,Separate team simulation workstream; inspect before reuse
+909,generic_aba_model_training,train,used,2026-11-17,audit_output/aba_pilot_seed_101_20261117,Separate A-only training seed for frozen model/risk sidecar; confirm exact training artifact provenance
 901,omar_simulator_stress,development,used,2026-11-17,team-work/Omar/deliverables/Omar_iFogSim_Experiment_Results_v26,Separate team simulation workstream; inspect before reuse
 902,omar_simulator_stress,development,used,2026-11-17,team-work/Omar/deliverables/Omar_iFogSim_Experiment_Results_v26,Separate team simulation workstream; inspect before reuse
 903,omar_simulator_stress,development,used,2026-11-17,team-work/Omar/deliverables/Omar_iFogSim_Experiment_Results_v26,Separate team simulation workstream; inspect before reuse
