@@ -96,7 +96,7 @@ jobs:
           report = {"status": "PASS", "independent_output_directories": 2, "compared_files": len(rows), "all_sha256_match": True, "files": rows}
           out = stage / "reports" / "independent_sha256_comparison.json"
           tmp = out.with_suffix(out.suffix + ".tmp")
-          tmp.write_text(json.dumps(report, indent=2) + "\\n", encoding="utf-8")
+          tmp.write_text(json.dumps(report, indent=2) + "\n", encoding="utf-8")
           os.replace(tmp, out)
           print(json.dumps({"status": report["status"], "compared_files": len(rows)}))
           PY
