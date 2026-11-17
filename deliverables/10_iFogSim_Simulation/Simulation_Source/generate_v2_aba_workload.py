@@ -74,9 +74,9 @@ def main() -> int:
         parser.error("--tasks-per-phase must be between 10 and 1000")
     rows = build(args.seed, args.tasks_per_phase)
     args.output.parent.mkdir(parents=True, exist_ok=True)
-    with args.output.open("w", encoding="utf-8", newline="\\n") as handle:
+    with args.output.open("w", encoding="utf-8", newline="\n") as handle:
         for row in rows:
-            handle.write(json.dumps(row, separators=(",", ":"), sort_keys=True) + "\\n")
+            handle.write(json.dumps(row, separators=(",", ":"), sort_keys=True) + "\n")
     print(json.dumps({
         "status": "PASS", "seed": args.seed, "profile": "aba_network_load_v1",
         "tasks": len(rows), "phase_boundaries": [1, args.tasks_per_phase + 1, 2 * args.tasks_per_phase + 1],
