@@ -1,15 +1,15 @@
-# A-B-A Paired-Seed Results — 2026-11-17
+# A-B-A Paired-Seed Pilot Results — 2026-11-17 (Exploratory; Not Final Held-Out Evidence)
 
 ## Executive result
 
-The 20-seed A -> B -> A evaluation completed successfully. It compares five policy arms on the same 90-task workload within each seed, using a frozen model and risk-calibration sidecar trained separately on A-only seed 909.
+The 20-run A -> B -> A pilot completed successfully. It compares five policy arms on the same 90-task workload within each run, using a frozen model and risk-calibration sidecar trained separately on A-only seed 909. A subsequent evidence audit found that seed IDs 102–121 had already been used in the earlier generic A→B→A work. This bundle is therefore exploratory pilot evidence, not an untouched confirmatory test set. See `docs/EXPERIMENTAL_EVIDENCE_VALIDITY_AUDIT_2026-11-17.md`.
 
-- Test seeds: 102–121 (20 independent paired simulation runs)
+- Reused historical seed IDs: 102–121 (20 paired simulation runs; not eligible as final held-out test seeds)
 - Workload profile: `aba_network_load_v1`
 - Tasks: 90 per policy per seed; 1,800 tasks per policy; 9,000 policy-task executions total
 - Policy arms: Local, Edge, Cloud, Random, RL Evaluation
 - Every seed passed the Java contract checks (80 checks; 9 execution plans) and per-seed evaluation validation.
-- Paired inference: PASS; 20/20 seeds; 10,000 bootstrap resamples per comparison; Wilcoxon signed-rank tests with Holm correction.
+- Exploratory paired inference calculation: PASS; 20/20 runs; 10,000 bootstrap resamples per comparison; Wilcoxon signed-rank tests with Holm correction. These inferential outputs are exploratory because the seed allocation was reused.
 - Frozen model SHA-256: `0b45a649ee6b47b937d0db2a4002147b7d98b2941741a3a0d8ead7b64844115c`
 - Frozen risk-state SHA-256: `7307dd1bf19755da8c0ddd12775c5a11f402e7652901bf488529acf585e97d63`
 - Source commit recorded in manifests: `076e45bf25ae6b05d91e7cb21fc6ba815d3e30a9`
@@ -19,7 +19,7 @@ Artifacts are archived under `audit_output/aba_paired_20seeds_20261117_final/`: 
 
 ## Aggregate policy results
 
-Means are across the 20 independent workload seeds. Latency is conditional on completed tasks only; interpret it together with completion coverage and deadline-miss rate. Bandwidth is the simulator's mean transmitted-byte metric, not energy or monetary cost.
+Means are across 20 paired runs from a reused historical seed allocation; treat these as descriptive pilot summaries, not independent final-test evidence. Latency is conditional on completed tasks only; interpret it together with completion coverage and deadline-miss rate. Bandwidth is the simulator's mean transmitted-byte metric, not energy or monetary cost.
 
 | Policy | Deadline-miss rate | Mean completed latency | Mean bandwidth metric | Completion coverage | A2 recovered |
 |---|---:|---:|---:|---:|---:|
@@ -94,7 +94,7 @@ Recovery-time comparison is conditional on both policies recovering. RL versus C
 
 - The current A-B-A profile is a **joint shift** in task MI, input bytes, arrival gaps, WAN latency, and deadlines. It does not isolate workload-only or network-only effects.
 - B deadlines are 20 s versus 15 s in A1/A2. This is a real confound for phase-wise deadline-miss comparisons and must be removed or separately controlled in the next experiment.
-- The 20 seeds are the independent units. Tasks within a seed are not treated as independent statistical samples.
+- The run/seed is the within-batch inferential unit; tasks within a run are not treated as independent statistical samples. However, reuse of seed IDs from prior work prevents this batch from serving as an untouched confirmatory test allocation.
 - Mean latency is conditional on completion. Completion coverage and all-task deadline misses must be reported alongside it.
 - The bandwidth metric does not establish energy savings, monetary savings, or a universal resource-efficiency improvement.
 - This experiment has five policy arms only. It does not yet isolate the contribution of risk calibration from the learner or the contribution of partial execution from full-only actions.
