@@ -529,10 +529,34 @@ public final class RlOffloadingV2PartialIntegrationExperiment {
                     constraints.put("partition_overhead_ms", PARTITION_OVERHEAD_MS);
                     constraints.put("merge_overhead_ms", MERGE_OVERHEAD_MS);
                 }
-                JSONObject response = python.request(mapOf("protocol_version", "2.0", "type", "observation",
+                List<Map<String, Object>> localEdgePath = Arrays.asList(
+                        mapOf("bandwidth_mbps", 10.0, "latency_ms", 2.0));
+                List<Map<String, Object>> edgeCloudPath = Arrays.asList(
+                        mapOf("bandwidth_mbps", 10.0, "latency_ms", WAN_LATENCY_MS));
+                List<Map<String, Object>> cloudPath = Arrays.asList(
+                        mapOf("bandwidth_mbps", 10.0, "latency_ms", 2.0),
+                        mapOf("bandwidth_mbps", 10.0, "latency_ms", WAN_LATENCY_MS));
+                Map<String, Object> riskContext = mapOf(
+                        "remaining_deadline_ms", workload.deadlineMs,
+                        "partition_overhead_ms", workload.divisible() ? PARTITION_OVERHEAD_MS : 0.0,
+                        "merge_overhead_ms", workload.divisible() ? MERGE_OVERHEAD_MS : 0.0,
+                        "merge_compute_mi", workload.mergeMi,
+                        "merge_queue_wait_ms", 0.0,
+                        "queue_wait_basis", "zero_predecision_queue_estimate; residual calibration captures subsequent queueing and contention",
+                        "resources", mapOf(
+                                "LOCAL", mapOf("compute_mips", 1000.0, "utilization", localUtil,
+                                        "queue_wait_ms", 0.0),
+                                "EDGE", mapOf("compute_mips", 2800.0, "utilization", edgeUtil,
+                                        "queue_wait_ms", 0.0, "uplink_path", localEdgePath,
+                                        "downlink_path", localEdgePath),
+                                "CLOUD", mapOf("compute_mips", 44800.0, "utilization", cloudUtil,
+                                        "queue_wait_ms", 0.0, "uplink_path", cloudPath,
+                                        "downlink_path", cloudPath)));
+                Map<String, Object> observation = mapOf("protocol_version", "2.0", "type", "observation",
                         "task_id", taskId, "features", features, "available_actions", mask,
-                        "task_constraints", constraints,
-                        "sim_time_ms", CloudSim.clock()));
+                        "task_constraints", constraints, "risk_context", riskContext,
+                        "sim_time_ms", CloudSim.clock());
+                JSONObject response = python.request(observation);
                 requireType(response, "action");
                 OffloadingActionV2.Action action = OffloadingActionV2.validateResponse(
                         (Map<?, ?>) response, taskId, mask);
@@ -546,7 +570,8 @@ public final class RlOffloadingV2PartialIntegrationExperiment {
                 acceptedDecisions++;
                 trace.record("decision", mapOf("task_id", taskId, "action", action.wireName,
                         "action_id", action.id, "model_version", response.get("model_version"),
-                        "mode", response.get("mode"), "task_mi", workload.taskMi,
+                        "mode", response.get("mode"), "risk", response.get("risk"),
+                        "task_mi", workload.taskMi,
                         "input_bytes", workload.inputBytes, "output_bytes", workload.outputBytes,
                         "local_utilization", localUtil, "edge_utilization", edgeUtil,
                         "cloud_utilization", cloudUtil, "deadline_ms", workload.deadlineMs,
