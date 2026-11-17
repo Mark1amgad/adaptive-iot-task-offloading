@@ -40,10 +40,14 @@ def constraints():
 
 
 def context_dict(slack=2000):
-    local_edge = [{"bandwidth_mbps": 10, "latency_ms": 2}]
-    cloud_path = [
-        {"bandwidth_mbps": 10, "latency_ms": 2},
-        {"bandwidth_mbps": 10, "latency_ms": 45},
+    local_edge = [{"bandwidth_bytes_per_second": 10000, "latency_ms": 2}]
+    cloud_up_path = [
+        {"bandwidth_bytes_per_second": 10000, "latency_ms": 2},
+        {"bandwidth_bytes_per_second": 10000, "latency_ms": 45},
+    ]
+    cloud_down_path = [
+        {"bandwidth_bytes_per_second": 100000, "latency_ms": 45},
+        {"bandwidth_bytes_per_second": 10000, "latency_ms": 2},
     ]
     return {
         "remaining_deadline_ms": slack,
@@ -57,7 +61,7 @@ def context_dict(slack=2000):
             "EDGE": {"compute_mips": 2000, "utilization": 0, "queue_wait_ms": 0,
                      "uplink_path": local_edge, "downlink_path": local_edge},
             "CLOUD": {"compute_mips": 8000, "utilization": 0, "queue_wait_ms": 0,
-                      "uplink_path": cloud_path, "downlink_path": cloud_path},
+                      "uplink_path": cloud_up_path, "downlink_path": cloud_down_path},
         },
     }
 
@@ -74,17 +78,17 @@ def test_predicts_full_and_partial_actions_with_real_merge_compute():
     assert predictions["LOCAL"] == pytest.approx(1000.0)
 
     # Edge full: uplink + 1000 MI / 2000 MIPS + downlink.
-    expected_edge_full = 6.4 + 500.0 + 1.6 + 2.0 + 2.0
+    expected_edge_full = 800.0 + 2.0 + 500.0 + 200.0 + 2.0
     assert predictions["EDGE_FULL"] == pytest.approx(expected_edge_full)
 
     # Partial includes parallel branches, explicit partition/merge delay, and
     # the merge Cloudlet's actual 100 MI on Local.
     local_branch = 500.0
-    edge_branch = 3.2 + 250.0 + 0.8 + 2.0 + 2.0
+    edge_branch = 400.0 + 2.0 + 250.0 + 100.0 + 2.0
     merge_compute = 100.0
     expected_partial = max(local_branch, edge_branch) + 3.0 + 2.0 + merge_compute
     assert predictions["EDGE_PARTIAL_50"] == pytest.approx(expected_partial)
-    assert predictions["CLOUD_FULL"] < predictions["EDGE_FULL"]
+    assert predictions["CLOUD_FULL"] > predictions["EDGE_FULL"]
 
 
 def test_prediction_uses_predecision_queue_wait_and_saturation():
@@ -92,7 +96,7 @@ def test_prediction_uses_predecision_queue_wait_and_saturation():
     raw["resources"]["EDGE"]["queue_wait_ms"] = 40
     ctx = RiskContext.from_dict(raw, features(), constraints())
     base = predict_legal_actions(features(), constraints(), (4,), ctx)["EDGE_FULL"]
-    assert base == pytest.approx(40 + 6.4 + 500 + 1.6 + 2 + 2)
+    assert base == pytest.approx(40 + 800 + 2 + 500 + 200 + 2)
 
     raw["resources"]["EDGE"]["utilization"] = 1.0
     f = features()
