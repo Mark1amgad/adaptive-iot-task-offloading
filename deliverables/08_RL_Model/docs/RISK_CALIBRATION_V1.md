@@ -33,10 +33,10 @@ MIPS^{eff}_s = MIPS_s(1-U_s)
 T_{compute}(s,MI)=Q_s + 1000\frac{MI}{MIPS^{eff}_s}
 \]
 
-For each network hop \\(h\\), where bandwidth is in bytes per simulator second:
+For each network hop \(h\), where bandwidth is in bytes per simulator second:
 
 \[
-T_{transfer}(B,h)=1000\\frac{B}{BW_h}+L_h
+T_{transfer}(B,h)=1000\frac{B}{BW_h}+L_h
 \]
 
 A path is the sum of its hop transfer times. A full remote action adds input-path transfer, remote compute/queue time, and output-path transfer. A Local action uses the Local compute/queue estimate.
@@ -91,7 +91,7 @@ Training writes a calibration sidecar next to the model:
 
 Evaluation automatically loads \`<model-in>.risk.json\` when present, or accepts \`--risk-state-in\`. It does not update calibration. Keep the model and its sidecar together; a configuration fingerprint prevents loading residual state under a different risk configuration.
 
-In Java/iFogSim, add \\`--risk-filter\\` to include the risk context. Add \\`--risk-state-in <path>\\` to evaluate with a frozen residual state. The training runner saves both artifacts. **Current comparison-runner behavior:** \\`run_v2_policy_comparison.ps1\\` runs Local, Edge, Cloud, and Random without \\`--risk-filter\\`; only \\`policy_rl_eval\\` receives \\`--risk-filter --risk-state-in\\`. Therefore, the existing five-arm comparison is a combined learner-plus-filter comparison against unfiltered reference baselines. It does not isolate the learner effect from the filter effect, and it does not apply one common filter to all policies. To make a filter-specific claim, add paired learner ablations (no filter; analytical-only feasibility with zero residual margin; residual-calibrated feasibility) using identical workload traces and the same frozen learner artifact.
+In Java/iFogSim, add \`--risk-filter\` to include the risk context. Add \`--risk-state-in <path>\` to evaluate with a frozen residual state. The training runner saves both artifacts. **Current comparison-runner behavior:** \`run_v2_policy_comparison.ps1\` runs Local, Edge, Cloud, and Random without \`--risk-filter\`; only \`policy_rl_eval\` receives \`--risk-filter --risk-state-in\`. Therefore, the existing five-arm comparison is a combined learner-plus-filter comparison against unfiltered reference baselines. It does not isolate the learner effect from the filter effect, and it does not apply one common filter to all policies. To make a filter-specific claim, add paired learner ablations (no filter; analytical-only feasibility with zero residual margin; residual-calibrated feasibility) using identical workload traces and the same frozen learner artifact.
 
 The current simulator adapter uses:
 - explicit provisional MIPS values for Local, Edge and Cloud;
