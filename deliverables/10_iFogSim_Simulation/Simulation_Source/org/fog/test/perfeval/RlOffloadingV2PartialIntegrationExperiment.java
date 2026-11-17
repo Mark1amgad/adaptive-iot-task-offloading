@@ -1013,7 +1013,7 @@ public final class RlOffloadingV2PartialIntegrationExperiment {
         double partitionOverheadMs = 3.0;
         double mergeOverheadMs = 2.0;
         double wanLatencyMs = 45.0;
-        double watchdogMs = 1000.0;
+        double watchdogMs = 60000.0;
 
         static Options parse(String[] args) throws Exception {
             Options o = new Options();
