@@ -183,11 +183,25 @@ def main() -> int:
             "ties": sum(x == 0 for x in diffs),
             "warning": "conditional paired latency; differing completion sets are not treated as equal coverage",
         }
+    provenance = {
+        "source_git_commit": manifest["source_git_commit"],
+        "model_sha256": manifest["model_sha256"],
+        "risk_state_sha256": manifest["risk_state_sha256"],
+        "java_version": manifest["java_version"],
+        "simulator_jar_inventory": manifest["simulator_jar_inventory"],
+        "parameters": manifest["parameters"],
+        "policies": manifest["policies"],
+        "evaluation_split": manifest["evaluation_split"],
+    }
+    provenance_canonical = json.dumps(provenance, sort_keys=True, separators=(",", ":"))
+    provenance_fingerprint = hashlib.sha256(provenance_canonical.encode("utf-8")).hexdigest()
     report = {
         "status": "PASS", "workload_seed": workload[0]["seed"],
         "workload_profile": workload[0]["profile"], "tasks": n,
         "comparison_design": "paired task stream and exogenous inputs; all generated tasks retained in outcome denominator",
         "manifest_sha256": manifest_sha256,
+        "provenance": provenance,
+        "provenance_fingerprint": provenance_fingerprint,
         "source_git_commit": manifest["source_git_commit"],
         "evaluation_split": manifest["evaluation_split"],
         "policy_metrics": metrics, "paired_rl_differences": paired,
