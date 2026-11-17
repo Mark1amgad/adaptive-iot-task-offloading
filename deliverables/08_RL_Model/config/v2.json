@@ -23,8 +23,15 @@
       {
         "name": "input_bytes",
         "unit": "bytes",
-        "thresholds": [4096, 65536],
-        "labels": ["small", "medium", "large"],
+        "thresholds": [
+          4096,
+          65536
+        ],
+        "labels": [
+          "small",
+          "medium",
+          "large"
+        ],
         "min_value": 0,
         "max_value": null,
         "source": "Task input payload size known before offloading",
@@ -34,8 +41,15 @@
       {
         "name": "output_bytes",
         "unit": "bytes",
-        "thresholds": [1024, 4096],
-        "labels": ["small", "medium", "large"],
+        "thresholds": [
+          1024,
+          4096
+        ],
+        "labels": [
+          "small",
+          "medium",
+          "large"
+        ],
         "min_value": 0,
         "max_value": null,
         "source": "Expected task output payload size known from workload profile",
@@ -193,5 +207,14 @@
       "CLOUD_PARTIAL_25",
       "CLOUD_PARTIAL_75"
     ]
+  },
+  "risk": {
+    "_status": "PROVISIONAL — select epsilon, window, minimum samples, and cold-start margin using training/validation only; freeze for held-out evaluation.",
+    "enabled": true,
+    "epsilon": 0.1,
+    "window_size": 200,
+    "min_samples": 20,
+    "uncalibrated_margin_ms": 0,
+    "update_on_train_outcomes": true
   }
 }
