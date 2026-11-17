@@ -62,6 +62,45 @@ jobs:
             --output "$WORKLOAD_STAGE/data" \
             --hash-report "$WORKLOAD_STAGE/reports/dev_hashes_v1_2.json"
 
+      - name: Independently regenerate and compare SHA-256 in a second output directory
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$WORKLOAD_STAGE/replay/data" "$WORKLOAD_STAGE/replay/reports"
+          python scripts/generate_workloads.py \
+            --scenario all-core \
+            --dataset-split development \
+            --seed 1300 \
+            --seed-count 1 \
+            --task-count 48 \
+            --output "$WORKLOAD_STAGE/replay/data" \
+            --hash-report "$WORKLOAD_STAGE/replay/reports/dev_hashes_v1_2.json"
+          python - <<'PY'
+          import hashlib, json, os
+          from pathlib import Path
+          stage = Path(os.environ["WORKLOAD_STAGE"])
+          first, second = stage / "data", stage / "replay" / "data"
+          names = sorted(p.name for p in first.glob("*_tasks.csv")) + sorted(p.name for p in first.glob("*_scenario_manifest.csv"))
+          if len(names) != 16:
+              raise SystemExit(f"expected 16 generated files, found {len(names)}")
+          rows = []
+          for name in names:
+              a, b = first / name, second / name
+              if not b.is_file():
+                  raise SystemExit(f"independent reproduction missing {name}")
+              ha = hashlib.sha256(a.read_bytes()).hexdigest()
+              hb = hashlib.sha256(b.read_bytes()).hexdigest()
+              rows.append({"file": name, "primary_sha256": ha, "independent_sha256": hb, "match": ha == hb})
+          if not all(row["match"] for row in rows):
+              raise SystemExit("independent output SHA-256 mismatch")
+          report = {"status": "PASS", "independent_output_directories": 2, "compared_files": len(rows), "all_sha256_match": True, "files": rows}
+          out = stage / "reports" / "independent_sha256_comparison.json"
+          tmp = out.with_suffix(out.suffix + ".tmp")
+          tmp.write_text(json.dumps(report, indent=2) + "\\n", encoding="utf-8")
+          os.replace(tmp, out)
+          print(json.dumps({"status": report["status"], "compared_files": len(rows)}))
+          PY
+
       - name: Validate every staged task/manifest pair including replay
         shell: bash
         run: |
