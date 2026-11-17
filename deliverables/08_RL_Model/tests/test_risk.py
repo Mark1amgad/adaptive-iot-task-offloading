@@ -74,13 +74,13 @@ def test_predicts_full_and_partial_actions_with_real_merge_compute():
     assert predictions["LOCAL"] == pytest.approx(1000.0)
 
     # Edge full: uplink + 1000 MI / 2000 MIPS + downlink.
-    expected_edge_full = 8.0 + 500.0 + 8.0 + 2.0 + 2.0
+    expected_edge_full = 6.4 + 500.0 + 1.6 + 2.0 + 2.0
     assert predictions["EDGE_FULL"] == pytest.approx(expected_edge_full)
 
     # Partial includes parallel branches, explicit partition/merge delay, and
     # the merge Cloudlet's actual 100 MI on Local.
     local_branch = 500.0
-    edge_branch = 4.0 + 250.0 + 4.0 + 2.0 + 2.0
+    edge_branch = 3.2 + 250.0 + 0.8 + 2.0 + 2.0
     merge_compute = 100.0
     expected_partial = max(local_branch, edge_branch) + 3.0 + 2.0 + merge_compute
     assert predictions["EDGE_PARTIAL_50"] == pytest.approx(expected_partial)
@@ -146,13 +146,13 @@ def test_calibrator_uses_finite_sample_upper_rank_and_clips_negative_margin():
 
 
 def test_feasibility_filter_excludes_unsafe_actions_and_marks_uncalibrated():
-    config = RiskConfig(epsilon=0.1, window_size=20, min_samples=4)
+    config = RiskConfig(epsilon=0.2, window_size=20, min_samples=4)
     calibrator = RiskCalibrator(config)
     predictions = {"LOCAL": 90.0, "EDGE_FULL": 70.0, "CLOUD_FULL": 120.0}
     for residual in (50, 60, 70, 80):
         calibrator.observe("EDGE_FULL", 70, 70 + residual)
     result = filter_feasible_actions(
-        (0, 4, 8), predictions, 150, calibrator,
+        (0, 4, 8), predictions, 149, calibrator,
         ("EDGE_FULL", "CLOUD_FULL", "LOCAL"),
     )
     assert result.no_feasible_action is False
