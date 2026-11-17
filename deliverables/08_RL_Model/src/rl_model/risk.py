@@ -422,6 +422,20 @@ class RiskDecision:
             "no_feasible_action": self.no_feasible_action,
             "fallback_reason": self.fallback_reason,
             "queue_wait_basis": queue_wait_basis,
+            "candidates": [
+                {
+                    "action": name,
+                    "predicted_completion_ms": values["predicted_completion_ms"],
+                    "residual_margin_ms": values["margin_ms"],
+                    "safe_completion_ms": values["safe_completion_ms"],
+                    "calibration_group": values["group"],
+                    "calibration_samples": values["sample_count"],
+                    "calibrated": values["calibrated"],
+                    "feasible": values["safe_completion_ms"] is not None
+                    and values["safe_completion_ms"] <= remaining_deadline_ms + 1e-9,
+                }
+                for name, values in self.estimates.items()
+            ],
         }
 
 
