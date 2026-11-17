@@ -9,20 +9,28 @@ import sys
 from pathlib import Path
 from typing import Any
 
-from analyze_v2_paired_seed_inference import (
-    AnalysisError, holm_adjust, load_summary, paired_effect,
-)
+from analyze_v2_paired_seed_inference import AnalysisError, holm_adjust, paired_effect
+
 
 MODES = ("none", "analytical", "calibrated")
 METRICS = ("deadline_miss_rate", "mean_latency_ms", "mean_bandwidth_bytes", "completion_coverage")
 
 
-def _load_group(paths: list[Path], expected_mode: str) -> dict[int, dict[str, Any]]:
+def _load_group(paths: list[Path], expected_mode: str, expected_split: str) -> dict[int, dict[str, Any]]:
     if len(paths) < 2:
         raise AnalysisError(f"{expected_mode}: provide at least two paired-seed summaries")
     result: dict[int, dict[str, Any]] = {}
     for path in paths:
-        summary = load_summary(path)
+        try:
+            summary = json.loads(path.read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError) as exc:
+            raise AnalysisError(f"{path}: cannot read valid JSON: {exc}") from exc
+        if summary.get("status") != "PASS":
+            raise AnalysisError(f"{path}: summary status is not PASS")
+        if summary.get("evaluation_split") != expected_split:
+            raise AnalysisError(f"{path}: expected evaluation_split={expected_split!r}")
+        if not isinstance(summary.get("provenance"), dict) or summary["provenance"].get("evaluation_split") != expected_split:
+            raise AnalysisError(f"{path}: provenance split does not match {expected_split!r}")
         seed = summary["workload_seed"]
         if isinstance(seed, bool) or not isinstance(seed, int):
             raise AnalysisError(f"{path}: workload_seed must be an integer")
@@ -46,11 +54,12 @@ def _common_provenance(summary: dict[str, Any]) -> dict[str, Any]:
 
 
 def analyze(no_filter_paths: list[Path], analytical_paths: list[Path],
-            calibrated_paths: list[Path], training_risk_mode: str = "calibrated") -> dict[str, Any]:
+            calibrated_paths: list[Path], training_risk_mode: str = "calibrated",
+            expected_split: str = "test") -> dict[str, Any]:
     groups = {
-        "none": _load_group(no_filter_paths, "none"),
-        "analytical": _load_group(analytical_paths, "analytical"),
-        "calibrated": _load_group(calibrated_paths, "calibrated"),
+        "none": _load_group(no_filter_paths, "none", expected_split),
+        "analytical": _load_group(analytical_paths, "analytical", expected_split),
+        "calibrated": _load_group(calibrated_paths, "calibrated", expected_split),
     }
     seed_sets = {mode: set(group) for mode, group in groups.items()}
     if len({tuple(sorted(values)) for values in seed_sets.values()}) != 1:
@@ -149,6 +158,7 @@ def analyze(no_filter_paths: list[Path], analytical_paths: list[Path],
 
     return {
         "status": "PASS",
+        "evaluation_split": expected_split,
         "analysis": "matched frozen-learner risk-filter ablation",
         "ablation_scope": "test-time intervention on the same frozen contextual learner",
         "arms": {
@@ -193,10 +203,11 @@ def main() -> int:
     parser.add_argument("--calibrated", nargs="+", type=Path, required=True,
                         help="P3 per-seed summaries using the frozen residual state")
     parser.add_argument("--training-risk-mode", choices=MODES, default="calibrated")
+    parser.add_argument("--expected-split", choices=("development", "validation", "test"), default="test")
     parser.add_argument("--output", type=Path, default=Path("risk_ablation_inference.json"))
     args = parser.parse_args()
     try:
-        result = analyze(args.no_filter, args.analytical, args.calibrated, args.training_risk_mode)
+        result = analyze(args.no_filter, args.analytical, args.calibrated, args.training_risk_mode, args.expected_split)
         args.output.parent.mkdir(parents=True, exist_ok=True)
         args.output.write_text(json.dumps(result, indent=2, sort_keys=True) + "\n", encoding="utf-8")
         print(json.dumps(result, indent=2, sort_keys=True))
