@@ -43,7 +43,7 @@ The `MEASUREMENT_CONTRACT_V1.md` provides a one-task event/measurement contract 
 - deadline classes and workload ranges remain `PROPOSED`;
 - split/merge overheads remain `PROPOSED` until the adapter can account for them;
 - network bandwidth's physical unit is `BLOCKED` pending Ayoub's confirmation;
-- the two-Edge selection/site mapping and 4-IoT source mapping are `BLOCKED` pending topology verification;
+- the two-Edge selection/site mapping and 100-IoT source mapping are `BLOCKED` pending topology verification;
 - energy is omitted from the outcome schema because current evidence says cumulative device energy is not defensible as per-task energy.
 
 ## 4. Task record semantics
@@ -54,7 +54,7 @@ Each row in `data/dev/*_tasks.csv` is one task before a policy decision.
 - `(run_id, task_id)` is the primary task key. The task ID string is not required to be globally unique across different run IDs.
 - `application_profile` describes workload semantics; `urgency_class` describes the deadline class. They are separate fields.
 - `workload_profile_id` names the configured task-mix profile used by the scenario.
-- `source_device_id` cycles through `iot-01` to `iot-04` as logical task sources.
+- `source_device_id` cycles through `iot-001` to `iot-100` as logical task sources.
 - `required_mi` is the total compute demand before any action is chosen.
 - `output_size_bytes` is present only because each synthetic application profile defines an output-byte generation rule. It is a workload assumption, not a measured simulator output.
 
@@ -186,7 +186,7 @@ A no-feasible-site or fallback decision belongs in the decision record/reason. I
 
 ## 11. Unresolved evidence needed before benchmark approval
 
-Ayoub must provide: (1) current V2 topology code and actual counts/site IDs for 4 IoT, 2 Edge, 1 Cloud; (2) local/edge/cloud MIPS and RAM per device; (3) explicit bandwidth raw-unit and transfer-time conversion; (4) uplink and downlink one-way latency semantics; (5) queue length/wait and available-capacity observation hooks; (6) per-task stable ID/correlation hooks; (7) measured nominal execution/transfer/E2E service-time distributions for each proposed task profile at each tier, including queueing under the nominated baseline load; (8) implemented partial branch concurrency, input/output transfer, split/merge, join timing and branch failure/unresolved behaviour; and (9) power model/per-task attribution evidence before energy can be added.
+Ayoub must provide: (1) current V2 topology code and actual counts/site IDs for 100 IoT, 20 Edge, 1 Cloud; (2) local/edge/cloud MIPS and RAM per device; (3) explicit bandwidth raw-unit and transfer-time conversion; (4) uplink and downlink one-way latency semantics; (5) queue length/wait and available-capacity observation hooks; (6) per-task stable ID/correlation hooks; (7) measured nominal execution/transfer/E2E service-time distributions for each proposed task profile at each tier, including queueing under the nominated baseline load; (8) implemented partial branch concurrency, input/output transfer, split/merge, join timing and branch failure/unresolved behaviour; and (9) power model/per-task attribution evidence before energy can be added.
 
 Mark must approve: workload mix proportions, profile distributions and output-byte rules, deadline class ranges, scenario rates, shift magnitudes, partition overheads, split/merge model assumptions, seed bands, and the exact held-out profiles/scenarios. Until then, `data/dev/` remains development-only.
 
@@ -202,6 +202,13 @@ The new single-image and single-event numeric brackets are synthetic design assu
 
 ## 21. Topology metadata separation
 
-Every scenario manifest distinguishes target_topology_id from actual_topology_id. The target references the proposed 4-IoT / 2-Edge / 1-Cloud design. The actual field remains null with NOT_VERIFIED_PENDING_AYOUB_CONFIRMATION until Ayoub verifies the simulator source/topology. Four logical source IDs must not be described as four instantiated IoT FogDevices.
+Every scenario manifest distinguishes target_topology_id from actual_topology_id. The target references the proposed 100-IoT / 20-Edge / 1-Cloud design. The actual field remains null with NOT_VERIFIED_PENDING_AYOUB_CONFIRMATION until Ayoub verifies the simulator source/topology. Four logical source IDs must not be described as four instantiated IoT FogDevices.
 
 The generator produces input tasks and scenario metadata only. No simulator outcomes, latency, deadline-success, energy, rewards, execution destinations or resource measurements are produced.
+
+
+## 100/20/1 target topology and network contract boundary
+
+The target topology ID is `v2_target_100iot_20edge_1cloud`: logical source IDs `iot-001` through `iot-100`, 20 target Edge nodes `edge-001` through `edge-020`, and one target Cloud node `cloud-001`. The target mapping assigns five sequential IoT source IDs to each Edge node. This is a target contract only, not evidence of instantiated simulator devices or confirmed actual placement. `actual_topology_id` remains null and `actual_topology_status` remains `NOT_VERIFIED_PENDING_AYOUB_CONFIRMATION` until Ayoub verifies the implementation.
+
+Network contract items remain BLOCKED pending Ayoub confirmation: bandwidth physical units and transfer-time conversion; uplink/downlink semantics; IoT–Edge and Edge–Cloud link definitions; and measured/confirmed latency and network-shift parameters. No unconfirmed values or units are inferred.
