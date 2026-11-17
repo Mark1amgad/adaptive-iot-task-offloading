@@ -21,7 +21,7 @@ The outcome timestamp is checked before either learner or calibrator state is mu
 
 ## Completion-time model
 
-All times are milliseconds. Capacity is MIPS; data rate is decimal Mbps; payloads are bytes.
+Protocol, trace, deadline, latency, and overhead fields use milliseconds. CloudSim itself advances in seconds; Java converts clock values to milliseconds at the protocol/trace boundary and converts millisecond event delays to seconds before scheduling. Capacity is MIPS (million instructions per simulator second); payload sizes are bytes and FogDevice bandwidth is bytes per simulator second.
 
 For tier \(s\):
 
@@ -96,10 +96,10 @@ In Java/iFogSim, add \`--risk-filter\` to the experiment runner to include the r
 The current simulator adapter uses:
 - explicit provisional MIPS values for Local, Edge and Cloud;
 - zero pre-decision queue-wait estimates;
-- a symmetric uplink/downlink path profile;
+- directional link profiles that follow the actual FogDevice uplink/downlink bandwidth values;
 - configured link capacities/latencies and partition/merge delays.
 
-These are model inputs, not claims that queue waiting is actually zero or that every path is symmetric. The \`queue_wait_basis\` field records the zero-queue assumption. Residual updates can learn observed end-to-end bias after completed training tasks, but they cannot correct a missing or incorrect input before enough representative outcomes exist. Replace the provisional values with measured/simulator-derived snapshots before final experiments.
+These are model inputs, not claims that queue waiting is actually zero. The current links are directional: Local↔Edge uses 10,000 bytes/s in each direction, Edge→Cloud uses 10,000 bytes/s, and Cloud→Edge uses 100,000 bytes/s; Edge/Local and Cloud/Edge propagation latencies are 2ms and 45ms respectively. The \`queue_wait_basis\` field records the zero-queue assumption. Residual updates can learn observed end-to-end bias after completed training tasks, but they cannot correct a missing or incorrect input before enough representative outcomes exist. Replace the provisional values with measured/simulator-derived snapshots before final experiments.
 
 ## Required reporting
 
