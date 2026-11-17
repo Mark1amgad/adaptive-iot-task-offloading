@@ -44,6 +44,13 @@ The registry at research/experiments/SEED_REGISTRY_V2.csv is the only seed alloc
 
 ## Topology provenance
 
-Manifests use target_topology_id for the proposed 4-IoT / 2-Edge / 1-Cloud design and actual_topology_id for the implemented simulator layout. actual_topology_id remains null with status NOT_VERIFIED_PENDING_AYOUB_CONFIRMATION until Ayoub confirms the running topology. Logical source IDs do not prove instantiated FogDevices.
+Manifests use target_topology_id for the proposed 100-IoT / 20-Edge / 1-Cloud design and actual_topology_id for the implemented simulator layout. actual_topology_id remains null with status NOT_VERIFIED_PENDING_AYOUB_CONFIRMATION until Ayoub confirms the running topology. Logical source IDs do not prove instantiated FogDevices.
 
 All sizes, compute demands, deadlines, rates, profile proportions and partition overheads remain proposed synthetic configurations. They are not factory measurements, industrial traces or measured performance. The generator never creates simulator outcomes.
+
+
+## 100/20/1 target topology and network contract boundary
+
+The target topology ID is `v2_target_100iot_20edge_1cloud`: logical source IDs `iot-001` through `iot-100`, 20 target Edge nodes `edge-001` through `edge-020`, and one target Cloud node `cloud-001`. The target mapping assigns five sequential IoT source IDs to each Edge node. This is a target contract only, not evidence of instantiated simulator devices or confirmed actual placement. `actual_topology_id` remains null and `actual_topology_status` remains `NOT_VERIFIED_PENDING_AYOUB_CONFIRMATION` until Ayoub verifies the implementation.
+
+Network contract items remain BLOCKED pending Ayoub confirmation: bandwidth physical units and transfer-time conversion; uplink/downlink semantics; IoT–Edge and Edge–Cloud link definitions; and measured/confirmed latency and network-shift parameters. No unconfirmed values or units are inferred.
