@@ -212,6 +212,7 @@ def validate_training_case(case_dir: Path, tasks_expected: int) -> dict:
     counts = {}
     tuple_ids = []
     update_counts = []
+    calibration_counts = []
     partial_count = full_count = 0
     for decision in decisions:
         action = decision.get("action")
@@ -296,13 +297,25 @@ def validate_training_case(case_dir: Path, tasks_expected: int) -> dict:
         sent = one(rows, "python_send", type="outcome", task_id=task_id)
         if sent.get("action_executed") != action_id:
             raise AssertionError(f"train_policy/{task_id}: wrong executed action in outcome")
+        decision = one(rows, "decision", task_id=task_id)
         ack = one(rows, "outcome_ack", task_id=task_id)
-        if ack.get("updated") is not True or not isinstance(ack.get("update_count"), int):
-            raise AssertionError(f"train_policy/{task_id}: training update was not applied")
-        update_counts.append(ack["update_count"])
+        if ack.get("risk_calibration_updated") is not True:
+            raise AssertionError(f"train_policy/{task_id}: risk residual was not calibrated from its measured outcome")
+        if not isinstance(ack.get("risk_calibration_updates"), int):
+            raise AssertionError(f"train_policy/{task_id}: risk calibration update count is missing")
+        calibration_counts.append(ack["risk_calibration_updates"])
+        if decision.get("mode") == "risk_fallback":
+            if ack.get("updated") is not False:
+                raise AssertionError(f"train_policy/{task_id}: risk-forced fallback must not update the learner")
+        else:
+            if ack.get("updated") is not True or not isinstance(ack.get("update_count"), int):
+                raise AssertionError(f"train_policy/{task_id}: feasible training decision did not update the learner")
+            update_counts.append(ack["update_count"])
 
-    if sorted(update_counts) != list(range(1, tasks_expected + 1)):
-        raise AssertionError("train_policy: measured-outcome update count is not a complete 1..N sequence")
+    if sorted(update_counts) != list(range(1, len(update_counts) + 1)) or not update_counts:
+        raise AssertionError("train_policy: learner update count is not a complete non-empty 1..N sequence")
+    if sorted(calibration_counts) != list(range(1, tasks_expected + 1)):
+        raise AssertionError("train_policy: risk calibration updates are not a complete 1..N sequence")
     if partial_count == 0 or full_count == 0:
         raise AssertionError("train_policy: training run did not exercise both partial and full placements")
     if len(tuple_ids) != len(set(tuple_ids)):
