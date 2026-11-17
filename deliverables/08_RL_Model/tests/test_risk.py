@@ -92,7 +92,7 @@ def test_prediction_uses_predecision_queue_wait_and_saturation():
     raw["resources"]["EDGE"]["queue_wait_ms"] = 40
     ctx = RiskContext.from_dict(raw, features(), constraints())
     base = predict_legal_actions(features(), constraints(), (4,), ctx)["EDGE_FULL"]
-    assert base == pytest.approx(40 + 8 + 500 + 8 + 2 + 2)
+    assert base == pytest.approx(40 + 6.4 + 500 + 1.6 + 2 + 2)
 
     raw["resources"]["EDGE"]["utilization"] = 1.0
     f = features()
