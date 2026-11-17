@@ -1,4 +1,5 @@
 import importlib.util
+import hashlib
 import json
 import tempfile
 import unittest
@@ -34,7 +35,9 @@ def summary(seed, offset=0.0, profile="industrial_a"):
         "workload_profile": profile,
         "policy_metrics": metrics,
         "provenance": provenance,
-        "provenance_fingerprint": "d" * 64,
+        "provenance_fingerprint": hashlib.sha256(
+            json.dumps(provenance, sort_keys=True, separators=(",", ":")).encode("utf-8")
+        ).hexdigest(),
         "evaluation_split": "test",
     }
 
