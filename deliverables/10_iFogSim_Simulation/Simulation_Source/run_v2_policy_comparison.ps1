@@ -42,7 +42,7 @@ $javaClasspath = "$classes;$classpath"
 if ($LASTEXITCODE -ne 0) { throw "Java contract tests failed: $LASTEXITCODE" }
 
 # Freeze provenance before any policy run. Every arm receives the exact same manifest.
-$workloadRows = Get-Content -LiteralPath $WorkloadFile | Where-Object { $_.Trim() } | ForEach-Object { $_ | ConvertFrom-Json }
+$workloadRows = @(Get-Content -LiteralPath $WorkloadFile | Where-Object { $_.Trim() } | ForEach-Object { $_ | ConvertFrom-Json })
 if (-not $workloadRows -or $workloadRows.Count -lt 1) { throw "Workload is empty or invalid: $WorkloadFile" }
 $seedValues = @($workloadRows | ForEach-Object { [string]$_.seed } | Select-Object -Unique)
 $profileValues = @($workloadRows | ForEach-Object { [string]$_.profile } | Select-Object -Unique)
