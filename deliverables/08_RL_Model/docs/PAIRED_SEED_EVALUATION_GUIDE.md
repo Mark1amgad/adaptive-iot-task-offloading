@@ -53,13 +53,13 @@ After at least two seed outputs exist (20 distinct paired seeds are required by 
 
 The analyzer:
 - rejects duplicate workload seeds and mixed workload profiles;
-- requires the five current policy arms and finite latency, miss-rate, and bandwidth metrics;
+- requires the five current policy arms and finite deadline-miss/bandwidth metrics; conditional latency inference is included only when every seed/policy has at least one completion;
 - computes paired seed-level differences (RL evaluation minus each baseline);
 - reports paired bootstrap 95% confidence intervals, median/mean differences, standardized paired effect size, and Wilcoxon p-values when SciPy is installed;
 - applies Holm correction across the reported baseline/metric comparisons;
 - explicitly flags whether the 20-seed protocol minimum has been met.
 
-For latency and bandwidth, negative differences mean the learner used less. For deadline-miss rate, a negative difference means fewer misses. Always interpret effect direction metric by metric.
+For latency and bandwidth, negative differences mean the learner used less. For deadline-miss rate, a negative difference means fewer misses. Always interpret effect direction metric by metric. If any policy has zero completed tasks in any seed, latency inference is withheld for the entire paired batch rather than silently conditioning on a selected subset of seeds; deadline-miss and bandwidth inference remain available.
 
 ## 5. What this does not yet solve
 
