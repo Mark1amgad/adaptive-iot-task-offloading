@@ -155,6 +155,21 @@ topology_profiles:
       Edge node. This is not an assertion of instantiated simulator devices or
       confirmed actual placement; Ayoub must verify implementation.
 
+network_contract:
+  status: BLOCKED_PENDING_AYOUB_CONFIRMATION
+  bandwidth_physical_unit: BLOCKED_NOT_CONFIRMED
+  bandwidth_transfer_time_conversion: BLOCKED_NOT_CONFIRMED
+  uplink_semantics: BLOCKED_NOT_CONFIRMED
+  downlink_semantics: BLOCKED_NOT_CONFIRMED
+  iot_edge_link_definition: BLOCKED_NOT_CONFIRMED
+  edge_cloud_link_definition: BLOCKED_NOT_CONFIRMED
+  target_link_latency_values: BLOCKED_NOT_CONFIRMED
+  network_shift_parameters: BLOCKED_NOT_CONFIRMED
+  note: >-
+    Existing 2 ms / 45 ms values and scenario shift factors are prototype/reference
+    or proposed synthetic settings only. They are not confirmed V2 target link
+    parameters and must not be assigned physical bandwidth units without Ayoub.
+
 scenarios:
   stable_steady:
     family: stable
