@@ -245,6 +245,15 @@
               }
             }
           }
+        },
+        "baseline_action_override": {
+          "type": "boolean"
+        },
+        "baseline_action_requested": {
+          "type": [
+            "string",
+            "null"
+          ]
         }
       }
     }
