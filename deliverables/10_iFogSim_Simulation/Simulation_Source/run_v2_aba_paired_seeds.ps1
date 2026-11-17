@@ -7,10 +7,14 @@ param(
     [string]$JdkHome = 'C:\Program Files\Eclipse Adoptium\jdk-25.0.3.9-hotspot',
     [string]$ModelIn = 'C:\Users\DELL\OneDrive\Desktop\Research\adaptive-iot-task-offloading\audit_output\aba_pilot_seed_101_20261117\training\python_model.json',
     [string]$RiskStateIn = '',
+    [ValidateSet('none','analytical','calibrated')][string]$RiskMode = 'calibrated',
+    [string]$SeedRegistry = '',
+    [string]$ExperimentFamily = 'iiot_final_aba',
+    [ValidateSet('development','validation','test')][string]$EvaluationSplit = 'test',
     [string]$OutputRoot = '',
-    [int[]]$Seeds = @(102..121),
+    [int[]]$Seeds = @(),
     [int]$TasksPerPhase = 30,
-    [ValidateSet('combined','network_only','workload_only')][string]$ShiftMode = 'combined',
+    [ValidateSet('combined','network_only','workload_only')][string]$ShiftMode = 'network_only',
     [double]$FixedDeadlineMs = 0.0,
     [double]$PartitionOverheadMs = 3.0,
     [double]$MergeOverheadMs = 2.0,
@@ -23,11 +27,17 @@ $generator = Join-Path $simulationSource 'generate_v2_aba_workload.py'
 $runner = Join-Path $simulationSource 'run_v2_policy_comparison.ps1'
 $inference = Join-Path $simulationSource 'analyze_v2_paired_seed_inference.py'
 $regimeInference = Join-Path $simulationSource 'analyze_v2_aba_regime_inference.py'
-if (-not $RiskStateIn) { $RiskStateIn = "$ModelIn.risk.json" }
-foreach ($required in @($generator,$runner,$inference,$regimeInference,$PythonExe,$InferencePythonExe,$ModelIn,$RiskStateIn,(Join-Path $JdkHome 'bin\javac.exe'),(Join-Path $IFogSimRoot 'jars'))) {
+if (-not $RiskStateIn -and $RiskMode -ne 'none') { $RiskStateIn = "$ModelIn.risk.json" }
+if (-not $SeedRegistry) { $SeedRegistry = Join-Path $ProjectRoot 'research\\experiments\\SEED_REGISTRY_V1.csv' }
+$requiredPaths = @($generator,$runner,$inference,$regimeInference,$PythonExe,$InferencePythonExe,$ModelIn,$SeedRegistry,(Join-Path $JdkHome 'bin\\javac.exe'),(Join-Path $IFogSimRoot 'jars'))
+if ($RiskMode -ne 'none') { $requiredPaths += $RiskStateIn }
+foreach ($required in $requiredPaths) {
     if (-not (Test-Path $required)) { throw "Required file not found: $required" }
 }
-if ($Seeds.Count -lt 2) { throw 'At least two distinct test seeds are required.' }
+if ($Seeds.Count -lt 2) { throw 'No default seed allocation is provided. Supply at least two explicitly approved seeds after checking the versioned seed registry and local run archives.' }
+$historicalSeeds = @(7,42,43,44,45,81) + (101..121) + (201..205) + (301..305) + (401..405) + (901..906) + (951..956)
+$reused = @($Seeds | Where-Object { $historicalSeeds -contains $_ })
+if ($reused.Count -gt 0) { throw "Refusing known reused seed IDs for a new batch: $($reused -join ', '). Historical IDs require a separately labelled exploratory run." }
 if (($Seeds | Select-Object -Unique).Count -ne $Seeds.Count) { throw 'Seed list contains duplicates.' }
 if ($TasksPerPhase -lt 10) { throw 'TasksPerPhase must be at least 10.' }
 if ($FixedDeadlineMs -lt 0) { throw 'FixedDeadlineMs must be zero (legacy profile) or positive.' }
@@ -50,7 +60,7 @@ foreach ($seed in $Seeds) {
     & $PythonExe $generator @generatorArgs
     if ($LASTEXITCODE -ne 0) { throw "Workload generation failed for seed $seed" }
     Write-Host ("[{0}/{1}] Running five paired policy arms for seed {2}" -f $runIndex,$Seeds.Count,$seed)
-    & $runner -ProjectRoot $ProjectRoot -IFogSimRoot $IFogSimRoot -PythonExe $PythonExe -JdkHome $JdkHome -WorkloadFile $workload -ModelIn $ModelIn -RiskStateIn $RiskStateIn -OutputRoot $evaluationRoot -PartitionOverheadMs $PartitionOverheadMs -MergeOverheadMs $MergeOverheadMs -WanLatencyMs $WanLatencyMs -WatchdogMs $WatchdogMs
+    & $runner -ProjectRoot $ProjectRoot -IFogSimRoot $IFogSimRoot -PythonExe $PythonExe -JdkHome $JdkHome -WorkloadFile $workload -ModelIn $ModelIn -RiskStateIn $RiskStateIn -RiskMode $RiskMode -SeedRegistry $SeedRegistry -ExperimentFamily $ExperimentFamily -EvaluationSplit $EvaluationSplit -OutputRoot $evaluationRoot -PartitionOverheadMs $PartitionOverheadMs -MergeOverheadMs $MergeOverheadMs -WanLatencyMs $WanLatencyMs -WatchdogMs $WatchdogMs
     if ($LASTEXITCODE -ne 0) { throw "Policy comparison failed for seed $seed" }
     $summary = Join-Path $evaluationRoot 'policy_comparison_summary.json'
     if (-not (Test-Path $summary)) { throw "Missing summary for seed $seed" }
@@ -63,4 +73,4 @@ Write-Host "All per-seed policy comparisons completed. Running paired-seed and r
 if ($LASTEXITCODE -ne 0) { throw 'Paired-seed inference failed.' }
 & $InferencePythonExe $regimeInference @summaryPaths --output $regimeOutput
 if ($LASTEXITCODE -ne 0) { throw 'A-B-A regime inference failed.' }
-Write-Host "PASS: paired-seed A-B-A batch completed. Artifacts: $OutputRoot"
+Write-Host "PASS: paired-seed A-B-A batch completed (risk mode: $RiskMode; split: $EvaluationSplit). Artifacts: $OutputRoot"

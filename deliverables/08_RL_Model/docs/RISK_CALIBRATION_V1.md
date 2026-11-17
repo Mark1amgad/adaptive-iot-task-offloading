@@ -33,10 +33,10 @@ MIPS^{eff}_s = MIPS_s(1-U_s)
 T_{compute}(s,MI)=Q_s + 1000\frac{MI}{MIPS^{eff}_s}
 \]
 
-For each network hop \(h\):
+For each network hop \(h\), where bandwidth is in bytes per simulator second:
 
 \[
-T_{transfer}(B,h)=1000\frac{8B}{10^6 BW_h}+L_h
+T_{transfer}(B,h)=1000\frac{B}{BW_h}+L_h
 \]
 
 A path is the sum of its hop transfer times. A full remote action adds input-path transfer, remote compute/queue time, and output-path transfer. A Local action uses the Local compute/queue estimate.
@@ -65,7 +65,7 @@ An action is not eligible if any required tier has zero effective MIPS. That act
 - \`merge_compute_mi\`, \`merge_queue_wait_ms\`
 - optional \`queue_wait_basis\`, a non-empty provenance/assumption label
 
-Each tier profile contains \`compute_mips\`, \`utilization\` in [0,1], and \`queue_wait_ms\`. Remote tier profiles additionally contain \`uplink_path\` and \`downlink_path\`, each an ordered list of hops with \`bandwidth_mbps\` and \`latency_ms\`.
+Each tier profile contains \`compute_mips\`, \`utilization\` in [0,1], and \`queue_wait_ms\`. Remote tier profiles additionally contain \`uplink_path\` and \`downlink_path\`, each an ordered list of hops with \`bandwidth_bytes_per_second\` and \`latency_ms\`. This is the field required by the V2 parser and populated by the current Java adapter; do not substitute Mbps without an explicit conversion.
 
 The parser checks that the utilization values match the observation features, that remaining slack does not exceed the original task deadline, and that partition/merge overheads match the task constraints. Divisible tasks require a partition model and positive merge MI. Indivisible tasks must declare zero merge MI.
 
@@ -91,7 +91,7 @@ Training writes a calibration sidecar next to the model:
 
 Evaluation automatically loads \`<model-in>.risk.json\` when present, or accepts \`--risk-state-in\`. It does not update calibration. Keep the model and its sidecar together; a configuration fingerprint prevents loading residual state under a different risk configuration.
 
-In Java/iFogSim, add \`--risk-filter\` to the experiment runner to include the risk context. Add \`--risk-state-in <path>\` to evaluate with a frozen residual state. The training runner saves both artifacts. \`run_v2_policy_comparison.ps1\` passes the same frozen sidecar to Local, Edge, Cloud, Random and learned-policy comparisons, so all policies face the same filter and calibration state.
+In Java/iFogSim, add \`--risk-filter\` to include the risk context. Add \`--risk-state-in <path>\` to evaluate with a frozen residual state. The training runner saves both artifacts. **Current comparison-runner behavior:** \`run_v2_policy_comparison.ps1\` runs Local, Edge, Cloud, and Random without \`--risk-filter\`; only \`policy_rl_eval\` receives \`--risk-filter --risk-state-in\`. Therefore, the existing five-arm comparison is a combined learner-plus-filter comparison against unfiltered reference baselines. It does not isolate the learner effect from the filter effect, and it does not apply one common filter to all policies. To make a filter-specific claim, add paired learner ablations (no filter; analytical-only feasibility with zero residual margin; residual-calibrated feasibility) using identical workload traces and the same frozen learner artifact.
 
 The current simulator adapter uses:
 - explicit provisional MIPS values for Local, Edge and Cloud;

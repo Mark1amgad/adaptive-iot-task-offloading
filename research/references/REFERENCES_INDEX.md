@@ -76,3 +76,21 @@ Audit date: 2026-11-03. Classification is based on PDF first-page text and embed
 - [Literature review workbook/document](../literature_review/paper_extractions/Literature_Review_Task_Offloading_2025_2026.docx)
 - [Rebuilt literature links](../literature_review/comparative_analysis/MEC_Research_Rebuilt_Clickable_Links.docx)
 - [Dataset and experimental-data notes](../datasets/documentation/MEC_Research_Datasets_and_Download_Links_2025_2026.docx)
+
+
+## Relationship to the Research Gap v29 matrix
+
+The Research Gap v29 matrix is a **targeted, non-systematic 21-record related-work screening matrix** retained in `research/literature_review/research_gaps/Research_Gap_Excel_v29.xlsx` and summarized in `Research_Gap_Report_v29.docx`. It is not a second bibliography classification. Use this References Index for Core / Supporting / Conference / Unverified source classification, and use the v29 matrix for method-overlap and evidence-grade screening. Do not mix the 21 matrix records into the Core Journal count.
+
+The v29 matrix includes several high-overlap precedents for contextual-bandit offloading, feasibility filtering, heterogeneous deadlines, partial execution, uncertainty-aware constraints, and load balancing. In particular:
+- `PRIOR-01`: E2DA (2023), deadline-aware contextual neural bandit.
+- `PRIOR-02`: O2C/CCMAB (IEEE ICC 2026), chance-constrained multi-tenant task offloading.
+- `PRIOR-03`: LITO (2026), Edge–Fog–Cloud contextual-bandit feedback with explicit feasibility filter and fallback.
+- `PRIOR-04`: H-DQAC (2025), hybrid DQL/Actor-Critic and iFogSim2 with deadline-miss reward.
+Use each row's evidence grade; do not describe abstract-only records as full equation audits.
+
+## CORE journal paper 7 — full-text status and audit note
+
+**Distributed Optimization of Task Offloading and Resource Allocation for Mobile Edge Computing With Multifactorial Uncertainty**, Bin Xu, Honggen Bian, Qiulan Cui, Xiaohui Yu, Jin Qi, and Yimu Ji. IEEE Transactions on Mobile Computing, 25(2), 1644–1659 (2026). Published online 26 August 2025. DOI: `10.1109/TMC.2025.3603064`. IEEE record: https://ieeexplore.ieee.org/document/11142343/
+
+The bibliographic record is confirmed by IEEE. Its full text remains **pending an authorized/official local copy** and therefore remains outside the count of six verified local Core PDFs. A technical overlap review was carried out using accessible accepted-author-version text hosted on a third-party repost; that repost is not an authorized archive and must not be redistributed or treated as the final IEEE version. The inspected work formulates joint offloading/resource allocation under task-latency and device-energy/resource constraints in a multi-device, multi-MEC-server system; it proposes TOPRFM/TODC and DGOLB for feasible-mode ranking, distributed game offloading, and load balancing. See `docs/RESEARCH_POSITIONING_AND_TMC7_AUDIT_V1.md` for the detailed audit and limitations. Obtain the official accepted/final manuscript through institutional IEEE access or from the authors before manuscript submission.

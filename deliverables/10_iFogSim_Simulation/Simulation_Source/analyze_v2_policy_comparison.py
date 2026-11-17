@@ -78,8 +78,8 @@ def main() -> int:
     manifest_bytes = manifest_path.read_bytes()
     manifest = json.loads(manifest_bytes)
     manifest_sha256 = hashlib.sha256(manifest_bytes).hexdigest()
-    if manifest.get("schema_version") != "v1" or manifest.get("evaluation_split") != "test":
-        raise AssertionError("manifest must declare schema_version=v1 and evaluation_split=test")
+    if manifest.get("schema_version") != "v1" or manifest.get("evaluation_split") not in ("development", "validation", "test"):
+        raise AssertionError("manifest must declare schema_version=v1 and a registered development, validation, or test split")
     actual_workload_sha = hashlib.sha256(args.workload.read_bytes()).hexdigest()
     if actual_workload_sha != manifest.get("workload_sha256"):
         raise AssertionError("workload SHA-256 does not match frozen experiment manifest")
@@ -315,6 +315,8 @@ def main() -> int:
         "source_inventory": manifest["source_inventory"],
         "model_sha256": manifest["model_sha256"],
         "risk_state_sha256": manifest["risk_state_sha256"],
+        "risk_filter_mode": manifest.get("risk_filter_mode", "legacy_unspecified"),
+        "workload_sha256": manifest["workload_sha256"],
         "java_version": manifest["java_version"],
         "simulator_jar_inventory": manifest["simulator_jar_inventory"],
         "parameters": manifest["parameters"],
