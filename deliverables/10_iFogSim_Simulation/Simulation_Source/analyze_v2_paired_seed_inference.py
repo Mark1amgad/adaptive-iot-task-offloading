@@ -31,9 +31,11 @@ def load_summary(path: Path) -> dict[str, Any]:
         raise AnalysisError(f"{path}: cannot read valid JSON: {exc}") from exc
     if data.get("status") != "PASS":
         raise AnalysisError(f"{path}: summary status is not PASS")
-    for key in ("workload_seed", "workload_profile", "policy_metrics"):
+    for key in ("workload_seed", "workload_profile", "policy_metrics", "provenance_fingerprint", "provenance"):
         if key not in data:
             raise AnalysisError(f"{path}: missing {key}")
+    if data.get("evaluation_split") != "test" or data["provenance"].get("evaluation_split") != "test":
+        raise AnalysisError(f"{path}: only frozen test-split summaries may enter paired inference")
     if not isinstance(data["policy_metrics"], dict):
         raise AnalysisError(f"{path}: policy_metrics must be an object")
     return data
@@ -110,6 +112,13 @@ def analyze(paths: list[Path]) -> dict[str, Any]:
     profiles = {s["workload_profile"] for s in summaries}
     if len(profiles) != 1:
         raise AnalysisError(f"mixed workload profiles: {sorted(map(str, profiles))}")
+    fingerprints = {s["provenance_fingerprint"] for s in summaries}
+    if len(fingerprints) != 1:
+        raise AnalysisError("mixed model/source/simulator provenance across paired seeds")
+    provenance_records = [s["provenance"] for s in summaries]
+    canonical = [json.dumps(p, sort_keys=True, separators=(",", ":")) for p in provenance_records]
+    if len(set(canonical)) != 1:
+        raise AnalysisError("provenance fingerprint collision or inconsistent provenance payload")
 
     for path, summary in zip(paths, summaries):
         absent = [p for p in POLICIES if p not in summary["policy_metrics"]]
@@ -147,6 +156,8 @@ def analyze(paths: list[Path]) -> dict[str, Any]:
         "n_paired_seeds": len(seeds),
         "workload_seeds": seeds,
         "workload_profile": next(iter(profiles)),
+        "provenance_fingerprint": next(iter(fingerprints)),
+        "provenance": provenance_records[0],
         "minimum_protocol_seeds": 20,
         "meets_minimum_protocol_seeds": len(seeds) >= 20,
         "limitations": [
