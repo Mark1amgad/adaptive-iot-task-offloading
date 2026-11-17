@@ -160,7 +160,7 @@ def main() -> int:
             with tempfile.NamedTemporaryFile("w", encoding="utf-8", dir=args.output.parent, prefix=args.output.name + ".", suffix=".tmp", delete=False) as stream:
                 temp_name = stream.name
                 json.dump(report, stream, indent=2, allow_nan=False)
-                stream.write("\\n")
+                stream.write("\n")
                 stream.flush()
                 os.fsync(stream.fileno())
             os.replace(temp_name, args.output)
