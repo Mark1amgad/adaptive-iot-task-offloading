@@ -250,3 +250,25 @@ def test_risk_filter_rejects_inconsistent_context_before_policy_selection(tmp_pa
     assert result["code"] == "invalid_message"
     assert "disagrees" in result["message"]
     assert s.pending == {}
+
+
+
+def test_invalid_outcome_timestamp_is_rejected_before_any_state_update(tmp_path):
+    s = make_session(tmp_path)
+    send(s, hello())
+    obs = observation()
+    obs["sim_time_ms"] = 10
+    obs["risk_context"] = risk_context()
+    decision = send(s, obs)
+    assert decision["type"] == "action"
+
+    invalid = outcome("task-1", decision["action_id"])
+    invalid["sim_time_ms"] = 9
+    result = send(s, invalid)
+
+    assert result["type"] == "error"
+    assert result["code"] == "invalid_message"
+    assert "precedes its decision" in result["message"]
+    assert s.agent.updates == 0
+    assert s.risk_calibrator.updates == 0
+    assert "task-1" in s.pending
