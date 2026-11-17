@@ -24,7 +24,7 @@ def hello(phase="train"):
 
 def observation(task_id="task-1"):
     return {
-        "protocol_version": "2.0", "type": "observation", "task_id": task_id,
+        "protocol_version": "2.0", "type": "observation", "task_id": task_id, "sim_time_ms": 10,
         "features": {"task_mi": 900, "input_bytes": 12000, "output_bytes": 2048, "wan_latency_ms": 25, "local_utilization": 0.2,
                      "edge_utilization": 0.3, "cloud_utilization": 0.4,
                      "deadline_ms": 600, "splittability": 1},
@@ -41,7 +41,7 @@ def outcome(task_id, action):
     return {
         "protocol_version": "2.0", "type": "outcome", "task_id": task_id,
         "action_executed": action, "status": "completed", "latency_ms": 120,
-        "deadline_met": True,
+        "deadline_met": True, "sim_time_ms": 130,
         "resource_metrics": {"bandwidth_bytes": 1200, "energy_joules": 1.0},
     }
 
@@ -170,3 +170,83 @@ def test_v2_action_message_conforms_to_json_schema(tmp_path):
     decision = send(s, observation())
     schema = json.loads((ROOT / "schemas" / "action.v2.schema.json").read_text())
     jsonschema.validate(decision, schema, cls=jsonschema.Draft202012Validator)
+
+
+def risk_context(slack=600):
+    local_edge = [{"bandwidth_mbps": 10, "latency_ms": 2}]
+    cloud_path = [
+        {"bandwidth_mbps": 10, "latency_ms": 2},
+        {"bandwidth_mbps": 10, "latency_ms": 45},
+    ]
+    return {
+        "remaining_deadline_ms": slack,
+        "partition_overhead_ms": 5,
+        "merge_overhead_ms": 5,
+        "merge_compute_mi": 100,
+        "merge_queue_wait_ms": 0,
+        "queue_wait_basis": "test_zero_predecision_queue_wait",
+        "resources": {
+            "LOCAL": {"compute_mips": 1000, "utilization": 0.2, "queue_wait_ms": 0},
+            "EDGE": {"compute_mips": 2800, "utilization": 0.3, "queue_wait_ms": 0,
+                     "uplink_path": local_edge, "downlink_path": local_edge},
+            "CLOUD": {"compute_mips": 44800, "utilization": 0.4, "queue_wait_ms": 0,
+                      "uplink_path": cloud_path, "downlink_path": cloud_path},
+        },
+    }
+
+
+def test_risk_context_filters_actions_and_updates_residual_after_completion(tmp_path):
+    s = make_session(tmp_path)
+    send(s, hello())
+    obs = observation()
+    obs["sim_time_ms"] = 10
+    obs["risk_context"] = risk_context()
+    decision = send(s, obs)
+
+    assert decision["type"] == "action"
+    assert decision["risk"]["filter_applied"] is True
+    assert decision["risk"]["status"] == "uncalibrated"
+    assert decision["risk"]["calibrated"] is False
+    assert decision["action"] in decision["risk"]["feasible_actions"]
+    assert "LOCAL" not in decision["risk"]["feasible_actions"]
+
+    result = send(s, outcome("task-1", decision["action_id"]))
+    assert result["type"] == "outcome_ack"
+    assert result["risk_calibration_updated"] is True
+    assert result["risk_calibration_updates"] == 1
+    assert s.risk_calibrator.sample_counts()["pooled"] == 1
+
+
+def test_no_feasible_action_forces_audited_fallback_without_q_update(tmp_path):
+    s = make_session(tmp_path)
+    send(s, hello())
+    obs = observation()
+    obs["sim_time_ms"] = 10
+    obs["risk_context"] = risk_context(slack=0)
+    decision = send(s, obs)
+
+    assert decision["type"] == "action"
+    assert decision["mode"] == "risk_fallback"
+    assert decision["risk"]["no_feasible_action"] is True
+    assert decision["risk"]["status"] == "no_feasible_action"
+    assert decision["risk"]["fallback_reason"] == "NO_FEASIBLE_SITE_AT_ARRIVAL"
+    assert len(decision["risk"]["feasible_actions"]) == 0
+
+    result = send(s, outcome("task-1", decision["action_id"]))
+    assert result["type"] == "outcome_ack"
+    assert result["agent_updated"] is False
+    assert result["risk_calibration_updated"] is True
+    assert s.agent.updates == 0
+
+
+def test_risk_filter_rejects_inconsistent_context_before_policy_selection(tmp_path):
+    s = make_session(tmp_path)
+    send(s, hello())
+    obs = observation()
+    obs["risk_context"] = risk_context()
+    obs["risk_context"]["resources"]["EDGE"]["utilization"] = 0.9
+    result = send(s, obs)
+    assert result["type"] == "error"
+    assert result["code"] == "invalid_message"
+    assert "disagrees" in result["message"]
+    assert s.pending == {}
