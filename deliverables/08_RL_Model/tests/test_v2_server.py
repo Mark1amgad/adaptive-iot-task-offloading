@@ -247,7 +247,7 @@ def test_risk_filter_rejects_inconsistent_context_before_policy_selection(tmp_pa
     obs["risk_context"]["resources"]["EDGE"]["utilization"] = 0.9
     result = send(s, obs)
     assert result["type"] == "error"
-    assert result["code"] == "invalid_message"
+    assert result["code"] == "invalid_outcome"
     assert "disagrees" in result["message"]
     assert s.pending == {}
 
