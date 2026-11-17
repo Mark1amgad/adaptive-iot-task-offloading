@@ -315,6 +315,8 @@ def main() -> int:
         "source_inventory": manifest["source_inventory"],
         "model_sha256": manifest["model_sha256"],
         "risk_state_sha256": manifest["risk_state_sha256"],
+        "risk_filter_mode": manifest.get("risk_filter_mode", "legacy_unspecified"),
+        "workload_sha256": manifest["workload_sha256"],
         "java_version": manifest["java_version"],
         "simulator_jar_inventory": manifest["simulator_jar_inventory"],
         "parameters": manifest["parameters"],
