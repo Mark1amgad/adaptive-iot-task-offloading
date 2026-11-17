@@ -4,7 +4,7 @@
 **Historical repository baseline:** `main` at `39d6cd448ba5a15e690ac67ff777017a445ce577` (2026-11-03 16:45:53 UTC)  
 **Current integration base:** `mark/iiot-scope-transition-v1`  
 **Delivery form:** committed on `abdo/industrial-workload-replay-seed-v2`, based on `mark/iiot-scope-transition-v1`; not merged to `main`  
-**Status:** V1.2.0 implementation and generated Development samples are on the research-based feature branch; CI passed 43 tests. Actual topology verification and the complete historical seed archive audit remain external dependencies.
+**Status:** V1.2.0 implementation and generated Development samples are on the research-based feature branch; CI passed 44 tests. Actual topology verification and the complete historical seed archive audit remain external dependencies.
 
 ## 1. Completed work
 
@@ -73,7 +73,7 @@ Seed selection is registry-only. Seed 1300 is Development/CI only; historical se
 
 ## 4. Verification results
 
-- `pytest -q`: **43 passed** on the V1.2.0 CI run. The workflow regenerates all eight Development pairs, validates each pair including exact A→B→A replay, runs the tests, then verifies that the committed Development inputs and reports already match the generated outputs.
+- `pytest -q`: **44 passed** on the V1.2.0 CI run. The workflow regenerates all eight Development pairs, validates each pair including exact A→B→A replay, runs the tests, then verifies that the committed Development inputs and reports already match the generated outputs.
 - Eight core scenarios generated; each development sample has 48 task rows and a one-row run manifest.
 - Each sample has a successful task/manifest validation and deterministic replay check; no outcome or decision records are generated.
 - All six JSON Schemas parse and validate structurally.
@@ -169,7 +169,7 @@ All workload ranges and mix proportions remain proposed synthetic configurations
 - Industrial archetypes: Predictive Maintenance indivisible inference; Visual Inspection indivisible single-image inference plus divisible frame batches; Production Monitoring indivisible single-event processing plus divisible aggregation windows.
 - Seed allocation: seed 1300 is allocated to Development/CI only. Seed 81, seeds 102–121, and other known previous-use seeds are retired. There are no approved final Test seeds; repository-visible inventory is incomplete pending local and team archive scans.
 - Topology: `target_topology_id` captures the proposed 4-IoT/2-Edge/1-Cloud target. `actual_topology_id` is null with `NOT_VERIFIED_PENDING_AYOUB_CONFIRMATION`; no implementation claim is made.
-- CI: eight scenario generation and validation, deterministic replay, and 43 automated tests passed on the V1.2.0 CI run; generated Development inputs and reports are synchronized on the branch.
+- CI: eight scenario generation and validation, deterministic replay, and 44 automated tests passed on the V1.2.0 CI run; generated Development inputs and reports are synchronized on the branch.
 - No simulator outcomes, execution decisions, performance measurements, latency, energy, or rewards are created by this workstream.
 
 All workload values remain proposed synthetic configurations, not factory measurements or industrial traces. Mark's approval of numerical profiles and Ayoub's verification of the actual topology remain prerequisites before benchmark use.
