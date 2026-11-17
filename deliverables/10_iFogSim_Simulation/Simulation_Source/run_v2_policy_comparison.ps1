@@ -40,7 +40,10 @@ if ($LASTEXITCODE -ne 0) { throw "javac failed: $LASTEXITCODE" }
 $javaClasspath = "$classes;$classpath"
 & $java -cp $javaClasspath org.fog.test.perfeval.OffloadingActionV2ContractTest
 if ($LASTEXITCODE -ne 0) { throw "Java contract tests failed: $LASTEXITCODE" }
-$common = @('--python',$PythonExe,'--rl-root',$rlRoot,'--workload',$WorkloadFile,'--partition-overhead-ms',"$PartitionOverheadMs",'--merge-overhead-ms',"$MergeOverheadMs",'--wan-latency-ms',"$WanLatencyMs",'--watchdog-ms',"$WatchdogMs",'--risk-filter','--risk-state-in',$RiskStateIn)
+
+# Fixed baselines must not receive the learned policy's risk filter or calibration state.
+# Otherwise the comparison would confound placement policy with risk filtering.
+$common = @('--python',$PythonExe,'--rl-root',$rlRoot,'--workload',$WorkloadFile,'--partition-overhead-ms',"$PartitionOverheadMs",'--merge-overhead-ms',"$MergeOverheadMs",'--wan-latency-ms',"$WanLatencyMs",'--watchdog-ms',"$WatchdogMs")
 foreach ($policy in @('local','edge','cloud','random')) {
     $out = Join-Path $OutputRoot ('policy_' + $policy)
     New-Item -ItemType Directory -Force -Path $out | Out-Null
@@ -50,7 +53,7 @@ foreach ($policy in @('local','edge','cloud','random')) {
 }
 $rlOut = Join-Path $OutputRoot 'policy_rl_eval'
 New-Item -ItemType Directory -Force -Path $rlOut | Out-Null
-$rlArgs = @('-cp',$javaClasspath,'org.fog.test.perfeval.RlOffloadingV2PartialIntegrationExperiment','--output',$rlOut,'--run-id','paired-rl-eval','--mode','eval','--model-in',$ModelIn) + $common
+$rlArgs = @('-cp',$javaClasspath,'org.fog.test.perfeval.RlOffloadingV2PartialIntegrationExperiment','--output',$rlOut,'--run-id','paired-rl-eval','--mode','eval','--model-in',$ModelIn) + $common + @('--risk-filter','--risk-state-in',$RiskStateIn)
 & $java @rlArgs
 if ($LASTEXITCODE -ne 0) { throw "RL evaluation policy failed: $LASTEXITCODE" }
 & $PythonExe $analyzer --root $OutputRoot --workload $WorkloadFile
