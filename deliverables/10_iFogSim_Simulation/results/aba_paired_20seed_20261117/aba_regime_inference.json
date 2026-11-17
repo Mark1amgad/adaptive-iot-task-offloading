@@ -1,0 +1,287 @@
+{
+  "analysis": "paired A1/B/A2 and return-A recovery inference",
+  "comparisons": {
+    "rl_eval_minus_cloud__A1_deadline_miss_rate": {
+      "ci95_paired_bootstrap": [
+        0.05333333333333334,
+        0.08333333333333333
+      ],
+      "mean_difference": 0.06833333333333333,
+      "median_difference": 0.06666666666666667,
+      "negative_differences": 0,
+      "paired_standardized_effect_dz": 1.9522644583952058,
+      "positive_differences": 18,
+      "sd_difference": 0.0350020884924087,
+      "ties": 2,
+      "wilcoxon_holm_adjusted_p": 0.0007866794399836032,
+      "wilcoxon_two_sided_p": 0.00015741946928887155
+    },
+    "rl_eval_minus_cloud__A2_deadline_miss_rate": {
+      "ci95_paired_bootstrap": [
+        0.03833333333333333,
+        0.06
+      ],
+      "mean_difference": 0.04833333333333333,
+      "median_difference": 0.05,
+      "negative_differences": 0,
+      "paired_standardized_effect_dz": 1.9100192449244418,
+      "positive_differences": 18,
+      "sd_difference": 0.02530515515054161,
+      "ties": 2,
+      "wilcoxon_holm_adjusted_p": 0.0007866794399836032,
+      "wilcoxon_two_sided_p": 0.00013508289932418328
+    },
+    "rl_eval_minus_cloud__B_deadline_miss_rate": {
+      "ci95_paired_bootstrap": [
+        0.0,
+        0.0
+      ],
+      "mean_difference": 0.0,
+      "median_difference": 0.0,
+      "negative_differences": 0,
+      "paired_standardized_effect_dz": null,
+      "positive_differences": 0,
+      "sd_difference": 0.0,
+      "ties": 20,
+      "wilcoxon_holm_adjusted_p": 1.0,
+      "wilcoxon_two_sided_p": 1.0
+    },
+    "rl_eval_minus_cloud__recovery_time_ms": {
+      "ci95_paired_bootstrap": [
+        -10530.835573220924,
+        11590.74144642428
+      ],
+      "interpretation": "positive means RL took longer to recover",
+      "mean_difference": 760.2479999947885,
+      "median_difference": 2193.756428566092,
+      "negative_differences": 5,
+      "paired_recovered_seeds": 20,
+      "paired_standardized_effect_dz": 0.029374141238759307,
+      "positive_differences": 13,
+      "sd_difference": 25881.539610480188,
+      "ties": 2,
+      "wilcoxon_holm_adjusted_p": 0.999312759286684,
+      "wilcoxon_two_sided_p": 0.499656379643342
+    },
+    "rl_eval_minus_edge__A1_deadline_miss_rate": {
+      "ci95_paired_bootstrap": [
+        0.05333333333333334,
+        0.08333333333333333
+      ],
+      "mean_difference": 0.06833333333333333,
+      "median_difference": 0.06666666666666667,
+      "negative_differences": 0,
+      "paired_standardized_effect_dz": 1.9522644583952058,
+      "positive_differences": 18,
+      "sd_difference": 0.0350020884924087,
+      "ties": 2,
+      "wilcoxon_holm_adjusted_p": 0.0007866794399836032,
+      "wilcoxon_two_sided_p": 0.00015741946928887155
+    },
+    "rl_eval_minus_edge__A2_deadline_miss_rate": {
+      "ci95_paired_bootstrap": [
+        -0.255,
+        -0.20166666666666666
+      ],
+      "mean_difference": -0.22833333333333333,
+      "median_difference": -0.21666666666666667,
+      "negative_differences": 20,
+      "paired_standardized_effect_dz": -3.554830215309023,
+      "positive_differences": 0,
+      "sd_difference": 0.06423185342298668,
+      "ties": 0,
+      "wilcoxon_holm_adjusted_p": 0.0007866794399836032,
+      "wilcoxon_two_sided_p": 8.474874829613897e-05
+    },
+    "rl_eval_minus_edge__B_deadline_miss_rate": {
+      "ci95_paired_bootstrap": [
+        -0.8066666666666666,
+        -0.75
+      ],
+      "mean_difference": -0.7766666666666666,
+      "median_difference": -0.7666666666666667,
+      "negative_differences": 20,
+      "paired_standardized_effect_dz": -11.63470124093778,
+      "positive_differences": 0,
+      "sd_difference": 0.06675432833065731,
+      "ties": 0,
+      "wilcoxon_holm_adjusted_p": 0.0007866794399836032,
+      "wilcoxon_two_sided_p": 8.128491040753146e-05
+    },
+    "rl_eval_minus_edge__recovery_time_ms": {
+      "ci95_paired_bootstrap": [
+        -37917.63667143178,
+        -21028.32843214839
+      ],
+      "interpretation": "positive means RL took longer to recover",
+      "mean_difference": -29929.996285719528,
+      "median_difference": -34016.28500000251,
+      "negative_differences": 19,
+      "paired_recovered_seeds": 20,
+      "paired_standardized_effect_dz": -1.5174668891131402,
+      "positive_differences": 1,
+      "sd_difference": 19723.656905101663,
+      "ties": 0,
+      "wilcoxon_holm_adjusted_p": 0.0006198883056640625,
+      "wilcoxon_two_sided_p": 4.76837158203125e-05
+    },
+    "rl_eval_minus_local__A1_deadline_miss_rate": {
+      "ci95_paired_bootstrap": [
+        -0.8766666666666667,
+        -0.8400000000000001
+      ],
+      "mean_difference": -0.8583333333333334,
+      "median_difference": -0.8333333333333334,
+      "negative_differences": 20,
+      "paired_standardized_effect_dz": -20.578349967744213,
+      "positive_differences": 0,
+      "sd_difference": 0.04171050325603066,
+      "ties": 0,
+      "wilcoxon_holm_adjusted_p": 0.0007866794399836032,
+      "wilcoxon_two_sided_p": 6.808599234788901e-05
+    },
+    "rl_eval_minus_local__A2_deadline_miss_rate": {
+      "ci95_paired_bootstrap": [
+        -0.9616666666666667,
+        -0.9400000000000001
+      ],
+      "mean_difference": -0.9516666666666667,
+      "median_difference": -0.95,
+      "negative_differences": 20,
+      "paired_standardized_effect_dz": -37.60762030523643,
+      "positive_differences": 0,
+      "sd_difference": 0.025305155150541603,
+      "ties": 0,
+      "wilcoxon_holm_adjusted_p": 0.0007866794399836032,
+      "wilcoxon_two_sided_p": 6.55566199986336e-05
+    },
+    "rl_eval_minus_local__B_deadline_miss_rate": {
+      "ci95_paired_bootstrap": [
+        -1.0,
+        -1.0
+      ],
+      "mean_difference": -1.0,
+      "median_difference": -1.0,
+      "negative_differences": 20,
+      "paired_standardized_effect_dz": null,
+      "positive_differences": 0,
+      "sd_difference": 0.0,
+      "ties": 0,
+      "wilcoxon_holm_adjusted_p": 0.00010841903003461698,
+      "wilcoxon_two_sided_p": 7.74421643104407e-06
+    },
+    "rl_eval_minus_local__recovery_time_ms": {
+      "paired_recovered_seeds": 0,
+      "status": "insufficient paired recoveries for inference"
+    },
+    "rl_eval_minus_random__A1_deadline_miss_rate": {
+      "ci95_paired_bootstrap": [
+        -0.26166666666666666,
+        -0.2
+      ],
+      "mean_difference": -0.23166666666666666,
+      "median_difference": -0.24999999999999997,
+      "negative_differences": 20,
+      "paired_standardized_effect_dz": -3.2120968304741013,
+      "positive_differences": 0,
+      "sd_difference": 0.07212318896142149,
+      "ties": 0,
+      "wilcoxon_holm_adjusted_p": 0.0007866794399836032,
+      "wilcoxon_two_sided_p": 8.69545403378786e-05
+    },
+    "rl_eval_minus_random__A2_deadline_miss_rate": {
+      "ci95_paired_bootstrap": [
+        -0.695,
+        -0.6683333333333333
+      ],
+      "mean_difference": -0.6816666666666666,
+      "median_difference": -0.6666666666666667,
+      "negative_differences": 20,
+      "paired_standardized_effect_dz": -21.651364008344334,
+      "positive_differences": 0,
+      "sd_difference": 0.03148377471294444,
+      "ties": 0,
+      "wilcoxon_holm_adjusted_p": 0.0007866794399836032,
+      "wilcoxon_two_sided_p": 7.988361736862663e-05
+    },
+    "rl_eval_minus_random__B_deadline_miss_rate": {
+      "ci95_paired_bootstrap": [
+        -0.64,
+        -0.6083333333333333
+      ],
+      "mean_difference": -0.625,
+      "median_difference": -0.6333333333333333,
+      "negative_differences": 20,
+      "paired_standardized_effect_dz": -16.770509831248425,
+      "positive_differences": 0,
+      "sd_difference": 0.03726779962499649,
+      "ties": 0,
+      "wilcoxon_holm_adjusted_p": 0.0007866794399836032,
+      "wilcoxon_two_sided_p": 7.612502462153449e-05
+    },
+    "rl_eval_minus_random__recovery_time_ms": {
+      "paired_recovered_seeds": 0,
+      "status": "insufficient paired recoveries for inference"
+    }
+  },
+  "independent_unit": "workload_seed / paired simulation run",
+  "limitations": [
+    "Bootstrap intervals resample workload seeds, not tasks.",
+    "Recovery-time comparisons are conditional on both policies recovering within A2.",
+    "A policy that does not recover within the observed horizon is not assigned an artificial recovery time.",
+    "Recovery thresholds and 10-task window size are operational definitions and require sensitivity analysis."
+  ],
+  "n_paired_seeds": 20,
+  "provenance_fingerprint": "47dc44bc7e4e0fb57e69ace161badbab2f9e78ab5c28d76ea76c2abd2bd9a00d",
+  "recovery_rates": {
+    "cloud": {
+      "recovered_seeds": 20,
+      "recovery_rate": 1.0,
+      "total_seeds": 20
+    },
+    "edge": {
+      "recovered_seeds": 20,
+      "recovery_rate": 1.0,
+      "total_seeds": 20
+    },
+    "local": {
+      "recovered_seeds": 0,
+      "recovery_rate": 0.0,
+      "total_seeds": 20
+    },
+    "random": {
+      "recovered_seeds": 0,
+      "recovery_rate": 0.0,
+      "total_seeds": 20
+    },
+    "rl_eval": {
+      "recovered_seeds": 20,
+      "recovery_rate": 1.0,
+      "total_seeds": 20
+    }
+  },
+  "status": "PASS",
+  "workload_profile": "aba_network_load_v1",
+  "workload_seeds": [
+    102,
+    103,
+    104,
+    105,
+    106,
+    107,
+    108,
+    109,
+    110,
+    111,
+    112,
+    113,
+    114,
+    115,
+    116,
+    117,
+    118,
+    119,
+    120,
+    121
+  ]
+}

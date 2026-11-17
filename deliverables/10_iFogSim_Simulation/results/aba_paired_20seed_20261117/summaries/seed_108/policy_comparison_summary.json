@@ -1,0 +1,595 @@
+{
+  "comparison_design": "paired task stream and exogenous inputs; all generated tasks retained in outcome denominator",
+  "evaluation_split": "test",
+  "interpretation": "Descriptive single-seed evaluation only; not evidence of statistical significance, convergence, or generalization.",
+  "manifest_sha256": "5cb39479f1a59d62e76de4a7613b7945736b43c50b8e390389dc750c9f12af1e",
+  "paired_rl_differences": {
+    "rl_minus_cloud_latency_ms_completed_pairs": {
+      "baseline_faster_tasks": 53,
+      "mean_difference": 2086.9832380939574,
+      "paired_completed_tasks": 90,
+      "rl_faster_tasks": 13,
+      "ties": 24,
+      "warning": "conditional paired latency; differing completion sets are not treated as equal coverage"
+    },
+    "rl_minus_edge_latency_ms_completed_pairs": {
+      "baseline_faster_tasks": 30,
+      "mean_difference": -4970.667714285998,
+      "paired_completed_tasks": 90,
+      "rl_faster_tasks": 38,
+      "ties": 22,
+      "warning": "conditional paired latency; differing completion sets are not treated as equal coverage"
+    },
+    "rl_minus_local_latency_ms_completed_pairs": {
+      "baseline_faster_tasks": 2,
+      "mean_difference": -43684.48995238002,
+      "paired_completed_tasks": 30,
+      "rl_faster_tasks": 28,
+      "ties": 0,
+      "warning": "conditional paired latency; differing completion sets are not treated as equal coverage"
+    },
+    "rl_minus_random_latency_ms_completed_pairs": {
+      "baseline_faster_tasks": 19,
+      "mean_difference": -26488.215575395894,
+      "paired_completed_tasks": 90,
+      "rl_faster_tasks": 65,
+      "ties": 6,
+      "warning": "conditional paired latency; differing completion sets are not treated as equal coverage"
+    }
+  },
+  "policy_metrics": {
+    "cloud": {
+      "action_counts": {
+        "CLOUD_FULL": 90
+      },
+      "completion_coverage": 1.0,
+      "deadline_miss_rate": 0.0,
+      "deadline_misses": 0,
+      "decision_modes": {
+        "baseline": 90
+      },
+      "failed_tasks": 0,
+      "generated_tasks": 90,
+      "late_tasks": 0,
+      "latency_condition": "completed tasks only; interpret together with completion_coverage and deadline_miss_rate",
+      "mean_bandwidth_bytes": 42480.84444444445,
+      "mean_bandwidth_bytes_all_tasks": 42480.84444444445,
+      "mean_latency_ms": 5966.169523809492,
+      "mean_latency_ms_completed_only": 5966.169523809492,
+      "median_latency_ms_completed_only": 6094.248571428523,
+      "on_time_tasks": 90,
+      "p95_latency_ms_completed_only": 9845.37285714282,
+      "unresolved_at_horizon": 0
+    },
+    "edge": {
+      "action_counts": {
+        "EDGE_FULL": 90
+      },
+      "completion_coverage": 1.0,
+      "deadline_miss_rate": 0.2777777777777778,
+      "deadline_misses": 25,
+      "decision_modes": {
+        "baseline": 90
+      },
+      "failed_tasks": 0,
+      "generated_tasks": 90,
+      "late_tasks": 25,
+      "latency_condition": "completed tasks only; interpret together with completion_coverage and deadline_miss_rate",
+      "mean_bandwidth_bytes": 21240.422222222223,
+      "mean_bandwidth_bytes_all_tasks": 21240.422222222223,
+      "mean_latency_ms": 13023.820476189447,
+      "mean_latency_ms_completed_only": 13023.820476189447,
+      "median_latency_ms_completed_only": 5608.057142857149,
+      "on_time_tasks": 65,
+      "p95_latency_ms_completed_only": 38284.19999999594,
+      "unresolved_at_horizon": 0
+    },
+    "local": {
+      "action_counts": {
+        "LOCAL": 90
+      },
+      "completion_coverage": 0.3333333333333333,
+      "deadline_miss_rate": 0.9444444444444444,
+      "deadline_misses": 85,
+      "decision_modes": {
+        "baseline": 90
+      },
+      "failed_tasks": 0,
+      "generated_tasks": 90,
+      "late_tasks": 25,
+      "latency_condition": "completed tasks only; interpret together with completion_coverage and deadline_miss_rate",
+      "mean_bandwidth_bytes": 0.0,
+      "mean_bandwidth_bytes_all_tasks": 0.0,
+      "mean_latency_ms": 51572.333333332776,
+      "mean_latency_ms_completed_only": 51572.333333332776,
+      "median_latency_ms_completed_only": 42560.000000000415,
+      "on_time_tasks": 5,
+      "p95_latency_ms_completed_only": 152329.99999999744,
+      "unresolved_at_horizon": 60
+    },
+    "random": {
+      "action_counts": {
+        "CLOUD_FULL": 13,
+        "CLOUD_PARTIAL_25": 6,
+        "CLOUD_PARTIAL_50": 13,
+        "CLOUD_PARTIAL_75": 13,
+        "EDGE_FULL": 7,
+        "EDGE_PARTIAL_25": 8,
+        "EDGE_PARTIAL_50": 6,
+        "EDGE_PARTIAL_75": 12,
+        "LOCAL": 12
+      },
+      "completion_coverage": 1.0,
+      "deadline_miss_rate": 0.5,
+      "deadline_misses": 45,
+      "decision_modes": {
+        "baseline": 90
+      },
+      "failed_tasks": 0,
+      "generated_tasks": 90,
+      "late_tasks": 45,
+      "latency_condition": "completed tasks only; interpret together with completion_coverage and deadline_miss_rate",
+      "mean_bandwidth_bytes": 19695.566666666666,
+      "mean_bandwidth_bytes_all_tasks": 19695.566666666666,
+      "mean_latency_ms": 34541.36833729934,
+      "mean_latency_ms_completed_only": 34541.36833729934,
+      "median_latency_ms_completed_only": 15018.00000000112,
+      "on_time_tasks": 45,
+      "p95_latency_ms_completed_only": 117040.99999999318,
+      "unresolved_at_horizon": 0
+    },
+    "rl_eval": {
+      "action_counts": {
+        "CLOUD_FULL": 29,
+        "CLOUD_PARTIAL_75": 2,
+        "EDGE_FULL": 36,
+        "EDGE_PARTIAL_25": 23
+      },
+      "completion_coverage": 1.0,
+      "deadline_miss_rate": 0.044444444444444446,
+      "deadline_misses": 4,
+      "decision_modes": {
+        "fallback": 34,
+        "greedy": 56
+      },
+      "failed_tasks": 0,
+      "generated_tasks": 90,
+      "late_tasks": 4,
+      "latency_condition": "completed tasks only; interpret together with completion_coverage and deadline_miss_rate",
+      "mean_bandwidth_bytes": 25572.944444444445,
+      "mean_bandwidth_bytes_all_tasks": 25572.944444444445,
+      "mean_latency_ms": 8053.152761903449,
+      "mean_latency_ms_completed_only": 8053.152761903449,
+      "median_latency_ms_completed_only": 7174.7278571427705,
+      "on_time_tasks": 86,
+      "p95_latency_ms_completed_only": 13435.000000001197,
+      "unresolved_at_horizon": 0
+    }
+  },
+  "provenance": {
+    "evaluation_split": "test",
+    "java_version": "JAVA_VERSION=\"25.0.3\"",
+    "model_sha256": "0b45a649ee6b47b937d0db2a4002147b7d98b2941741a3a0d8ead7b64844115c",
+    "parameters": {
+      "merge_overhead_ms": 2.0,
+      "partition_overhead_ms": 3.0,
+      "wan_latency_ms": 45.0,
+      "watchdog_ms": 60000.0
+    },
+    "policies": [
+      "local",
+      "edge",
+      "cloud",
+      "random",
+      "rl_eval"
+    ],
+    "risk_state_sha256": "7307dd1bf19755da8c0ddd12775c5a11f402e7652901bf488529acf585e97d63",
+    "simulator_jar_inventory": [
+      {
+        "name": "commons-io-2.17.0.jar",
+        "sha256": "4aa4ca48f3dfd30b78220b7881d8cb93eac4093ec94361b6befa9487998a550b"
+      },
+      {
+        "name": "commons-lang3-3.17.0.jar",
+        "sha256": "6ee731df5c8e5a2976a1ca023b6bb320ea8d3539fbe64c8a1d5cb765127c33b4"
+      },
+      {
+        "name": "commons-net-3.11.1.jar",
+        "sha256": "3bb861274992dba5487de328303745b7085de72694b63a3300be1e057144311e"
+      },
+      {
+        "name": "easymock-5.3.0.jar",
+        "sha256": "df558727da7d9d87d11979b2c4c67480c8efb62e2e40e11c352717b9817a7f3f"
+      },
+      {
+        "name": "geoip2-4.2.0.jar",
+        "sha256": "5981ac68332deebdf52e7a7f96a0bef5f320012fa930f3778ee1e9c827a80dbd"
+      },
+      {
+        "name": "guava-18.0.jar",
+        "sha256": "d664fbfc03d2e5ce9cab2a44fb01f1d0bf9dfebeccc1a473b1f9ea31f79f6f99"
+      },
+      {
+        "name": "json-simple-1.1.1.jar",
+        "sha256": "4e69696892b88b41c55d49ab2fdcc21eead92bf54acc588c0050596c3b75199c"
+      },
+      {
+        "name": "junit-jupiter-engine-5.11.3.jar",
+        "sha256": "e62420c99f7c0d59a2159a2ef63e61877e9c80bd722c03ca8bf3bdcea050a589"
+      },
+      {
+        "name": "opencsv-5.9.jar",
+        "sha256": "2023969b86ce968ad8ae549648ac587d141c19ae684a9a5c67c9105f37ab0d1c"
+      },
+      {
+        "name": "uncommons-maths-1.2.3.jar",
+        "sha256": "67c5d6173ab3bd5b53ece7c99f43bb162710c9e1f3fb3305ad2f93e712906bd8"
+      }
+    ],
+    "source_git_commit": "076e45bf25ae6b05d91e7cb21fc6ba815d3e30a9",
+    "source_inventory": [
+      {
+        "path": "deliverables/08_RL_Model/config/default.json",
+        "sha256": "d27c522ae18cc8b7b57cbde01b1a554688d569b68b5a64b5611406c82d0644d7"
+      },
+      {
+        "path": "deliverables/08_RL_Model/config/v2.json",
+        "sha256": "dec925af758861c522b692494b1d319f294eb6da2c52a14d2a69102b1289598c"
+      },
+      {
+        "path": "deliverables/08_RL_Model/src/rl_model/__init__.py",
+        "sha256": "1714f6c39fcd1666da2623648ba69759c6afda6293f23aa956dea1b0959cb678"
+      },
+      {
+        "path": "deliverables/08_RL_Model/src/rl_model/actions.py",
+        "sha256": "43da629dbb287b59e3608eb5b2fa588d2165a201055db014beae97a2f12a8310"
+      },
+      {
+        "path": "deliverables/08_RL_Model/src/rl_model/agent.py",
+        "sha256": "67e6526b29789e437588aece6104df06b07d7f5c9274c69719a8b27e8051b497"
+      },
+      {
+        "path": "deliverables/08_RL_Model/src/rl_model/agent_v2.py",
+        "sha256": "cfa0aeb5f8dd6001e44b89fba211c21c6945bd56bb38e96434421d0126726a93"
+      },
+      {
+        "path": "deliverables/08_RL_Model/src/rl_model/aggregate.py",
+        "sha256": "a676b30a82393acc3c8929e299c9139e0af1659db6d28a16deff5e37fae9e8d4"
+      },
+      {
+        "path": "deliverables/08_RL_Model/src/rl_model/config.py",
+        "sha256": "53ff10e297b2a692a28cd3e9795674336c0ee9898688f6a436d95c99165834e2"
+      },
+      {
+        "path": "deliverables/08_RL_Model/src/rl_model/config_v2.py",
+        "sha256": "b704a868908558191e6e8dac7e69e224900cc39680c344eae044a3b6694a758d"
+      },
+      {
+        "path": "deliverables/08_RL_Model/src/rl_model/logging_utils.py",
+        "sha256": "372b3d31737e3a6dabc3c028e591592e0db3b758c9d8580a55cb9c208df8e4d7"
+      },
+      {
+        "path": "deliverables/08_RL_Model/src/rl_model/offloading.py",
+        "sha256": "5562fca7a76b84b164669ab50269f67d23944906a69c6ef651f1ff641c81dcf6"
+      },
+      {
+        "path": "deliverables/08_RL_Model/src/rl_model/persistence.py",
+        "sha256": "442f6c833d14915f11bebf3f25e9b89a7d4bdafcf7b1bf75b9ccab0d675fce02"
+      },
+      {
+        "path": "deliverables/08_RL_Model/src/rl_model/persistence_v2.py",
+        "sha256": "074680344827bcba8cf931c5904299e51da39ab28f08e97b6a7fa487ae46f456"
+      },
+      {
+        "path": "deliverables/08_RL_Model/src/rl_model/protocol.py",
+        "sha256": "f5132fa360196461db9c6b235fc4505b54e37b9b8b379dbc71ae580482f669f3"
+      },
+      {
+        "path": "deliverables/08_RL_Model/src/rl_model/protocol_v2.py",
+        "sha256": "e1b6ff0228130b57b27fefaecd88e630a2aeb2eab5246371d99247b35ceb1df6"
+      },
+      {
+        "path": "deliverables/08_RL_Model/src/rl_model/reward.py",
+        "sha256": "67a5f6974f6a8869670674e0d2e4c9f22dc6a92daef4adba96d660c31542c90e"
+      },
+      {
+        "path": "deliverables/08_RL_Model/src/rl_model/risk.py",
+        "sha256": "c78d9062017e056591db5131d915de917618a9972761127f7655003168de6c1e"
+      },
+      {
+        "path": "deliverables/08_RL_Model/src/rl_model/run_plan.py",
+        "sha256": "e14f71bc2d2a4c0098ae2d9e5eb08358573734ad230fcdd4c5a413293872b793"
+      },
+      {
+        "path": "deliverables/08_RL_Model/src/rl_model/server.py",
+        "sha256": "9322c3d1018d1cce092ba15ef8cc334d9ca4a09a0a8f3723465d61d628a6008c"
+      },
+      {
+        "path": "deliverables/08_RL_Model/src/rl_model/server_v2.py",
+        "sha256": "84e546d1f1d5038f209dad51c97ef8e54ae0de737bbab9c424f469601c5e39f5"
+      },
+      {
+        "path": "deliverables/08_RL_Model/src/rl_model/state.py",
+        "sha256": "d1fac5755f22b8f18e946fa4bae8819da7ddfa78756f1d3fa950b16b9744dbe6"
+      },
+      {
+        "path": "deliverables/08_RL_Model/src/rl_model/train_offline.py",
+        "sha256": "352109121602958c104fbcfbce2731da54d488bc813b83ff7f92ef78df4e503d"
+      },
+      {
+        "path": "deliverables/10_iFogSim_Simulation/Simulation_Source/analyze_v2_paired_seed_inference.py",
+        "sha256": "56fd6a4af9dc2d8942a004e271f4c6471a0642e03bb7eb51e106a035d87a6eda"
+      },
+      {
+        "path": "deliverables/10_iFogSim_Simulation/Simulation_Source/analyze_v2_policy_comparison.py",
+        "sha256": "dddb636a80f2afca4f896ade46d0eb656fe8ef2d810fa184d46272964459aaca"
+      },
+      {
+        "path": "deliverables/10_iFogSim_Simulation/Simulation_Source/create_v2_experiment_manifest.py",
+        "sha256": "2aac22f6117a994bf9f11875e056591db3884fa16dab9740f65aa06c658f6ec3"
+      },
+      {
+        "path": "deliverables/10_iFogSim_Simulation/Simulation_Source/generate_v2_aba_workload.py",
+        "sha256": "10f6635ac7371ab850f3f3f1312744639376db64cc956c9ba619d979b122bacb"
+      },
+      {
+        "path": "deliverables/10_iFogSim_Simulation/Simulation_Source/org/fog/test/perfeval/OffloadingActionV2.java",
+        "sha256": "8bde66147e3835b0c8a792166835a8586ea86e665e986e76b7e9f58b44cf112a"
+      },
+      {
+        "path": "deliverables/10_iFogSim_Simulation/Simulation_Source/org/fog/test/perfeval/OffloadingActionV2ContractTest.java",
+        "sha256": "36b7b8c303aa0dc9de13eb20cbda30f59e8ffe4e60d81cea30ee625665c3eccb"
+      },
+      {
+        "path": "deliverables/10_iFogSim_Simulation/Simulation_Source/org/fog/test/perfeval/OffloadingActionV2ExecutionPlan.java",
+        "sha256": "a506432d21c07040092c0b8919d536904a9dcc64023d589ed7b5d3590dbccaa6"
+      },
+      {
+        "path": "deliverables/10_iFogSim_Simulation/Simulation_Source/org/fog/test/perfeval/RlOffloadingV2PartialIntegrationExperiment.java",
+        "sha256": "57aa7b48bcf5f54e183ebd93cf982681c74ca42d558f8c3d731c23f8e7de9b38"
+      },
+      {
+        "path": "deliverables/10_iFogSim_Simulation/Simulation_Source/PAIRED_SEED_EVALUATION_GUIDE.md",
+        "sha256": "ed5688afbe0b5a39c523f7c3754b88010b759e8abfae5de60c9ba0ad0e66d859"
+      },
+      {
+        "path": "deliverables/10_iFogSim_Simulation/Simulation_Source/run_v2_aba_paired_seeds.ps1",
+        "sha256": "a6652b7f5fcbf351f52c9fccbc2e871af946c637f1efacfbcb28e68d2a86d258"
+      },
+      {
+        "path": "deliverables/10_iFogSim_Simulation/Simulation_Source/run_v2_policy_comparison.ps1",
+        "sha256": "472d079a2b83016f20e1c03eb17f5d21b7b6e45248ffa8e228c7bd479cd608f1"
+      }
+    ]
+  },
+  "provenance_fingerprint": "47dc44bc7e4e0fb57e69ace161badbab2f9e78ab5c28d76ea76c2abd2bd9a00d",
+  "regime_shift_analysis": {
+    "definition": "A2 recovery is the first 10-task completed window whose deadline-miss rate is within +5 percentage points of A1 and median completed latency is within +10% of A1; recovery time is measured from A2 transition to that window's last completion.",
+    "enabled": true,
+    "policy_results": {
+      "cloud": {
+        "phase_metrics": {
+          "0": {
+            "completion_coverage": 1.0,
+            "deadline_miss_rate": 0.0,
+            "median_latency_ms_completed_only": 3867.604999999996,
+            "p95_latency_ms_completed_only": 6240.887142857147,
+            "regime_id": "A",
+            "tasks": 30
+          },
+          "1": {
+            "completion_coverage": 1.0,
+            "deadline_miss_rate": 0.0,
+            "median_latency_ms_completed_only": 8910.992857142815,
+            "p95_latency_ms_completed_only": 10545.772857142765,
+            "regime_id": "B",
+            "tasks": 30
+          },
+          "2": {
+            "completion_coverage": 1.0,
+            "deadline_miss_rate": 0.0,
+            "median_latency_ms_completed_only": 3885.7299999999386,
+            "p95_latency_ms_completed_only": 6240.887142857105,
+            "regime_id": "A",
+            "tasks": 30
+          }
+        },
+        "return_A_recovery": {
+          "baseline_median_latency_tolerance_relative": 0.1,
+          "baseline_miss_rate_tolerance_absolute": 0.05,
+          "baseline_reference_phase": "A1",
+          "first_qualifying_window": {
+            "window_deadline_miss_rate": 0.0,
+            "window_end_completion_time_ms": 278240.88714285713,
+            "window_end_sequence": 70,
+            "window_median_latency_ms": 3913.958571428495,
+            "window_start_sequence": 61
+          },
+          "reason_if_not_recovered": null,
+          "recovered": true,
+          "recovery_time_ms": 47240.88714285713,
+          "return_phase": "A2",
+          "window_size_tasks": 10
+        },
+        "stress_B_deadline_miss_burden": 0.0
+      },
+      "edge": {
+        "phase_metrics": {
+          "0": {
+            "completion_coverage": 1.0,
+            "deadline_miss_rate": 0.0,
+            "median_latency_ms_completed_only": 4842.099999999988,
+            "p95_latency_ms_completed_only": 5965.20000000001,
+            "regime_id": "A",
+            "tasks": 30
+          },
+          "1": {
+            "completion_coverage": 1.0,
+            "deadline_miss_rate": 0.6666666666666666,
+            "median_latency_ms_completed_only": 26642.799999996954,
+            "p95_latency_ms_completed_only": 44595.19999999714,
+            "regime_id": "B",
+            "tasks": 30
+          },
+          "2": {
+            "completion_coverage": 1.0,
+            "deadline_miss_rate": 0.16666666666666666,
+            "median_latency_ms_completed_only": 5404.514285714242,
+            "p95_latency_ms_completed_only": 19848.89999999686,
+            "regime_id": "A",
+            "tasks": 30
+          }
+        },
+        "return_A_recovery": {
+          "baseline_median_latency_tolerance_relative": 0.1,
+          "baseline_miss_rate_tolerance_absolute": 0.05,
+          "baseline_reference_phase": "A1",
+          "first_qualifying_window": {
+            "window_deadline_miss_rate": 0.0,
+            "window_end_completion_time_ms": 299408.15714285715,
+            "window_end_sequence": 75,
+            "window_median_latency_ms": 4969.749999998669,
+            "window_start_sequence": 66
+          },
+          "reason_if_not_recovered": null,
+          "recovered": true,
+          "recovery_time_ms": 68408.15714285715,
+          "return_phase": "A2",
+          "window_size_tasks": 10
+        },
+        "stress_B_deadline_miss_burden": 0.6666666666666666
+      },
+      "local": {
+        "phase_metrics": {
+          "0": {
+            "completion_coverage": 1.0,
+            "deadline_miss_rate": 0.8333333333333334,
+            "median_latency_ms_completed_only": 42560.000000000415,
+            "p95_latency_ms_completed_only": 152329.99999999744,
+            "regime_id": "A",
+            "tasks": 30
+          },
+          "1": {
+            "completion_coverage": 0.0,
+            "deadline_miss_rate": 1.0,
+            "median_latency_ms_completed_only": null,
+            "p95_latency_ms_completed_only": null,
+            "regime_id": "B",
+            "tasks": 30
+          },
+          "2": {
+            "completion_coverage": 0.0,
+            "deadline_miss_rate": 1.0,
+            "median_latency_ms_completed_only": null,
+            "p95_latency_ms_completed_only": null,
+            "regime_id": "A",
+            "tasks": 30
+          }
+        },
+        "return_A_recovery": {
+          "baseline_median_latency_tolerance_relative": 0.1,
+          "baseline_miss_rate_tolerance_absolute": 0.05,
+          "baseline_reference_phase": "A1",
+          "first_qualifying_window": null,
+          "reason_if_not_recovered": "no qualifying 10-task window within return phase",
+          "recovered": false,
+          "recovery_time_ms": null,
+          "return_phase": "A2",
+          "window_size_tasks": 10
+        },
+        "stress_B_deadline_miss_burden": 1.0
+      },
+      "random": {
+        "phase_metrics": {
+          "0": {
+            "completion_coverage": 1.0,
+            "deadline_miss_rate": 0.2,
+            "median_latency_ms_completed_only": 12932.332678572948,
+            "p95_latency_ms_completed_only": 17050.000000001048,
+            "regime_id": "A",
+            "tasks": 30
+          },
+          "1": {
+            "completion_coverage": 1.0,
+            "deadline_miss_rate": 0.5666666666666667,
+            "median_latency_ms_completed_only": 29687.999999996635,
+            "p95_latency_ms_completed_only": 157812.99999999788,
+            "regime_id": "B",
+            "tasks": 30
+          },
+          "2": {
+            "completion_coverage": 1.0,
+            "deadline_miss_rate": 0.7333333333333333,
+            "median_latency_ms_completed_only": 33494.99999999387,
+            "p95_latency_ms_completed_only": 117040.99999999318,
+            "regime_id": "A",
+            "tasks": 30
+          }
+        },
+        "return_A_recovery": {
+          "baseline_median_latency_tolerance_relative": 0.1,
+          "baseline_miss_rate_tolerance_absolute": 0.05,
+          "baseline_reference_phase": "A1",
+          "first_qualifying_window": null,
+          "reason_if_not_recovered": "no qualifying 10-task window within return phase",
+          "recovered": false,
+          "recovery_time_ms": null,
+          "return_phase": "A2",
+          "window_size_tasks": 10
+        },
+        "stress_B_deadline_miss_burden": 0.5666666666666667
+      },
+      "rl_eval": {
+        "phase_metrics": {
+          "0": {
+            "completion_coverage": 1.0,
+            "deadline_miss_rate": 0.06666666666666667,
+            "median_latency_ms_completed_only": 6240.88714285714,
+            "p95_latency_ms_completed_only": 15274.999999993099,
+            "regime_id": "A",
+            "tasks": 30
+          },
+          "1": {
+            "completion_coverage": 1.0,
+            "deadline_miss_rate": 0.0,
+            "median_latency_ms_completed_only": 9138.101428569797,
+            "p95_latency_ms_completed_only": 11025.7999999956,
+            "regime_id": "B",
+            "tasks": 30
+          },
+          "2": {
+            "completion_coverage": 1.0,
+            "deadline_miss_rate": 0.06666666666666667,
+            "median_latency_ms_completed_only": 6240.887142857105,
+            "p95_latency_ms_completed_only": 15684.999999993408,
+            "regime_id": "A",
+            "tasks": 30
+          }
+        },
+        "return_A_recovery": {
+          "baseline_median_latency_tolerance_relative": 0.1,
+          "baseline_miss_rate_tolerance_absolute": 0.05,
+          "baseline_reference_phase": "A1",
+          "first_qualifying_window": {
+            "window_deadline_miss_rate": 0.1,
+            "window_end_completion_time_ms": 285184.99999999325,
+            "window_end_sequence": 70,
+            "window_median_latency_ms": 6240.887142857105,
+            "window_start_sequence": 61
+          },
+          "reason_if_not_recovered": null,
+          "recovered": true,
+          "recovery_time_ms": 54184.99999999325,
+          "return_phase": "A2",
+          "window_size_tasks": 10
+        },
+        "stress_B_deadline_miss_burden": 0.0
+      }
+    }
+  },
+  "source_git_commit": "076e45bf25ae6b05d91e7cb21fc6ba815d3e30a9",
+  "status": "PASS",
+  "tasks": 90,
+  "workload_profile": "aba_network_load_v1",
+  "workload_seed": 108
+}

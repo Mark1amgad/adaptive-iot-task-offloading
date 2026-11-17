@@ -1,0 +1,204 @@
+{
+  "created_at_utc": "2026-11-17T18:27:08.550009+00:00",
+  "evaluation_split": "test",
+  "experiment_id": "experiment_manifest.json",
+  "java_version": "JAVA_VERSION=\"25.0.3\"",
+  "model_sha256": "0b45a649ee6b47b937d0db2a4002147b7d98b2941741a3a0d8ead7b64844115c",
+  "parameters": {
+    "merge_overhead_ms": 2.0,
+    "partition_overhead_ms": 3.0,
+    "wan_latency_ms": 45.0,
+    "watchdog_ms": 60000.0
+  },
+  "policies": [
+    "local",
+    "edge",
+    "cloud",
+    "random",
+    "rl_eval"
+  ],
+  "risk_state_sha256": "7307dd1bf19755da8c0ddd12775c5a11f402e7652901bf488529acf585e97d63",
+  "schema_version": "v1",
+  "simulator_jar_inventory": [
+    {
+      "name": "commons-io-2.17.0.jar",
+      "sha256": "4aa4ca48f3dfd30b78220b7881d8cb93eac4093ec94361b6befa9487998a550b"
+    },
+    {
+      "name": "commons-lang3-3.17.0.jar",
+      "sha256": "6ee731df5c8e5a2976a1ca023b6bb320ea8d3539fbe64c8a1d5cb765127c33b4"
+    },
+    {
+      "name": "commons-net-3.11.1.jar",
+      "sha256": "3bb861274992dba5487de328303745b7085de72694b63a3300be1e057144311e"
+    },
+    {
+      "name": "easymock-5.3.0.jar",
+      "sha256": "df558727da7d9d87d11979b2c4c67480c8efb62e2e40e11c352717b9817a7f3f"
+    },
+    {
+      "name": "geoip2-4.2.0.jar",
+      "sha256": "5981ac68332deebdf52e7a7f96a0bef5f320012fa930f3778ee1e9c827a80dbd"
+    },
+    {
+      "name": "guava-18.0.jar",
+      "sha256": "d664fbfc03d2e5ce9cab2a44fb01f1d0bf9dfebeccc1a473b1f9ea31f79f6f99"
+    },
+    {
+      "name": "json-simple-1.1.1.jar",
+      "sha256": "4e69696892b88b41c55d49ab2fdcc21eead92bf54acc588c0050596c3b75199c"
+    },
+    {
+      "name": "junit-jupiter-engine-5.11.3.jar",
+      "sha256": "e62420c99f7c0d59a2159a2ef63e61877e9c80bd722c03ca8bf3bdcea050a589"
+    },
+    {
+      "name": "opencsv-5.9.jar",
+      "sha256": "2023969b86ce968ad8ae549648ac587d141c19ae684a9a5c67c9105f37ab0d1c"
+    },
+    {
+      "name": "uncommons-maths-1.2.3.jar",
+      "sha256": "67c5d6173ab3bd5b53ece7c99f43bb162710c9e1f3fb3305ad2f93e712906bd8"
+    }
+  ],
+  "simulator_root": "C:\\Users\\DELL\\OneDrive\\Desktop\\Research\\iFogSim",
+  "source_git_commit": "076e45bf25ae6b05d91e7cb21fc6ba815d3e30a9",
+  "source_inventory": [
+    {
+      "path": "deliverables/08_RL_Model/config/default.json",
+      "sha256": "d27c522ae18cc8b7b57cbde01b1a554688d569b68b5a64b5611406c82d0644d7"
+    },
+    {
+      "path": "deliverables/08_RL_Model/config/v2.json",
+      "sha256": "dec925af758861c522b692494b1d319f294eb6da2c52a14d2a69102b1289598c"
+    },
+    {
+      "path": "deliverables/08_RL_Model/src/rl_model/__init__.py",
+      "sha256": "1714f6c39fcd1666da2623648ba69759c6afda6293f23aa956dea1b0959cb678"
+    },
+    {
+      "path": "deliverables/08_RL_Model/src/rl_model/actions.py",
+      "sha256": "43da629dbb287b59e3608eb5b2fa588d2165a201055db014beae97a2f12a8310"
+    },
+    {
+      "path": "deliverables/08_RL_Model/src/rl_model/agent.py",
+      "sha256": "67e6526b29789e437588aece6104df06b07d7f5c9274c69719a8b27e8051b497"
+    },
+    {
+      "path": "deliverables/08_RL_Model/src/rl_model/agent_v2.py",
+      "sha256": "cfa0aeb5f8dd6001e44b89fba211c21c6945bd56bb38e96434421d0126726a93"
+    },
+    {
+      "path": "deliverables/08_RL_Model/src/rl_model/aggregate.py",
+      "sha256": "a676b30a82393acc3c8929e299c9139e0af1659db6d28a16deff5e37fae9e8d4"
+    },
+    {
+      "path": "deliverables/08_RL_Model/src/rl_model/config.py",
+      "sha256": "53ff10e297b2a692a28cd3e9795674336c0ee9898688f6a436d95c99165834e2"
+    },
+    {
+      "path": "deliverables/08_RL_Model/src/rl_model/config_v2.py",
+      "sha256": "b704a868908558191e6e8dac7e69e224900cc39680c344eae044a3b6694a758d"
+    },
+    {
+      "path": "deliverables/08_RL_Model/src/rl_model/logging_utils.py",
+      "sha256": "372b3d31737e3a6dabc3c028e591592e0db3b758c9d8580a55cb9c208df8e4d7"
+    },
+    {
+      "path": "deliverables/08_RL_Model/src/rl_model/offloading.py",
+      "sha256": "5562fca7a76b84b164669ab50269f67d23944906a69c6ef651f1ff641c81dcf6"
+    },
+    {
+      "path": "deliverables/08_RL_Model/src/rl_model/persistence.py",
+      "sha256": "442f6c833d14915f11bebf3f25e9b89a7d4bdafcf7b1bf75b9ccab0d675fce02"
+    },
+    {
+      "path": "deliverables/08_RL_Model/src/rl_model/persistence_v2.py",
+      "sha256": "074680344827bcba8cf931c5904299e51da39ab28f08e97b6a7fa487ae46f456"
+    },
+    {
+      "path": "deliverables/08_RL_Model/src/rl_model/protocol.py",
+      "sha256": "f5132fa360196461db9c6b235fc4505b54e37b9b8b379dbc71ae580482f669f3"
+    },
+    {
+      "path": "deliverables/08_RL_Model/src/rl_model/protocol_v2.py",
+      "sha256": "e1b6ff0228130b57b27fefaecd88e630a2aeb2eab5246371d99247b35ceb1df6"
+    },
+    {
+      "path": "deliverables/08_RL_Model/src/rl_model/reward.py",
+      "sha256": "67a5f6974f6a8869670674e0d2e4c9f22dc6a92daef4adba96d660c31542c90e"
+    },
+    {
+      "path": "deliverables/08_RL_Model/src/rl_model/risk.py",
+      "sha256": "c78d9062017e056591db5131d915de917618a9972761127f7655003168de6c1e"
+    },
+    {
+      "path": "deliverables/08_RL_Model/src/rl_model/run_plan.py",
+      "sha256": "e14f71bc2d2a4c0098ae2d9e5eb08358573734ad230fcdd4c5a413293872b793"
+    },
+    {
+      "path": "deliverables/08_RL_Model/src/rl_model/server.py",
+      "sha256": "9322c3d1018d1cce092ba15ef8cc334d9ca4a09a0a8f3723465d61d628a6008c"
+    },
+    {
+      "path": "deliverables/08_RL_Model/src/rl_model/server_v2.py",
+      "sha256": "84e546d1f1d5038f209dad51c97ef8e54ae0de737bbab9c424f469601c5e39f5"
+    },
+    {
+      "path": "deliverables/08_RL_Model/src/rl_model/state.py",
+      "sha256": "d1fac5755f22b8f18e946fa4bae8819da7ddfa78756f1d3fa950b16b9744dbe6"
+    },
+    {
+      "path": "deliverables/08_RL_Model/src/rl_model/train_offline.py",
+      "sha256": "352109121602958c104fbcfbce2731da54d488bc813b83ff7f92ef78df4e503d"
+    },
+    {
+      "path": "deliverables/10_iFogSim_Simulation/Simulation_Source/analyze_v2_paired_seed_inference.py",
+      "sha256": "56fd6a4af9dc2d8942a004e271f4c6471a0642e03bb7eb51e106a035d87a6eda"
+    },
+    {
+      "path": "deliverables/10_iFogSim_Simulation/Simulation_Source/analyze_v2_policy_comparison.py",
+      "sha256": "dddb636a80f2afca4f896ade46d0eb656fe8ef2d810fa184d46272964459aaca"
+    },
+    {
+      "path": "deliverables/10_iFogSim_Simulation/Simulation_Source/create_v2_experiment_manifest.py",
+      "sha256": "2aac22f6117a994bf9f11875e056591db3884fa16dab9740f65aa06c658f6ec3"
+    },
+    {
+      "path": "deliverables/10_iFogSim_Simulation/Simulation_Source/generate_v2_aba_workload.py",
+      "sha256": "10f6635ac7371ab850f3f3f1312744639376db64cc956c9ba619d979b122bacb"
+    },
+    {
+      "path": "deliverables/10_iFogSim_Simulation/Simulation_Source/org/fog/test/perfeval/OffloadingActionV2.java",
+      "sha256": "8bde66147e3835b0c8a792166835a8586ea86e665e986e76b7e9f58b44cf112a"
+    },
+    {
+      "path": "deliverables/10_iFogSim_Simulation/Simulation_Source/org/fog/test/perfeval/OffloadingActionV2ContractTest.java",
+      "sha256": "36b7b8c303aa0dc9de13eb20cbda30f59e8ffe4e60d81cea30ee625665c3eccb"
+    },
+    {
+      "path": "deliverables/10_iFogSim_Simulation/Simulation_Source/org/fog/test/perfeval/OffloadingActionV2ExecutionPlan.java",
+      "sha256": "a506432d21c07040092c0b8919d536904a9dcc64023d589ed7b5d3590dbccaa6"
+    },
+    {
+      "path": "deliverables/10_iFogSim_Simulation/Simulation_Source/org/fog/test/perfeval/RlOffloadingV2PartialIntegrationExperiment.java",
+      "sha256": "57aa7b48bcf5f54e183ebd93cf982681c74ca42d558f8c3d731c23f8e7de9b38"
+    },
+    {
+      "path": "deliverables/10_iFogSim_Simulation/Simulation_Source/PAIRED_SEED_EVALUATION_GUIDE.md",
+      "sha256": "ed5688afbe0b5a39c523f7c3754b88010b759e8abfae5de60c9ba0ad0e66d859"
+    },
+    {
+      "path": "deliverables/10_iFogSim_Simulation/Simulation_Source/run_v2_aba_paired_seeds.ps1",
+      "sha256": "a6652b7f5fcbf351f52c9fccbc2e871af946c637f1efacfbcb28e68d2a86d258"
+    },
+    {
+      "path": "deliverables/10_iFogSim_Simulation/Simulation_Source/run_v2_policy_comparison.ps1",
+      "sha256": "472d079a2b83016f20e1c03eb17f5d21b7b6e45248ffa8e228c7bd479cd608f1"
+    }
+  ],
+  "workload_file": "aba_seed_103.jsonl",
+  "workload_profile": "aba_network_load_v1",
+  "workload_seed": 103,
+  "workload_sha256": "8a4220d0bb05c2f6ea5ff2676328ec55cea9a5d1102c2d4bfab060db7feb775a"
+}
