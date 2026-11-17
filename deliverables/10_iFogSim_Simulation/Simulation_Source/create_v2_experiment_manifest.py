@@ -140,6 +140,7 @@ def main() -> int:
         "seed_registry_version": registry_path.stem,
         "seed_registry_sha256": sha256(registry_path),
         "risk_filter_mode": args.risk_mode,
+        "risk_filter_mode_applies_to": "rl_eval_only",
         "workload_seed": rows[0]["seed"],
         "workload_profile": rows[0]["profile"],
         "workload_file": workload_path.name,
