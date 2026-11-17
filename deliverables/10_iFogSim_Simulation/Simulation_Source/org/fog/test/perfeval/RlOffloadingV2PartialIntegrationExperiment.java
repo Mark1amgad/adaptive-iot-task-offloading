@@ -531,8 +531,6 @@ public final class RlOffloadingV2PartialIntegrationExperiment {
                 }
                 List<Map<String, Object>> localEdgePath = Arrays.asList(
                         mapOf("bandwidth_mbps", 10.0, "latency_ms", 2.0));
-                List<Map<String, Object>> edgeCloudPath = Arrays.asList(
-                        mapOf("bandwidth_mbps", 10.0, "latency_ms", WAN_LATENCY_MS));
                 List<Map<String, Object>> cloudPath = Arrays.asList(
                         mapOf("bandwidth_mbps", 10.0, "latency_ms", 2.0),
                         mapOf("bandwidth_mbps", 10.0, "latency_ms", WAN_LATENCY_MS));
