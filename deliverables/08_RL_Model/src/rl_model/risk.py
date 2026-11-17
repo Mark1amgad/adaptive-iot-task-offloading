@@ -97,15 +97,15 @@ def _finite_signed_number(value: Any, name: str) -> float:
 
 @dataclass(frozen=True)
 class LinkHop:
-    bandwidth_mbps: float
+    bandwidth_bytes_per_second: float
     latency_ms: float
 
     @classmethod
     def from_dict(cls, raw: Any, name: str) -> "LinkHop":
-        if not isinstance(raw, Mapping) or set(raw) != {"bandwidth_mbps", "latency_ms"}:
-            raise RiskError(f"{name} must contain bandwidth_mbps and latency_ms only")
+        if not isinstance(raw, Mapping) or set(raw) != {"bandwidth_bytes_per_second", "latency_ms"}:
+            raise RiskError(f"{name} must contain bandwidth_bytes_per_second and latency_ms only")
         return cls(
-            _finite_number(raw["bandwidth_mbps"], f"{name}.bandwidth_mbps", positive=True),
+            _finite_number(raw["bandwidth_bytes_per_second"], f"{name}.bandwidth_bytes_per_second", positive=True),
             _finite_number(raw["latency_ms"], f"{name}.latency_ms"),
         )
 
@@ -219,7 +219,7 @@ class RiskContext:
 def _transfer_ms(size_bytes: float, path: tuple[LinkHop, ...]) -> float:
     total = 0.0
     for hop in path:
-        total += (size_bytes * 8.0 / (hop.bandwidth_mbps * 1_000_000.0)) * 1000.0
+        total += (size_bytes / hop.bandwidth_bytes_per_second) * 1000.0
         total += hop.latency_ms
     return total
 
