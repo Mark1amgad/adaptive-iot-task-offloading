@@ -21,6 +21,7 @@ def summary(seed, offset=0.0, profile="industrial_a"):
         }
     provenance = {
         "source_git_commit": "abc123",
+        "source_inventory": [{"path": "src/a.py", "sha256": "f" * 64}],
         "model_sha256": "a" * 64,
         "risk_state_sha256": "b" * 64,
         "java_version": "Java 25",
