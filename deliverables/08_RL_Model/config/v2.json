@@ -209,7 +209,6 @@
     ]
   },
   "risk": {
-    "_status": "PROVISIONAL — select epsilon, window, minimum samples, and cold-start margin using training/validation only; freeze for held-out evaluation.",
     "enabled": true,
     "epsilon": 0.1,
     "window_size": 200,
