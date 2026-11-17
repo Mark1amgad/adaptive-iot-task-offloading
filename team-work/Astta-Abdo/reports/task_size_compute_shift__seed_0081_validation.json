@@ -4,11 +4,11 @@
   "scope_note": "Generated files contain synthetic task inputs and scenario metadata only. Decision contexts, decisions, task outcomes and calibration logs must be produced by the simulator/policy integration; no such records are fabricated.",
   "task_summary": {
     "application_profile_counts": {
-      "BULK_VIDEO_FRAME_BATCH": 7,
-      "LARGE_PARALLEL_SENSOR_AGGREGATION": 12,
-      "PARALLEL_SENSOR_AGGREGATION": 7,
-      "SENSOR_INFERENCE": 17,
-      "VIDEO_FRAME_BATCH": 5
+      "PREDICTIVE_MAINTENANCE_INFERENCE": 17,
+      "PRODUCTION_MONITORING_AGGREGATION": 7,
+      "PRODUCTION_MONITORING_LARGE_AGGREGATION": 12,
+      "VISUAL_INSPECTION_BULK_FRAME_BATCH": 7,
+      "VISUAL_INSPECTION_FRAME_BATCH": 5
     },
     "divisibility_counts": {
       "DATA_PARALLEL_DIVISIBLE": 31,
