@@ -331,9 +331,13 @@ def validate_configs(workload_cfg: dict[str, Any], scenario_cfg: dict[str, Any])
     for scenario_id, scenario in scenario_cfg["scenarios"].items():
         if scenario.get("status", "").startswith("BLOCKED"):
             continue
-        scenario_split(scenario, int(scenario_cfg["split_strategy"]["seed_bands"][
-            next(s for s in ("train", "validation", "test") if scenario["family"] in scenario_cfg["split_strategy"][f"{s}_families"])
-        ][0]), scenario_cfg["split_strategy"])
+        family = scenario["family"]
+        family_splits = [split for split in ("train", "validation", "test")
+                         if family in scenario_cfg["split_strategy"].get(f"{split}_families", [])]
+        if len(family_splits) != 1:
+            raise ValueError(f"{scenario_id}: scenario family must map to exactly one planned family group")
+        if scenario.get("target_topology_id") not in scenario_cfg.get("topology_profiles", {}):
+            raise ValueError(f"{scenario_id}: unknown target_topology_id")
         if scenario["arrival_process"].get("type") not in {"poisson", "on_off"}:
             raise ValueError(f"{scenario_id}: unsupported arrival process")
         if scenario["task_mix_profile"] not in scenario_cfg.get("task_mix_profiles", workload_cfg.get("mix_profiles", {})):
