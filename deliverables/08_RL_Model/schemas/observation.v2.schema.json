@@ -198,11 +198,6 @@
         "resources": {
           "type": "object",
           "additionalProperties": false,
-          "required": [
-            "LOCAL",
-            "EDGE",
-            "CLOUD"
-          ],
           "properties": {
             "LOCAL": {
               "type": "object",
