@@ -49,6 +49,8 @@ All six machine-readable record contracts are in the adjacent JSON Schema files.
 | `task_mix_profile_id`, `task_mix_profile_json` | string / JSON string | Application profile mix or A/B/A schedule. |
 | `target_topology_id` | string | Declared target topology design; not proof of simulator implementation. |
 | `actual_topology_id` | string/null | Actual instantiated simulator topology; null pending Ayoub verification. |
+| `target_topology_tier_counts_json` | JSON string | Target counts: 100 IoT, 20 Edge, 1 Cloud; not actual topology evidence. |
+| `target_device_mapping_json` | JSON string | Target-only mapping of five logical IoT IDs per Edge; not confirmed placement. |
 | `actual_topology_status` | string | Verification status, currently `NOT_VERIFIED_PENDING_AYOUB_CONFIRMATION`. |
 | `dataset_split` | enum | `development`, `train`, `validation`, or `test`, allocated only through the seed registry. |
 | `split_strategy_id` | string | Versioned split definition. |
@@ -105,3 +107,10 @@ One row per task/policy/candidate site/action calibration record (add a time/win
 
 
 The profile set now includes indivisible single-image Visual Inspection and single-event Production Monitoring in addition to their divisible frame-batch and aggregation-window counterparts. All numeric profile values are proposed synthetic inputs, not factory measurements or industrial traces.
+
+
+## 100/20/1 target topology and network contract boundary
+
+The target topology ID is `v2_target_100iot_20edge_1cloud`: logical source IDs `iot-001` through `iot-100`, 20 target Edge nodes `edge-001` through `edge-020`, and one target Cloud node `cloud-001`. The target mapping assigns five sequential IoT source IDs to each Edge node. This is a target contract only, not evidence of instantiated simulator devices or confirmed actual placement. `actual_topology_id` remains null and `actual_topology_status` remains `NOT_VERIFIED_PENDING_AYOUB_CONFIRMATION` until Ayoub verifies the implementation.
+
+Network contract items remain BLOCKED pending Ayoub confirmation: bandwidth physical units and transfer-time conversion; uplink/downlink semantics; IoT–Edge and Edge–Cloud link definitions; and measured/confirmed latency and network-shift parameters. No unconfirmed values or units are inferred.
