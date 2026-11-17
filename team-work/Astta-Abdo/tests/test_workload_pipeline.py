@@ -547,3 +547,27 @@ def test_industrial_archetypes_cover_indivisible_and_divisible_forms(configs):
     }
     for name, kind in expected.items():
         assert profiles[name]["splittability"] == kind
+
+def test_every_historical_seed_is_excluded_from_final_test():
+    registry = gen.read_seed_registry()
+    historical = [row for row in registry if row["status"] == "retired"]
+    assert historical
+    for row in historical:
+        errors = gen.validate_seed_allocation(int(row["seed"]), "test", registry)
+        assert errors, f"historical seed {row['seed']} was unexpectedly eligible for final Test"
+
+
+def test_manifest_keeps_target_and_actual_topology_separate(tmp_path, configs):
+    wc, sc = configs
+    _, manifest_path, _ = gen.generate_one(
+        "stable_steady", 1300, 12, "topology-provenance-check", wc, sc, tmp_path
+    )
+    header, manifests = val.read_csv(manifest_path)
+    manifest = manifests[0]
+    assert "target_topology_id" in header
+    assert "actual_topology_id" in header
+    assert "actual_topology_status" in header
+    assert "topology_id" not in header
+    assert manifest["target_topology_id"] == "v2_target_4iot_2edge_1cloud"
+    assert manifest["actual_topology_id"] == ""
+    assert manifest["actual_topology_status"] == "NOT_VERIFIED_PENDING_AYOUB_CONFIRMATION"
