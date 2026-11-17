@@ -147,6 +147,8 @@ class RiskContext:
     resources: dict[str, TierProfile]
     partition_overhead_ms: float
     merge_overhead_ms: float
+    merge_compute_mi: float
+    merge_queue_wait_ms: float
     queue_wait_basis: str = "provided_predecision_estimate"
 
     @classmethod
@@ -154,7 +156,8 @@ class RiskContext:
                   constraints: Mapping[str, Any]) -> "RiskContext":
         if not isinstance(raw, Mapping):
             raise RiskError("risk_context must be an object")
-        required = {"remaining_deadline_ms", "resources", "partition_overhead_ms", "merge_overhead_ms"}
+        required = {"remaining_deadline_ms", "resources", "partition_overhead_ms", "merge_overhead_ms",
+                    "merge_compute_mi", "merge_queue_wait_ms"}
         optional = {"queue_wait_basis"}
         if required - set(raw) or set(raw) - (required | optional):
             raise RiskError(f"risk_context: missing={sorted(required-set(raw))}, "
@@ -194,10 +197,16 @@ class RiskContext:
                 raise RiskError("risk_context partition overhead disagrees with task_constraints")
             if not math.isclose(merge, float(constraints["merge_overhead_ms"]), abs_tol=1e-9):
                 raise RiskError("risk_context merge overhead disagrees with task_constraints")
+        merge_mi = _finite_number(raw["merge_compute_mi"], "merge_compute_mi")
+        merge_queue = _finite_number(raw["merge_queue_wait_ms"], "merge_queue_wait_ms")
+        if constraints["splittability"] == "DATA_PARALLEL_DIVISIBLE" and merge_mi <= 0:
+            raise RiskError("divisible tasks require positive merge_compute_mi")
+        if constraints["splittability"] == "INDIVISIBLE" and merge_mi != 0:
+            raise RiskError("indivisible tasks must have merge_compute_mi=0")
         basis = raw.get("queue_wait_basis", "provided_predecision_estimate")
         if not isinstance(basis, str) or not basis:
             raise RiskError("queue_wait_basis must be a non-empty string")
-        return cls(slack, profiles, partition, merge, basis)
+        return cls(slack, profiles, partition, merge, merge_mi, merge_queue, basis)
 
 
 def _transfer_ms(size_bytes: float, path: tuple[LinkHop, ...]) -> float:
@@ -245,7 +254,14 @@ def predict_action_ms(action: int | str, features: Mapping[str, Any],
         return None
     if constraints["splittability"] != "DATA_PARALLEL_DIVISIBLE" or not constraints.get("partition_model_id"):
         raise RiskError("partial prediction requires DATA_PARALLEL_DIVISIBLE and partition_model_id")
-    return max(local_time, remote_time) + context.partition_overhead_ms + context.merge_overhead_ms
+    merge_compute_time = compute(local, context.merge_compute_mi, "LOCAL")
+    if merge_compute_time is None:
+        return None
+    merge_compute_time = context.merge_queue_wait_ms + (
+        context.merge_compute_mi / local.effective_mips * 1000.0
+    )
+    return (max(local_time, remote_time) + context.partition_overhead_ms
+            + context.merge_overhead_ms + merge_compute_time)
 
 
 def predict_legal_actions(features: Mapping[str, Any], constraints: Mapping[str, Any],
@@ -442,7 +458,7 @@ def filter_feasible_actions(legal_action_ids: tuple[int, ...],
         name = action_spec(action_id).name
         safe = estimates[name]["safe_completion_ms"]
         if safe is None:
-            return (1, math.inf, rank.get(name, len(rank)), action_id)
+            return (1, math.inf, math.inf, rank.get(name, len(rank)), action_id)
         return (0, max(0.0, safe - slack), safe, rank.get(name, len(rank)), action_id)
 
     selected = min(legal_action_ids, key=fallback_key)
