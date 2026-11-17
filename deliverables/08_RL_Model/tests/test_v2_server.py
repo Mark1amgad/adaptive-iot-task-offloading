@@ -75,6 +75,15 @@ def test_v2_server_rejects_wrong_protocol_and_illegal_executed_action(tmp_path):
     assert "task-1" in s.pending
 
 
+def test_v2_random_baseline_sets_baseline_decision_mode(tmp_path):
+    s = make_session(tmp_path, mode="baseline", policy="random")
+    send(s, hello("test"))
+    result = send(s, observation())
+    assert result["type"] == "action"
+    assert result["mode"] == "baseline"
+    assert result["action_id"] in (0, 1, 2, 3, 4)
+
+
 def test_v2_baseline_never_silently_uses_unavailable_action(tmp_path):
     s = make_session(tmp_path, mode="baseline", policy="cloud")
     send(s, hello("test"))
