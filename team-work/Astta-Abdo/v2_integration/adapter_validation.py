@@ -1,18 +1,16 @@
-"""Fail-closed source-side validation primitives for the V2 workload adapter.
-
-No V2 JSONL destination keys or simulator IDs are guessed here. The runtime
-inventory must be supplied explicitly by the simulator integration owner.
-"""
+"""Fail-closed source-side validation primitives for the V2 workload adapter."""
 from __future__ import annotations
-
 from decimal import Decimal, InvalidOperation
 from typing import Mapping, Any
 
 REQUIRED_FIELDS = (
     "task_id", "source_device_id", "arrival_time_ms", "relative_deadline_ms",
     "absolute_deadline_ms", "input_size_bytes", "required_mi", "urgency_class",
-    "splittability", "partition_model_id", "partition_overhead_ms",
-    "merge_overhead_ms",
+    "splittability", "partition_model_id", "partition_overhead_ms", "merge_overhead_ms",
+)
+NON_NULL_FIELDS = (
+    "task_id", "source_device_id", "arrival_time_ms", "relative_deadline_ms",
+    "absolute_deadline_ms", "input_size_bytes", "required_mi", "urgency_class", "splittability",
 )
 URGENCY = {"CRITICAL", "TIME_SENSITIVE", "DELAY_TOLERANT"}
 DIVISIBILITY = {"INDIVISIBLE", "DATA_PARALLEL_DIVISIBLE"}
@@ -29,25 +27,21 @@ def _decimal(value: Any, field: str, errors: list[str], task_id: str) -> Decimal
         return None
 
 
-def validate_records(
-    records: list[Mapping[str, Any]],
-    *,
-    expected_target_parent: Mapping[str, str] | None = None,
-    runtime_inventory: Mapping[str, Mapping[str, str]] | None = None,
-) -> list[str]:
-    """Validate task inputs. runtime_inventory maps original source ID to
-    {'simulator_device_id': ..., 'parent_edge_id': ...}; no alias normalization.
-    """
+def validate_records(records: list[Mapping[str, Any]], *,
+                     expected_target_parent: Mapping[str, str] | None = None,
+                     runtime_inventory: Mapping[str, Mapping[str, str]] | None = None) -> list[str]:
+    """runtime_inventory keys are exact original source IDs; no alias normalization."""
     errors: list[str] = []
     seen: set[str] = set()
     for index, row in enumerate(records, start=1):
         task_id = str(row.get("task_id", "") or "")
         prefix = f"row={index} task_id={task_id or '<missing>'}"
-        missing = [f for f in REQUIRED_FIELDS if f not in row or row[f] in (None, "")]
-        # Partition columns are nullable for indivisible tasks, but their columns
-        # must exist in the source schema.
-        for field in missing:
-            errors.append(f"MISSING_REQUIRED_FIELD {prefix} field={field}")
+        for field in REQUIRED_FIELDS:
+            if field not in row:
+                errors.append(f"MISSING_REQUIRED_FIELD {prefix} column={field}")
+        for field in NON_NULL_FIELDS:
+            if row.get(field) in (None, ""):
+                errors.append(f"MISSING_REQUIRED_FIELD {prefix} field={field}")
         if not task_id:
             continue
         if task_id in seen:
@@ -59,16 +53,14 @@ def validate_records(
             resolved = runtime_inventory.get(source)
             if resolved is None:
                 errors.append(f"UNKNOWN_SOURCE {prefix} source_device_id={source}")
-            elif expected_target_parent is not None:
-                expected_parent = expected_target_parent.get(source)
-                actual_parent = resolved.get("parent_edge_id")
-                if expected_parent is not None and actual_parent != expected_parent:
-                    errors.append(
-                        f"SOURCE_MAPPING_MISMATCH {prefix} source_device_id={source} "
-                        f"expected_parent={expected_parent} actual_parent={actual_parent}"
-                    )
-            if resolved is not None and not resolved.get("simulator_device_id"):
-                errors.append(f"MISSING_SIMULATOR_DEVICE_ID {prefix} source_device_id={source}")
+            else:
+                if not resolved.get("simulator_device_id"):
+                    errors.append(f"MISSING_SIMULATOR_DEVICE_ID {prefix} source_device_id={source}")
+                if expected_target_parent is not None:
+                    expected = expected_target_parent.get(source)
+                    actual = resolved.get("parent_edge_id")
+                    if expected is not None and actual != expected:
+                        errors.append(f"SOURCE_MAPPING_MISMATCH {prefix} source_device_id={source} expected_parent={expected} actual_parent={actual}")
 
         urgency = row.get("urgency_class")
         if urgency and urgency not in URGENCY:
@@ -88,9 +80,8 @@ def validate_records(
             errors.append(f"INVALID_DEADLINE {prefix} relative_deadline_ms must be > 0")
         if absolute is not None and absolute <= 0:
             errors.append(f"INVALID_DEADLINE {prefix} absolute_deadline_ms must be > 0")
-        if arrival is not None and relative is not None and absolute is not None:
-            if absolute != arrival + relative:
-                errors.append(f"INVALID_DEADLINE {prefix} absolute_deadline_ms != arrival_time_ms + relative_deadline_ms")
+        if arrival is not None and relative is not None and absolute is not None and absolute != arrival + relative:
+            errors.append(f"INVALID_DEADLINE {prefix} absolute_deadline_ms != arrival_time_ms + relative_deadline_ms")
         if size is not None and size <= 0:
             errors.append(f"INVALID_INPUT_SIZE {prefix} input_size_bytes must be > 0")
         if compute is not None and compute <= 0:
@@ -107,7 +98,11 @@ def validate_records(
             if not row.get("partition_model_id"):
                 errors.append(f"MISSING_REQUIRED_FIELD {prefix} field=partition_model_id")
             for field in ("partition_overhead_ms", "merge_overhead_ms"):
-                value = _decimal(row.get(field), field, errors, task_id)
+                raw = row.get(field)
+                if raw in (None, ""):
+                    errors.append(f"MISSING_REQUIRED_FIELD {prefix} field={field}")
+                    continue
+                value = _decimal(raw, field, errors, task_id)
                 if value is not None and value < 0:
                     errors.append(f"INVALID_OVERHEAD {prefix} field={field} must be >= 0")
             if ratio not in (None, ""):
@@ -118,13 +113,10 @@ def validate_records(
 
 
 def target_parent_crosswalk(source_ids: list[str]) -> dict[str, str]:
-    """Construct only the declared target mapping; does not claim runtime truth."""
+    """Construct target-only mapping; never represents runtime inventory."""
     if len(source_ids) != len(set(source_ids)):
         raise ValueError("duplicate source IDs in target crosswalk input")
     expected = {f"iot-{i:03d}" for i in range(1, 101)}
     if set(source_ids) != expected:
         raise ValueError("target source list must be exactly iot-001..iot-100")
-    return {
-        source: f"edge-{((int(source[-3:]) - 1) // 5) + 1:03d}"
-        for source in source_ids
-    }
+    return {source: f"edge-{((int(source[-3:]) - 1) // 5) + 1:03d}" for source in source_ids}
