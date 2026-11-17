@@ -5,6 +5,7 @@ param(
     [string]$JdkHome = 'C:\Program Files\Eclipse Adoptium\jdk-25.0.3.9-hotspot',
     [string]$WorkloadFile = '',
     [string]$ModelIn = '',
+    [string]$RiskStateIn = '',
     [string]$OutputRoot = '',
     [double]$PartitionOverheadMs = 3.0,
     [double]$MergeOverheadMs = 2.0,
@@ -26,6 +27,8 @@ $java = Join-Path $JdkHome 'bin\java.exe'
 foreach ($required in @($action,$plan,$contract,$experiment,$analyzer,$PythonExe,$javac,$WorkloadFile,$ModelIn)) {
     if (-not (Test-Path $required)) { throw "Required file not found: $required" }
 }
+if (-not $RiskStateIn) { $RiskStateIn = "$ModelIn.risk.json" }
+if (-not (Test-Path $RiskStateIn)) { throw "Risk calibration state not found: $RiskStateIn. Train with --risk-filter first." }
 if (-not $OutputRoot) { $OutputRoot = Join-Path $ProjectRoot ('audit_output\v2_policy_comparison_' + (Get-Date -Format 'yyyyMMdd_HHmmss')) }
 if (Test-Path $OutputRoot) { throw "Refusing to reuse existing output directory: $OutputRoot" }
 New-Item -ItemType Directory -Force -Path $OutputRoot | Out-Null
@@ -37,7 +40,7 @@ if ($LASTEXITCODE -ne 0) { throw "javac failed: $LASTEXITCODE" }
 $javaClasspath = "$classes;$classpath"
 & $java -cp $javaClasspath org.fog.test.perfeval.OffloadingActionV2ContractTest
 if ($LASTEXITCODE -ne 0) { throw "Java contract tests failed: $LASTEXITCODE" }
-$common = @('--python',$PythonExe,'--rl-root',$rlRoot,'--workload',$WorkloadFile,'--partition-overhead-ms',"$PartitionOverheadMs",'--merge-overhead-ms',"$MergeOverheadMs",'--wan-latency-ms',"$WanLatencyMs",'--watchdog-ms',"$WatchdogMs")
+$common = @('--python',$PythonExe,'--rl-root',$rlRoot,'--workload',$WorkloadFile,'--partition-overhead-ms',"$PartitionOverheadMs",'--merge-overhead-ms',"$MergeOverheadMs",'--wan-latency-ms',"$WanLatencyMs",'--watchdog-ms',"$WatchdogMs",'--risk-filter','--risk-state-in',$RiskStateIn)
 foreach ($policy in @('local','edge','cloud','random')) {
     $out = Join-Path $OutputRoot ('policy_' + $policy)
     New-Item -ItemType Directory -Force -Path $out | Out-Null
