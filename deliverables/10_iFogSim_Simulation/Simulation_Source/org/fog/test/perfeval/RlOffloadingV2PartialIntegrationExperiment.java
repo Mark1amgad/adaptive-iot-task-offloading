@@ -22,11 +22,14 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 
+import org.cloudbus.cloudsim.Cloudlet;
+import org.cloudbus.cloudsim.CloudletScheduler;
 import org.cloudbus.cloudsim.Host;
 import org.cloudbus.cloudsim.Log;
 import org.cloudbus.cloudsim.Pe;
 import org.cloudbus.cloudsim.Storage;
 import org.cloudbus.cloudsim.UtilizationModelFull;
+import org.cloudbus.cloudsim.Vm;
 import org.cloudbus.cloudsim.core.CloudSim;
 import org.cloudbus.cloudsim.core.CloudSimTags;
 import org.cloudbus.cloudsim.core.SimEntity;
@@ -325,10 +328,31 @@ public final class RlOffloadingV2PartialIntegrationExperiment {
             super.sendDownFreeLink(tuple, childId);
         }
         @Override protected void executeTuple(SimEvent event, String moduleName) {
-            registry.execution((Tuple) event.getData(), getName(), moduleName, lastUtilization);
+            registry.execution((Tuple) event.getData(), getName(), moduleName, getObservedUtilization());
             super.executeTuple(event, moduleName);
         }
-        double getObservedUtilization() { return lastUtilization; }
+
+        /**
+         * Current workload demand as a fraction of device MIPS. FogDevice.lastUtilization
+         * is an allocated-MIPS/VM-reservation ratio, not instantaneous CPU demand; it can
+         * equal 1.0 while no task Cloudlet is running. Build the snapshot from active
+         * Cloudlets and their currently allocated MIPS instead.
+         */
+        double getObservedUtilization() {
+            double activeMips = 0.0;
+            double now = CloudSim.clock();
+            for (Vm vm : getHost().getVmList()) {
+                CloudletScheduler scheduler = vm.getCloudletScheduler();
+                for (Cloudlet cloudlet : scheduler.<Cloudlet>getCloudletExecList()) {
+                    double utilization = cloudlet.getUtilizationOfCpu(now);
+                    double allocatedMips = scheduler.getTotalCurrentAllocatedMipsForCloudlet(cloudlet, now);
+                    activeMips += Math.max(0.0, allocatedMips) * Math.max(0.0, utilization);
+                }
+            }
+            double totalMips = getHost().getTotalMips();
+            if (totalMips <= 0.0) return 1.0;
+            return Math.max(0.0, Math.min(1.0, activeMips / totalMips));
+        }
     }
 
     private static final class BranchEndpoint extends Actuator {
