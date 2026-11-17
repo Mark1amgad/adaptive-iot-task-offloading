@@ -155,14 +155,16 @@ public final class RlOffloadingV2PartialIntegrationExperiment {
         CloudSim.startSimulation();
         CloudSim.stopSimulation();
 
-        if (!registry.runCompleted || registry.failed || registry.failedTaskCount > 0
+        if (!registry.runCompleted || registry.failed
+                || (!options.evaluationMode && registry.failedTaskCount > 0)
                 || registry.completedCount != options.tasks)
-            throw new IllegalStateException("v2 partial run did not achieve all-success acceptance: "
+            throw new IllegalStateException("v2 partial run did not reconcile all tasks: "
                     + registry.completedCount + "/" + options.tasks + "; failed_tasks="
                     + registry.failedTaskCount + "; " + registry.failureReason);
         registry.assertConsistent();
         trace.record("acceptance", registry.acceptanceFields());
-        System.out.println("V2_PARTIAL_STATUS=PASS");
+        System.out.println(options.evaluationMode
+                ? "V2_EVALUATION_STATUS=PASS" : "V2_PARTIAL_STATUS=PASS");
         System.out.println("MODE=" + options.mode);
         if (options.action != null) System.out.println("ACTION=" + options.action.wireName);
         System.out.println("TASKS=" + registry.completedCount);
@@ -753,11 +755,15 @@ public final class RlOffloadingV2PartialIntegrationExperiment {
                 if (!Double.isNaN(branch.utilization)) { utilSum += branch.utilization; utilCount++; }
             }
             double meanUtil = utilCount == 0 ? 0.0 : utilSum / utilCount;
+            String outcomeClass = deadlineMet ? "ON_TIME" : "LATE";
             trace.record("task_terminal", mapOf("task_id", task.taskId, "action", task.action.wireName,
                     "latency_ms", task.latency, "deadline_ms", task.workload.deadlineMs,
                     "urgency_class", task.workload.urgencyClass, "deadline_met", deadlineMet,
                     "bandwidth_bytes", task.bandwidthBytes, "transfer_count", task.transferCount,
                     "sim_time_ms", task.terminalTime * 1000.0));
+            trace.record("task_outcome", mapOf("task_id", task.taskId, "outcome", outcomeClass,
+                    "latency_ms", task.latency, "deadline_ms", task.workload.deadlineMs,
+                    "bandwidth_bytes", task.bandwidthBytes, "sim_time_ms", task.terminalTime * 1000.0));
             try {
                 JSONObject ack = python.request(mapOf("protocol_version", "2.0", "type", "outcome",
                         "task_id", task.taskId, "action_executed", task.action.id,
@@ -801,8 +807,13 @@ public final class RlOffloadingV2PartialIntegrationExperiment {
             task.terminalTime = CloudSim.clock();
             failedTaskCount++;
             completedCount++;
+            String outcomeClass = reason.startsWith("execution_horizon_exceeded")
+                    ? "UNRESOLVED_AT_HORIZON" : "FAILED";
             trace.record("task_failed", mapOf("task_id", task.taskId, "action", task.action.wireName,
                     "reason", reason, "deadline_met", false, "sim_time_ms", task.terminalTime * 1000.0));
+            trace.record("task_outcome", mapOf("task_id", task.taskId, "outcome", outcomeClass,
+                    "reason", reason, "deadline_ms", task.workload.deadlineMs,
+                    "bandwidth_bytes", task.bandwidthBytes, "sim_time_ms", task.terminalTime * 1000.0));
             try {
                 JSONObject ack = python.request(mapOf("protocol_version", "2.0", "type", "outcome",
                         "task_id", task.taskId, "action_executed", task.action.id,
@@ -814,8 +825,12 @@ public final class RlOffloadingV2PartialIntegrationExperiment {
                 if (!task.taskId.equals(ack.get("task_id")))
                     throw new IllegalStateException("failure acknowledgement task mismatch");
                 task.outcomeAck = true;
-                trace.record("failure_outcome_ack", mapOf("task_id", task.taskId,
-                        "updated", ack.get("updated"), "reward", ack.get("reward")));
+                trace.record("outcome_ack", mapOf("task_id", task.taskId,
+                        "updated", ack.get("updated"), "reward", ack.get("reward"),
+                        "update_count", ack.get("update_count"),
+                        "risk_calibration_updated", ack.get("risk_calibration_updated"),
+                        "risk_calibration_updates", ack.get("risk_calibration_updates"),
+                        "risk_residual_ms", ack.get("risk_residual_ms")));
             } catch (Exception error) {
                 failed = true;
                 failureReason = "failure outcome could not be reconciled for " + task.taskId + ": " + error;
@@ -864,9 +879,11 @@ public final class RlOffloadingV2PartialIntegrationExperiment {
                     throw new IllegalStateException("branch count mismatch for " + task.taskId);
                 long mi = 0, in = 0, out = 0;
                 for (Branch branch : task.branches.values()) {
-                    if (branch.executingNode == null || Double.isNaN(branch.executionStart)
-                            || Double.isNaN(branch.resultArrival) || branch.resultArrival < branch.executionStart)
-                        throw new IllegalStateException("incomplete branch lifecycle " + task.taskId + "/" + branch.name);
+                    if (!task.outcomeAck || task.failureReason == null) {
+                        if (branch.executingNode == null || Double.isNaN(branch.executionStart)
+                                || Double.isNaN(branch.resultArrival) || branch.resultArrival < branch.executionStart)
+                            throw new IllegalStateException("incomplete branch lifecycle " + task.taskId + "/" + branch.name);
+                    }
                     BranchRef owner = tupleOwners.get(branch.tupleId);
                     if (owner == null || owner.task != task || owner.branch != branch)
                         throw new IllegalStateException("tuple attribution error " + branch.tupleId);
@@ -874,7 +891,7 @@ public final class RlOffloadingV2PartialIntegrationExperiment {
                 }
                 if (mi != task.workload.taskMi || in != task.workload.inputBytes || out != task.workload.outputBytes)
                     throw new IllegalStateException("partition conservation failed for " + task.taskId);
-                if (task.action.isPartial()) {
+                if (task.action.isPartial() && task.failureReason == null) {
                     Branch local = task.branches.get("local");
                     Branch remote = task.branches.get(task.action.remoteTier.name().toLowerCase());
                     Branch merge = task.branches.get("merge");
@@ -892,8 +909,9 @@ public final class RlOffloadingV2PartialIntegrationExperiment {
             Map<String, Integer> counts = new LinkedHashMap<String, Integer>();
             for (TaskRecord task : tasks.values())
                 counts.put(task.action.wireName, counts.getOrDefault(task.action.wireName, 0) + 1);
-            return mapOf("status", "PASS", "run_id", options.runId,
-                    "mode", options.mode, "action_counts", counts, "tasks", completedCount,
+            return mapOf("status", failedTaskCount == 0 ? "PASS" : "RECONCILED_WITH_TASK_OUTCOMES",
+                    "run_id", options.runId, "mode", options.mode, "action_counts", counts, "tasks", completedCount,
+                    "failed_tasks", failedTaskCount, "evaluation_mode", options.evaluationMode,
                     "accepted_decisions", acceptedDecisions, "tuple_count", tupleOwners.size());
         }
     }
@@ -1026,7 +1044,7 @@ public final class RlOffloadingV2PartialIntegrationExperiment {
 
     private static final class Options {
         Path output, python, rlRoot, workloadFile, modelIn, riskStateIn;
-        boolean riskFilter;
+        boolean riskFilter, evaluationMode;
         List<WorkloadTask> workload = new ArrayList<WorkloadTask>();
         boolean tasksExplicit;
         String runId;
@@ -1053,6 +1071,7 @@ public final class RlOffloadingV2PartialIntegrationExperiment {
             for (int i = 0; i < args.length;) {
                 String key = args[i++];
                 if ("--risk-filter".equals(key)) { o.riskFilter = true; continue; }
+                if ("--evaluation-mode".equals(key)) { o.evaluationMode = true; continue; }
                 if (i >= args.length) throw new IllegalArgumentException("missing value for " + key);
                 String value = args[i++];
                 if ("--output".equals(key)) o.output = Path.of(value).toAbsolutePath();
