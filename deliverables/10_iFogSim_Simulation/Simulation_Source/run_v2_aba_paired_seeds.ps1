@@ -7,6 +7,10 @@ param(
     [string]$JdkHome = 'C:\Program Files\Eclipse Adoptium\jdk-25.0.3.9-hotspot',
     [string]$ModelIn = 'C:\Users\DELL\OneDrive\Desktop\Research\adaptive-iot-task-offloading\audit_output\aba_pilot_seed_101_20261117\training\python_model.json',
     [string]$RiskStateIn = '',
+    [ValidateSet('none','analytical','calibrated')][string]$RiskMode = 'calibrated',
+    [string]$SeedRegistry = '',
+    [string]$ExperimentFamily = 'iiot_final_aba',
+    [ValidateSet('development','validation','test')][string]$EvaluationSplit = 'test',
     [string]$OutputRoot = '',
     [int[]]$Seeds = @(),
     [int]$TasksPerPhase = 30,
@@ -53,7 +57,7 @@ foreach ($seed in $Seeds) {
     & $PythonExe $generator @generatorArgs
     if ($LASTEXITCODE -ne 0) { throw "Workload generation failed for seed $seed" }
     Write-Host ("[{0}/{1}] Running five paired policy arms for seed {2}" -f $runIndex,$Seeds.Count,$seed)
-    & $runner -ProjectRoot $ProjectRoot -IFogSimRoot $IFogSimRoot -PythonExe $PythonExe -JdkHome $JdkHome -WorkloadFile $workload -ModelIn $ModelIn -RiskStateIn $RiskStateIn -OutputRoot $evaluationRoot -PartitionOverheadMs $PartitionOverheadMs -MergeOverheadMs $MergeOverheadMs -WanLatencyMs $WanLatencyMs -WatchdogMs $WatchdogMs
+    & $runner -ProjectRoot $ProjectRoot -IFogSimRoot $IFogSimRoot -PythonExe $PythonExe -JdkHome $JdkHome -WorkloadFile $workload -ModelIn $ModelIn -RiskStateIn $RiskStateIn -RiskMode $RiskMode -SeedRegistry $SeedRegistry -ExperimentFamily $ExperimentFamily -EvaluationSplit $EvaluationSplit -OutputRoot $evaluationRoot -PartitionOverheadMs $PartitionOverheadMs -MergeOverheadMs $MergeOverheadMs -WanLatencyMs $WanLatencyMs -WatchdogMs $WatchdogMs
     if ($LASTEXITCODE -ne 0) { throw "Policy comparison failed for seed $seed" }
     $summary = Join-Path $evaluationRoot 'policy_comparison_summary.json'
     if (-not (Test-Path $summary)) { throw "Missing summary for seed $seed" }
@@ -66,4 +70,4 @@ Write-Host "All per-seed policy comparisons completed. Running paired-seed and r
 if ($LASTEXITCODE -ne 0) { throw 'Paired-seed inference failed.' }
 & $InferencePythonExe $regimeInference @summaryPaths --output $regimeOutput
 if ($LASTEXITCODE -ne 0) { throw 'A-B-A regime inference failed.' }
-Write-Host "PASS: paired-seed A-B-A batch completed. Artifacts: $OutputRoot"
+Write-Host "PASS: paired-seed A-B-A batch completed (risk mode: $RiskMode; split: $EvaluationSplit). Artifacts: $OutputRoot"
