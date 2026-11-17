@@ -257,6 +257,14 @@ class V2Session:
             return self._error("unknown_task", f"no pending decision for task {tid!r}", tid)
         if out["action_executed"] not in pending.mask:
             return self._error("invalid_outcome", "executed action was not in the task's feasible mask", tid)
+        observed_duration = None
+        if (out["sim_time_ms"] is not None
+                and pending.decision_sim_time_ms is not None):
+            raw_duration = out["sim_time_ms"] - pending.decision_sim_time_ms
+            if raw_duration < -1e-9:
+                return self._error("invalid_outcome", "outcome sim_time_ms precedes its decision", tid)
+            observed_duration = max(0.0, raw_duration)
+
         try:
             reward = compute_reward(
                 self.config.reward, failed=out["failed"], latency_ms=out["latency_ms"],
@@ -277,13 +285,9 @@ class V2Session:
         if (self.mode == "train" and self.config.risk.enabled
                 and self.config.risk.update_on_train_outcomes
                 and not out["failed"] and predicted is not None
-                and out["sim_time_ms"] is not None
-                and pending.decision_sim_time_ms is not None):
-            observed_duration = out["sim_time_ms"] - pending.decision_sim_time_ms
-            if observed_duration < -1e-9:
-                return self._error("invalid_outcome", "outcome sim_time_ms precedes its decision", tid)
+                and observed_duration is not None):
             residual_ms = self.risk_calibrator.observe(
-                out["action_executed"], predicted, max(0.0, observed_duration)
+                out["action_executed"], predicted, observed_duration
             )
             calibration_updated = True
 
