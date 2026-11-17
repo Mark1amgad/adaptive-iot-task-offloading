@@ -17,7 +17,8 @@ from pathlib import Path
 from typing import Any
 
 POLICIES = ("local", "edge", "cloud", "random", "rl_eval")
-METRICS = ("mean_latency_ms", "deadline_miss_rate", "mean_bandwidth_bytes")
+REQUIRED_METRICS = ("deadline_miss_rate", "mean_bandwidth_bytes")
+OPTIONAL_METRICS = ("mean_latency_ms",)
 
 
 class AnalysisError(ValueError):
@@ -125,15 +126,35 @@ def analyze(paths: list[Path]) -> dict[str, Any]:
         if absent:
             raise AnalysisError(f"{path}: missing policy arms {absent}")
         for policy in POLICIES:
-            for metric in METRICS:
+            for metric in REQUIRED_METRICS:
                 value = summary["policy_metrics"][policy].get(metric)
                 if not isinstance(value, (int, float)) or not math.isfinite(value):
                     raise AnalysisError(f"{path}: {policy}.{metric} missing/non-finite")
+            for metric in OPTIONAL_METRICS:
+                value = summary["policy_metrics"][policy].get(metric)
+                if value is not None and (not isinstance(value, (int, float)) or not math.isfinite(value)):
+                    raise AnalysisError(f"{path}: {policy}.{metric} must be finite or null")
+
+    unavailable_metrics = {}
+    analyzable_metrics = list(REQUIRED_METRICS)
+    for metric in OPTIONAL_METRICS:
+        missing = [
+            f"{s['workload_seed']}:{policy}"
+            for s in summaries for policy in POLICIES
+            if s["policy_metrics"][policy].get(metric) is None
+        ]
+        if missing:
+            unavailable_metrics[metric] = {
+                "reason": "at least one seed/policy has no completed task; conditional latency is undefined",
+                "affected_seed_policy_pairs": missing,
+            }
+        else:
+            analyzable_metrics.append(metric)
 
     comparisons: dict[str, Any] = {}
     raw_p: dict[str, float | None] = {}
     for baseline in ("local", "edge", "cloud", "random"):
-        for metric in METRICS:
+        for metric in analyzable_metrics:
             # Negative means the risk-calibrated learner has a lower metric.
             diffs = [
                 float(s["policy_metrics"]["rl_eval"][metric])
@@ -158,6 +179,8 @@ def analyze(paths: list[Path]) -> dict[str, Any]:
         "workload_profile": next(iter(profiles)),
         "provenance_fingerprint": next(iter(fingerprints)),
         "provenance": provenance_records[0],
+        "unavailable_metrics": unavailable_metrics,
+        "analyzed_metrics": analyzable_metrics,
         "minimum_protocol_seeds": 20,
         "meets_minimum_protocol_seeds": len(seeds) >= 20,
         "limitations": [
