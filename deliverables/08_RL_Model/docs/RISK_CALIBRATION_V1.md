@@ -65,7 +65,7 @@ An action is not eligible if any required tier has zero effective MIPS. That act
 - \`merge_compute_mi\`, \`merge_queue_wait_ms\`
 - optional \`queue_wait_basis\`, a non-empty provenance/assumption label
 
-Each tier profile contains \`compute_mips\`, \`utilization\` in [0,1], and \`queue_wait_ms\`. Remote tier profiles additionally contain \`uplink_path\` and \`downlink_path\`, each an ordered list of hops with \`bandwidth_mbps\` and \`latency_ms\`.
+Each tier profile contains \`compute_mips\`, \`utilization\` in [0,1], and \`queue_wait_ms\`. Remote tier profiles additionally contain \`uplink_path\` and \`downlink_path\`, each an ordered list of hops with \`bandwidth_bytes_per_second\` and \`latency_ms\`. This is the field required by the V2 parser and populated by the current Java adapter; do not substitute Mbps without an explicit conversion.
 
 The parser checks that the utilization values match the observation features, that remaining slack does not exceed the original task deadline, and that partition/merge overheads match the task constraints. Divisible tasks require a partition model and positive merge MI. Indivisible tasks must declare zero merge MI.
 
