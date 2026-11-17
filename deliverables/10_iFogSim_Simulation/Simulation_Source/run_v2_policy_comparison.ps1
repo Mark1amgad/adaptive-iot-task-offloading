@@ -41,21 +41,66 @@ $javaClasspath = "$classes;$classpath"
 & $java -cp $javaClasspath org.fog.test.perfeval.OffloadingActionV2ContractTest
 if ($LASTEXITCODE -ne 0) { throw "Java contract tests failed: $LASTEXITCODE" }
 
+# Freeze provenance before any policy run. Every arm receives the exact same manifest.
+$workloadRows = Get-Content -LiteralPath $WorkloadFile | Where-Object { $_.Trim() } | ForEach-Object { $_ | ConvertFrom-Json }
+if (-not $workloadRows -or $workloadRows.Count -lt 1) { throw "Workload is empty or invalid: $WorkloadFile" }
+$seedValues = @($workloadRows | ForEach-Object { [string]$_.seed } | Select-Object -Unique)
+$profileValues = @($workloadRows | ForEach-Object { [string]$_.profile } | Select-Object -Unique)
+if ($seedValues.Count -ne 1 -or $profileValues.Count -ne 1) {
+    throw "Workload rows must share exactly one seed and one profile."
+}
+$gitCommit = (& git -C $ProjectRoot rev-parse HEAD).Trim()
+if ($LASTEXITCODE -ne 0 -or -not $gitCommit) { throw "Cannot resolve source Git commit." }
+$javaVersion = (& $java -version 2>&1 | Select-Object -First 1).ToString()
+$manifest = [ordered]@{
+    schema_version = "v1"
+    experiment_id = [IO.Path]::GetFileName($OutputRoot)
+    evaluation_split = "test"
+    workload_seed = $seedValues[0]
+    workload_profile = $profileValues[0]
+    workload_file = [IO.Path]::GetFileName($WorkloadFile)
+    workload_sha256 = (Get-FileHash -Algorithm SHA256 -LiteralPath $WorkloadFile).Hash.ToLowerInvariant()
+    model_sha256 = (Get-FileHash -Algorithm SHA256 -LiteralPath $ModelIn).Hash.ToLowerInvariant()
+    risk_state_sha256 = (Get-FileHash -Algorithm SHA256 -LiteralPath $RiskStateIn).Hash.ToLowerInvariant()
+    source_git_commit = $gitCommit
+    java_version = $javaVersion
+    simulator_root = [IO.Path]::GetFullPath($IFogSimRoot)
+    simulator_jar_inventory = @(
+        Get-ChildItem -LiteralPath $jarRoot -Filter '*.jar' -File |
+        Sort-Object Name |
+        ForEach-Object { [ordered]@{ name = $_.Name; sha256 = (Get-FileHash -Algorithm SHA256 -LiteralPath $_.FullName).Hash.ToLowerInvariant() } }
+    )
+    parameters = [ordered]@{
+        partition_overhead_ms = $PartitionOverheadMs
+        merge_overhead_ms = $MergeOverheadMs
+        wan_latency_ms = $WanLatencyMs
+        watchdog_ms = $WatchdogMs
+    }
+    policies = @('local','edge','cloud','random','rl_eval')
+    created_at_utc = [DateTime]::UtcNow.ToString('o')
+}
+$manifestPath = Join-Path $OutputRoot 'experiment_manifest.json'
+$manifestJson = $manifest | ConvertTo-Json -Depth 8
+[IO.File]::WriteAllText($manifestPath, $manifestJson + [Environment]::NewLine, [Text.UTF8Encoding]::new($false))
+$manifestSha256 = (Get-FileHash -Algorithm SHA256 -LiteralPath $manifestPath).Hash.ToLowerInvariant()
+
 # Fixed baselines must not receive the learned policy's risk filter or calibration state.
 # Otherwise the comparison would confound placement policy with risk filtering.
 $common = @('--python',$PythonExe,'--rl-root',$rlRoot,'--workload',$WorkloadFile,'--partition-overhead-ms',"$PartitionOverheadMs",'--merge-overhead-ms',"$MergeOverheadMs",'--wan-latency-ms',"$WanLatencyMs",'--watchdog-ms',"$WatchdogMs")
 foreach ($policy in @('local','edge','cloud','random')) {
     $out = Join-Path $OutputRoot ('policy_' + $policy)
     New-Item -ItemType Directory -Force -Path $out | Out-Null
+    Copy-Item -LiteralPath $manifestPath -Destination (Join-Path $out 'experiment_manifest.json')
     $args = @('-cp',$javaClasspath,'org.fog.test.perfeval.RlOffloadingV2PartialIntegrationExperiment','--output',$out,'--run-id',('paired-' + $policy),'--mode','baseline','--policy',$policy,'--evaluation-mode') + $common
     & $java @args
     if ($LASTEXITCODE -ne 0) { throw "Baseline policy $policy failed: $LASTEXITCODE" }
 }
 $rlOut = Join-Path $OutputRoot 'policy_rl_eval'
 New-Item -ItemType Directory -Force -Path $rlOut | Out-Null
+Copy-Item -LiteralPath $manifestPath -Destination (Join-Path $rlOut 'experiment_manifest.json')
 $rlArgs = @('-cp',$javaClasspath,'org.fog.test.perfeval.RlOffloadingV2PartialIntegrationExperiment','--output',$rlOut,'--run-id','paired-rl-eval','--mode','eval','--model-in',$ModelIn,'--evaluation-mode') + $common + @('--risk-filter','--risk-state-in',$RiskStateIn)
 & $java @rlArgs
 if ($LASTEXITCODE -ne 0) { throw "RL evaluation policy failed: $LASTEXITCODE" }
-& $PythonExe $analyzer --root $OutputRoot --workload $WorkloadFile
+& $PythonExe $analyzer --root $OutputRoot --workload $WorkloadFile --manifest $manifestPath
 if ($LASTEXITCODE -ne 0) { throw "Policy comparison analysis failed: $LASTEXITCODE" }
 Write-Host "PASS: paired policy comparison completed. Artifacts: $OutputRoot"
