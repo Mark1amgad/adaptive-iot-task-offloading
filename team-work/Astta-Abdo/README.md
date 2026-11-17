@@ -17,3 +17,6 @@ Target topology contract: `v2_target_100iot_20edge_1cloud` = 100 logical IoT sou
 
 
 Latest topology update verification: Development scenarios/manifests are regenerated with seed 1300 under the 100-IoT/20-Edge/1-Cloud target contract. The latest successful pipeline run reports 47 passing tests and 8/8 scenario-manifest validation passes. These checks validate the generator contract only; actual simulator topology and network parameters remain pending Ayoub confirmation.
+
+
+PR #6 verification is tracked on the same head branch. This update does not change workload inputs or generator behavior; the canonical configs and seed-1300 development artifacts remain as validated by the pipeline.
