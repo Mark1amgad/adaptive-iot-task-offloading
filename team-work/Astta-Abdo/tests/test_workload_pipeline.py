@@ -62,7 +62,8 @@ def test_all_principal_scenarios_generate_in_registered_development_split(tmp_pa
         )
         _, task_rows = val.read_csv(task_path)
         _, manifest_rows = val.read_csv(manifest_path)
-        assert not val.validate_tasks(task_path)
+        task_errors, _ = val.validate_tasks(task_path)
+        assert not task_errors
         assert not val.validate_manifest(manifest_path, task_rows)
         assert manifest_rows[0]["dataset_split"] == "development"
         assert manifest_rows[0]["seed"] == "1300"
