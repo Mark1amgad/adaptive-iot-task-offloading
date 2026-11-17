@@ -50,3 +50,10 @@ The Java/iFogSim v2 acceptance runners are `../10_iFogSim_Simulation/Simulation_
 The current v2 state has nine features (including input/output payload bytes and three deadline bands), 13,122 states, and 118,098 Q values. Use `../10_iFogSim_Simulation/Simulation_Source/generate_workload_v2.py` to generate seeded mixed/divisible/indivisible JSONL workloads. The iFogSim runner supports `train`, frozen `eval`, and Local/Edge/Cloud/Random baselines. `run_v2_policy_comparison.ps1` evaluates all policies against the same workload file. See [V2_VARIABLE_WORKLOAD_ACCEPTANCE.md](../10_iFogSim_Simulation/Simulation_Source/V2_VARIABLE_WORKLOAD_ACCEPTANCE.md) for the seed-42 training run, three held-out paired comparisons (seeds 43–45), aggregate results, and limitations.
 
 The reproducible multi-seed holdout orchestrator is `../10_iFogSim_Simulation/Simulation_Source/run_v2_multiseed_holdout.ps1`; it regenerates each seeded workload, replays all policies, and aggregates paired per-task results. Important: the current 60-update model visited only 45 states and 60/118,098 state-action cells; 60% of held-out decisions used the `EDGE_FULL` fallback. Treat the comparison as a fallback/greedy hybrid result, not evidence of a trained RL policy's superiority.
+
+
+## Risk-calibrated feasibility filter (V1)
+
+The separate V2 risk layer is implemented in src/rl_model/risk.py. It predicts end-to-end completion time for the nine legal actions, applies a one-sided online residual margin, masks actions that exceed remaining deadline, and records a forced fallback when no candidate passes. Training writes a paired model sidecar named <model-out>.risk.json; evaluation loads the matching <model-in>.risk.json automatically when present or accepts --risk-state-in. See [RISK_CALIBRATION_V1.md](docs/RISK_CALIBRATION_V1.md) for the equations, observation context, calibration procedure, and limitations.
+
+The simulator adapter is opt-in (--risk-filter). Its current zero queue-wait profile and MIPS/link values are provisional inputs, not measured facts or deterministic deadline guarantees. Use the same frozen residual sidecar for every policy in a paired evaluation.
