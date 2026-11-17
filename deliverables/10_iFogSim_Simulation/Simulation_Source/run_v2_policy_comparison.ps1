@@ -34,10 +34,8 @@ foreach ($required in @($action,$plan,$contract,$experiment,$analyzer,$manifestB
 }
 if (-not $SeedRegistry) { $SeedRegistry = Join-Path $ProjectRoot 'research\experiments\SEED_REGISTRY_V1.csv' }
 if (-not (Test-Path $SeedRegistry)) { throw "Seed registry not found: $SeedRegistry" }
-if ($RiskMode -ne 'none') {
-    if (-not $RiskStateIn) { $RiskStateIn = "$ModelIn.risk.json" }
-    if (-not (Test-Path $RiskStateIn)) { throw "Risk state not found for $RiskMode mode: $RiskStateIn" }
-}
+if ($RiskMode -ne 'none' -and -not $RiskStateIn) { $RiskStateIn = "$ModelIn.risk.json" }
+if ($RiskStateIn -and -not (Test-Path $RiskStateIn)) { throw "Risk state not found: $RiskStateIn" }
 if (-not $OutputRoot) { $OutputRoot = Join-Path $ProjectRoot ('audit_output\v2_policy_comparison_' + (Get-Date -Format 'yyyyMMdd_HHmmss')) }
 if (Test-Path $OutputRoot) { throw "Refusing to reuse existing output directory: $OutputRoot" }
 New-Item -ItemType Directory -Force -Path $OutputRoot | Out-Null
@@ -53,7 +51,7 @@ if ($LASTEXITCODE -ne 0) { throw "Java contract tests failed: $LASTEXITCODE" }
 # Freeze provenance before any policy run. Every arm receives the exact same manifest.
 $manifestPath = Join-Path $OutputRoot 'experiment_manifest.json'
 $manifestArgs = @($manifestBuilder,'--project-root',$ProjectRoot,'--simulation-source',$simulationSource,'--rl-root',$rlRoot,'--ifogsim-root',$IFogSimRoot,'--jdk-home',$JdkHome,'--workload',$WorkloadFile,'--model',$ModelIn,'--risk-mode',$RiskMode,'--seed-registry',$SeedRegistry,'--experiment-family',$ExperimentFamily,'--expected-split',$EvaluationSplit,'--output',$manifestPath,'--partition-overhead-ms',$PartitionOverheadMs,'--merge-overhead-ms',$MergeOverheadMs,'--wan-latency-ms',$WanLatencyMs,'--watchdog-ms',$WatchdogMs)
-if ($RiskMode -ne 'none') { $manifestArgs += @('--risk-state',$RiskStateIn) }
+if ($RiskStateIn) { $manifestArgs += @('--risk-state',$RiskStateIn) }
 & $PythonExe @manifestArgs
 if ($LASTEXITCODE -ne 0) { throw "Experiment manifest creation failed: $LASTEXITCODE" }
 $manifestSha256 = (Get-FileHash -Algorithm SHA256 -LiteralPath $manifestPath).Hash.ToLowerInvariant()
@@ -73,7 +71,8 @@ $rlOut = Join-Path $OutputRoot 'policy_rl_eval'
 New-Item -ItemType Directory -Force -Path $rlOut | Out-Null
 Copy-Item -LiteralPath $manifestPath -Destination (Join-Path $rlOut 'experiment_manifest.json')
 $rlArgs = @('-cp',$javaClasspath,'org.fog.test.perfeval.RlOffloadingV2PartialIntegrationExperiment','--output',$rlOut,'--run-id',('paired-rl-eval-' + $RiskMode),'--mode','eval','--model-in',$ModelIn,'--evaluation-mode') + $common
-if ($RiskMode -ne 'none') { $rlArgs += @('--risk-filter','--risk-state-in',$RiskStateIn) }
+if ($RiskStateIn) { $rlArgs += @('--risk-state-in',$RiskStateIn) }
+if ($RiskMode -ne 'none') { $rlArgs += '--risk-filter' }
 & $java @rlArgs
 if ($LASTEXITCODE -ne 0) { throw "RL evaluation policy failed: $LASTEXITCODE" }
 & $PythonExe $analyzer --root $OutputRoot --workload $WorkloadFile --manifest $manifestPath
