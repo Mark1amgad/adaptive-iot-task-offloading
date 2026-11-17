@@ -68,14 +68,23 @@ def analyze(no_filter_paths: list[Path], analytical_paths: list[Path],
     reference_common = _common_provenance(reference)
     reference_model = reference_common.get("model_sha256")
     reference_source = reference_common.get("source_git_commit")
-    reference_arms = reference_common.get("policies")
+    invariant_provenance = dict(reference_common)
+    invariant_provenance.pop("workload_sha256", None)
     for mode, group in groups.items():
         for seed, summary in group.items():
             common = _common_provenance(summary)
-            if common != reference_common:
+            reference_for_seed = _common_provenance(groups["none"][seed])
+            if common != reference_for_seed:
                 raise AnalysisError(
                     f"{mode} seed {seed}: source/model/simulator/workload provenance differs "
-                    "from the no-filter reference"
+                    "from the no-filter arm for the same seed"
+                )
+            invariant = dict(common)
+            invariant.pop("workload_sha256", None)
+            if invariant != invariant_provenance:
+                raise AnalysisError(
+                    f"{mode} seed {seed}: invariant source/model/simulator provenance differs "
+                    "across the paired batch"
                 )
             if summary.get("workload_seed") != seed:
                 raise AnalysisError(f"{mode} seed identity mismatch")
