@@ -85,6 +85,15 @@ class PolicyOutcomeAnalysisTests(unittest.TestCase):
             self.assertEqual(metrics["completion_coverage"], 0.5)
             self.assertEqual(metrics["mean_latency_ms"], 5.0)
 
+            # Tampering with one policy's copied manifest must invalidate the whole comparison.
+            altered = root / "policy_local" / "experiment_manifest.json"
+            altered.write_text(altered.read_text(encoding="utf-8") + " ", encoding="utf-8")
+            with patch.object(sys, "argv", ["analyzer", "--root", str(root), "--workload", str(workload_path),
+                                           "--manifest", str(manifest_path)]):
+                with contextlib.redirect_stdout(io.StringIO()), contextlib.redirect_stderr(io.StringIO()):
+                    with self.assertRaisesRegex(AssertionError, "missing or modified per-policy experiment manifest"):
+                        analyzer.main()
+
 
 if __name__ == "__main__":
     unittest.main()
