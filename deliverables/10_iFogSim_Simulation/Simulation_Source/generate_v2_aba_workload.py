@@ -38,7 +38,13 @@ def build(seed: int, tasks_per_phase: int) -> list[dict]:
             task_mi = int(round(base["task_mi"] * phase["scale"]))
             input_bytes = int(round(base["input_bytes"] * (2.0 if stress else 1.0)))
             output_bytes = base["output_bytes"]
-            gap = rng.choice([450.0, 550.0, 650.0]) if stress else base["arrival_gap_ms"]
+            if stress:
+                gap = rng.choice([450.0, 550.0, 650.0])
+            elif phase["regime_index"] == 2 and i == 0:
+                # The first A2 task follows B, so use the first ordinary A inter-arrival.
+                gap = template[1]["arrival_gap_ms"]
+            else:
+                gap = base["arrival_gap_ms"]
             rows.append({
                 "sequence": sequence,
                 "seed": seed,
