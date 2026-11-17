@@ -13,7 +13,7 @@ The deterministic generator is `deliverables/10_iFogSim_Simulation/Simulation_So
 | Phase | Regime | Workload | WAN latency |
 |---|---|---|---:|
 | A1 | A | Baseline task-size distribution and arrival gaps | 45 ms |
-| B | B | 2.4× task MI, 2× input bytes, shorter 450–650 ms arrival gaps | 220 ms |
+| B | B | 1.8× task MI, 1.5× input bytes, shorter 2.5–3.5 s arrival gaps | 160 ms |
 | A2 | A | Exact replay of A1's per-task compute, input/output, deadline, urgency and arrival-gap profile | 45 ms |
 
 The generator uses one seeded baseline template and replays it in A2. This avoids confusing recovery with a newly sampled workload. B is a joint workload-and-network shift, so results must not be described as isolating network latency alone.
