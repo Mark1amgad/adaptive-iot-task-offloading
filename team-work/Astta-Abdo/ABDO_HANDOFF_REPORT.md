@@ -88,7 +88,7 @@ Seed selection is registry-only. Seed 1300 is Development/CI only; historical se
 |---|---|---|---|
 | Current topology reference | 1 Local / 1 Edge / 1 Cloud; 1,000 / 2,800 / 44,800 MIPS | `APPROVED` as existing prototype reference only | Checked-in topology document; not the V2 target layout. |
 | V2 topology | 4 IoT / 2 Edge / 1 Cloud | `PROPOSED` target; capacities `BLOCKED` | Target from V2 spec; current prototype has only one Local, Edge and Cloud executor. Ayoub must provide site IDs and capacities. |
-| Source IDs | `iot-01`…`iot-04` logical sources | `PROPOSED` | Does not assert four physical iFogSim FogDevices. Mapping needed from Ayoub. |
+| Source IDs | `iot-001`…`iot-100` logical sources | `PROPOSED` | Does not assert four physical iFogSim FogDevices. Mapping needed from Ayoub. |
 | Application compute values | Sensor: 200/1,000/4,000 MI; normal divisible: 1,000/4,000 MI; shifted divisible: 4,000/8,000/16,000 MI | `PROPOSED` smoke/stress only | 2,500 MI is the one-task pilot value; it does not justify broader distributions. Mark must approve calibrated ranges. |
 | Input sizes | 2,000/10,000/50,000 bytes; shifted 50,000/100,000/250,000 bytes | `PROPOSED` smoke/stress only | The prototype pilot used 12,000 bytes. Ranges are deliberately development assumptions. |
 | Output sizes | Profile values 256–8,192 bytes | `PROPOSED` synthetic profile rule | Only present because each profile explicitly models output size; not simulator-observed output. |
@@ -115,7 +115,7 @@ The 2,500 MI / 12,000-byte / 2,000-byte / 500-ms configuration is an existing **
 
 ## 7. Required items from Ayoub before benchmark calibration / outcome adapter
 
-1. Confirm whether the V2 4-IoT / 2-Edge / 1-Cloud topology is implemented; provide actual site IDs, MIPS, RAM and per-tier node capacity.
+1. Confirm whether the V2 100-IoT / 20-Edge / 1-Cloud topology is implemented; provide actual site IDs, MIPS, RAM and per-tier node capacity.
 2. Confirm units and transfer-delay conversion for the topology's bandwidth values, plus both uplink and downlink latency/child latency semantics.
 3. Provide nominal service-time traces/distributions by task profile and execution tier, including task MI/PE meaning and queueing/load assumptions, to calibrate deadline distributions without test tuning.
 4. Specify stable per-task identifiers and adapter joins from generated `task_id` through iFogSim tuples and simulator result endpoint.
@@ -168,8 +168,15 @@ All workload ranges and mix proportions remain proposed synthetic configurations
 - A→B→A exact replay: A1/A2 use the same task templates, attribute stream and relative arrival offsets. The manifest records the same A condition-profile ID for A1/A2; B uses its own workload stream.
 - Industrial archetypes: Predictive Maintenance indivisible inference; Visual Inspection indivisible single-image inference plus divisible frame batches; Production Monitoring indivisible single-event processing plus divisible aggregation windows.
 - Seed allocation: seed 1300 is allocated to Development/CI only. Seed 81, seeds 102–121, and other known previous-use seeds are retired. There are no approved final Test seeds; repository-visible inventory is incomplete pending local and team archive scans.
-- Topology: `target_topology_id` captures the proposed 4-IoT/2-Edge/1-Cloud target. `actual_topology_id` is null with `NOT_VERIFIED_PENDING_AYOUB_CONFIRMATION`; no implementation claim is made.
+- Topology: `target_topology_id` captures the proposed 100-IoT/20-Edge/1-Cloud target. `actual_topology_id` is null with `NOT_VERIFIED_PENDING_AYOUB_CONFIRMATION`; no implementation claim is made.
 - CI: eight scenario generation and validation, deterministic replay, and 44 automated tests passed on the V1.2.0 CI run; generated Development inputs and reports are synchronized on the branch.
 - No simulator outcomes, execution decisions, performance measurements, latency, energy, or rewards are created by this workstream.
 
 All workload values remain proposed synthetic configurations, not factory measurements or industrial traces. Mark's approval of numerical profiles and Ayoub's verification of the actual topology remain prerequisites before benchmark use.
+
+
+## 100/20/1 target topology and network contract boundary
+
+The target topology ID is `v2_target_100iot_20edge_1cloud`: logical source IDs `iot-001` through `iot-100`, 20 target Edge nodes `edge-001` through `edge-020`, and one target Cloud node `cloud-001`. The target mapping assigns five sequential IoT source IDs to each Edge node. This is a target contract only, not evidence of instantiated simulator devices or confirmed actual placement. `actual_topology_id` remains null and `actual_topology_status` remains `NOT_VERIFIED_PENDING_AYOUB_CONFIRMATION` until Ayoub verifies the implementation.
+
+Network contract items remain BLOCKED pending Ayoub confirmation: bandwidth physical units and transfer-time conversion; uplink/downlink semantics; IoT–Edge and Edge–Cloud link definitions; and measured/confirmed latency and network-shift parameters. No unconfirmed values or units are inferred.
