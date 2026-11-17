@@ -1,0 +1,456 @@
+{
+  "comparison_design": "paired policy replay on identical task traces within each held-out seed; one frozen model trained on one seed",
+  "heldout_seeds": [
+    43,
+    44,
+    45
+  ],
+  "limitations": [
+    "Only one training seed/model was evaluated; multiple independent training seeds are still required.",
+    "Three held-out workload seeds are not enough for strong statistical claims.",
+    "Workloads share the same synthetic generator distribution and do not represent a held-out application regime.",
+    "Energy is not measured; partition/merge and proportional data-split assumptions remain provisional."
+  ],
+  "overall_policy_metrics": {
+    "cloud": {
+      "action_counts": {
+        "CLOUD_FULL": 180
+      },
+      "deadline_miss_rate": 0.28888888888888886,
+      "deadline_misses": 52,
+      "decision_modes": {
+        "baseline": 180
+      },
+      "mean_bandwidth_bytes": 269912.86666666664,
+      "mean_latency_ms": 224.96794483234117,
+      "median_latency_ms": 215.79236383928566,
+      "p95_latency_ms": 371.87600303571406,
+      "tasks": 180
+    },
+    "edge": {
+      "action_counts": {
+        "EDGE_FULL": 180
+      },
+      "deadline_miss_rate": 0.06666666666666667,
+      "deadline_misses": 12,
+      "decision_modes": {
+        "baseline": 180
+      },
+      "mean_bandwidth_bytes": 134956.43333333332,
+      "mean_latency_ms": 119.75860087301581,
+      "median_latency_ms": 114.54082857142853,
+      "p95_latency_ms": 257.9788285714283,
+      "tasks": 180
+    },
+    "local": {
+      "action_counts": {
+        "LOCAL": 180
+      },
+      "deadline_miss_rate": 0.32222222222222224,
+      "deadline_misses": 58,
+      "decision_modes": {
+        "baseline": 180
+      },
+      "mean_bandwidth_bytes": 0.0,
+      "mean_latency_ms": 257.88994444444444,
+      "median_latency_ms": 235.99500000000003,
+      "p95_latency_ms": 597.865,
+      "tasks": 180
+    },
+    "random": {
+      "action_counts": {
+        "CLOUD_FULL": 30,
+        "CLOUD_PARTIAL_25": 8,
+        "CLOUD_PARTIAL_50": 14,
+        "CLOUD_PARTIAL_75": 19,
+        "EDGE_FULL": 36,
+        "EDGE_PARTIAL_25": 16,
+        "EDGE_PARTIAL_50": 5,
+        "EDGE_PARTIAL_75": 22,
+        "LOCAL": 30
+      },
+      "deadline_miss_rate": 0.06111111111111111,
+      "deadline_misses": 11,
+      "decision_modes": {
+        "baseline": 180
+      },
+      "mean_bandwidth_bytes": 131856.55555555556,
+      "mean_latency_ms": 92.15169059591436,
+      "median_latency_ms": 80.00404455357139,
+      "p95_latency_ms": 175.92680839285708,
+      "tasks": 180
+    },
+    "rl_eval": {
+      "action_counts": {
+        "CLOUD_FULL": 5,
+        "CLOUD_PARTIAL_25": 5,
+        "CLOUD_PARTIAL_50": 8,
+        "CLOUD_PARTIAL_75": 2,
+        "EDGE_FULL": 114,
+        "EDGE_PARTIAL_25": 2,
+        "EDGE_PARTIAL_50": 8,
+        "EDGE_PARTIAL_75": 7,
+        "LOCAL": 29
+      },
+      "deadline_miss_rate": 0.016666666666666666,
+      "deadline_misses": 3,
+      "decision_modes": {
+        "fallback": 108,
+        "greedy": 72
+      },
+      "mean_bandwidth_bytes": 105555.53888888888,
+      "mean_latency_ms": 60.0649842104783,
+      "median_latency_ms": 54.29085714285711,
+      "p95_latency_ms": 128.60103696428575,
+      "tasks": 180
+    }
+  },
+  "paired_rl_differences": {
+    "rl_minus_cloud": {
+      "baseline_faster": 2,
+      "mean_paired_latency_difference_ms": -164.9029606218629,
+      "per_seed_mean_differences_ms": {
+        "43": -110.55599408928573,
+        "44": -178.12716580654754,
+        "45": -206.02572196975538
+      },
+      "rl_faster": 178,
+      "sd_of_seed_mean_differences_ms": 49.089478887718,
+      "ties": 0
+    },
+    "rl_minus_edge": {
+      "baseline_faster": 22,
+      "mean_paired_latency_difference_ms": -59.69361666253751,
+      "per_seed_mean_differences_ms": {
+        "43": -6.309800821428565,
+        "44": -69.68251645238095,
+        "45": -103.088532713803
+      },
+      "rl_faster": 139,
+      "sd_of_seed_mean_differences_ms": 49.15652882306352,
+      "ties": 19
+    },
+    "rl_minus_local": {
+      "baseline_faster": 24,
+      "mean_paired_latency_difference_ms": -197.82496023396615,
+      "per_seed_mean_differences_ms": {
+        "43": -132.02175248809533,
+        "44": -132.0564505,
+        "45": -329.3966777138031
+      },
+      "rl_faster": 155,
+      "sd_of_seed_mean_differences_ms": 113.94445107785431,
+      "ties": 1
+    },
+    "rl_minus_random": {
+      "baseline_faster": 63,
+      "mean_paired_latency_difference_ms": -32.08670638543605,
+      "per_seed_mean_differences_ms": {
+        "43": -20.389964212855798,
+        "44": -16.339440941387824,
+        "45": -59.53071400206454
+      },
+      "rl_faster": 112,
+      "sd_of_seed_mean_differences_ms": 23.853340441945395,
+      "ties": 5
+    }
+  },
+  "per_seed_results": [
+    {
+      "policy_metrics": {
+        "cloud": {
+          "action_counts": {
+            "CLOUD_FULL": 60
+          },
+          "deadline_miss_rate": 0.13333333333333333,
+          "deadline_misses": 8,
+          "decision_modes": {
+            "baseline": 60
+          },
+          "mean_bandwidth_bytes": 243242.03333333333,
+          "mean_latency_ms": 169.2952916011904,
+          "median_latency_ms": 164.65770705357133,
+          "p95_latency_ms": 216.69449071428562
+        },
+        "edge": {
+          "action_counts": {
+            "EDGE_FULL": 60
+          },
+          "deadline_miss_rate": 0.016666666666666666,
+          "deadline_misses": 1,
+          "decision_modes": {
+            "baseline": 60
+          },
+          "mean_bandwidth_bytes": 121621.01666666666,
+          "mean_latency_ms": 65.04909833333325,
+          "median_latency_ms": 59.97749285714275,
+          "p95_latency_ms": 112.07389999999975
+        },
+        "local": {
+          "action_counts": {
+            "LOCAL": 60
+          },
+          "deadline_miss_rate": 0.23333333333333334,
+          "deadline_misses": 14,
+          "decision_modes": {
+            "baseline": 60
+          },
+          "mean_bandwidth_bytes": 0.0,
+          "mean_latency_ms": 190.76105,
+          "median_latency_ms": 175.65750000000003,
+          "p95_latency_ms": 393.94500000000005
+        },
+        "random": {
+          "action_counts": {
+            "CLOUD_FULL": 10,
+            "CLOUD_PARTIAL_25": 3,
+            "CLOUD_PARTIAL_50": 3,
+            "CLOUD_PARTIAL_75": 7,
+            "EDGE_FULL": 13,
+            "EDGE_PARTIAL_25": 5,
+            "EDGE_PARTIAL_50": 2,
+            "EDGE_PARTIAL_75": 7,
+            "LOCAL": 10
+          },
+          "deadline_miss_rate": 0.05,
+          "deadline_misses": 3,
+          "decision_modes": {
+            "baseline": 60
+          },
+          "mean_bandwidth_bytes": 117318.93333333333,
+          "mean_latency_ms": 79.12926172476048,
+          "median_latency_ms": 59.60810125000012,
+          "p95_latency_ms": 146.09156857142852
+        },
+        "rl_eval": {
+          "action_counts": {
+            "CLOUD_FULL": 1,
+            "CLOUD_PARTIAL_50": 2,
+            "CLOUD_PARTIAL_75": 1,
+            "EDGE_FULL": 44,
+            "EDGE_PARTIAL_50": 5,
+            "EDGE_PARTIAL_75": 3,
+            "LOCAL": 4
+          },
+          "deadline_miss_rate": 0.016666666666666666,
+          "deadline_misses": 1,
+          "decision_modes": {
+            "fallback": 44,
+            "greedy": 16
+          },
+          "mean_bandwidth_bytes": 107858.8,
+          "mean_latency_ms": 58.73929751190468,
+          "median_latency_ms": 59.700442857142775,
+          "p95_latency_ms": 115.75853410714285
+        }
+      },
+      "seed": 43,
+      "tasks": 60
+    },
+    {
+      "policy_metrics": {
+        "cloud": {
+          "action_counts": {
+            "CLOUD_FULL": 60
+          },
+          "deadline_miss_rate": 0.35,
+          "deadline_misses": 21,
+          "decision_modes": {
+            "baseline": 60
+          },
+          "mean_bandwidth_bytes": 270373.4,
+          "mean_latency_ms": 241.50033197321417,
+          "median_latency_ms": 252.0991159821426,
+          "p95_latency_ms": 311.3411012499997
+        },
+        "edge": {
+          "action_counts": {
+            "EDGE_FULL": 60
+          },
+          "deadline_miss_rate": 0.05,
+          "deadline_misses": 3,
+          "decision_modes": {
+            "baseline": 60
+          },
+          "mean_bandwidth_bytes": 135186.7,
+          "mean_latency_ms": 133.0556826190476,
+          "median_latency_ms": 145.0320714285714,
+          "p95_latency_ms": 202.86775714285704
+        },
+        "local": {
+          "action_counts": {
+            "LOCAL": 60
+          },
+          "deadline_miss_rate": 0.26666666666666666,
+          "deadline_misses": 16,
+          "decision_modes": {
+            "baseline": 60
+          },
+          "mean_bandwidth_bytes": 0.0,
+          "mean_latency_ms": 195.42961666666667,
+          "median_latency_ms": 190.35400000000004,
+          "p95_latency_ms": 415.37
+        },
+        "random": {
+          "action_counts": {
+            "CLOUD_FULL": 11,
+            "CLOUD_PARTIAL_25": 2,
+            "CLOUD_PARTIAL_50": 5,
+            "CLOUD_PARTIAL_75": 5,
+            "EDGE_FULL": 13,
+            "EDGE_PARTIAL_25": 5,
+            "EDGE_PARTIAL_50": 1,
+            "EDGE_PARTIAL_75": 7,
+            "LOCAL": 11
+          },
+          "deadline_miss_rate": 0.05,
+          "deadline_misses": 3,
+          "decision_modes": {
+            "baseline": 60
+          },
+          "mean_bandwidth_bytes": 131094.01666666666,
+          "mean_latency_ms": 79.71260710805447,
+          "median_latency_ms": 54.20934137709135,
+          "p95_latency_ms": 154.08173428571428
+        },
+        "rl_eval": {
+          "action_counts": {
+            "CLOUD_FULL": 3,
+            "CLOUD_PARTIAL_25": 3,
+            "CLOUD_PARTIAL_50": 2,
+            "EDGE_FULL": 41,
+            "EDGE_PARTIAL_25": 1,
+            "EDGE_PARTIAL_75": 2,
+            "LOCAL": 8
+          },
+          "deadline_miss_rate": 0.03333333333333333,
+          "deadline_misses": 2,
+          "decision_modes": {
+            "fallback": 40,
+            "greedy": 20
+          },
+          "mean_bandwidth_bytes": 114426.31666666667,
+          "mean_latency_ms": 63.37316616666664,
+          "median_latency_ms": 57.818792857142824,
+          "p95_latency_ms": 145.26529517857134
+        }
+      },
+      "seed": 44,
+      "tasks": 60
+    },
+    {
+      "policy_metrics": {
+        "cloud": {
+          "action_counts": {
+            "CLOUD_FULL": 60
+          },
+          "deadline_miss_rate": 0.38333333333333336,
+          "deadline_misses": 23,
+          "decision_modes": {
+            "baseline": 60
+          },
+          "mean_bandwidth_bytes": 296123.1666666667,
+          "mean_latency_ms": 264.108210922619,
+          "median_latency_ms": 239.8184084821429,
+          "p95_latency_ms": 401.5474799999996
+        },
+        "edge": {
+          "action_counts": {
+            "EDGE_FULL": 60
+          },
+          "deadline_miss_rate": 0.13333333333333333,
+          "deadline_misses": 8,
+          "decision_modes": {
+            "baseline": 60
+          },
+          "mean_bandwidth_bytes": 148061.58333333334,
+          "mean_latency_ms": 161.17102166666658,
+          "median_latency_ms": 150.58004999999997,
+          "p95_latency_ms": 292.3962142857139
+        },
+        "local": {
+          "action_counts": {
+            "LOCAL": 60
+          },
+          "deadline_miss_rate": 0.4666666666666667,
+          "deadline_misses": 28,
+          "decision_modes": {
+            "baseline": 60
+          },
+          "mean_bandwidth_bytes": 0.0,
+          "mean_latency_ms": 387.4791666666667,
+          "median_latency_ms": 441.5525,
+          "p95_latency_ms": 680.422
+        },
+        "random": {
+          "action_counts": {
+            "CLOUD_FULL": 9,
+            "CLOUD_PARTIAL_25": 3,
+            "CLOUD_PARTIAL_50": 6,
+            "CLOUD_PARTIAL_75": 7,
+            "EDGE_FULL": 10,
+            "EDGE_PARTIAL_25": 6,
+            "EDGE_PARTIAL_50": 2,
+            "EDGE_PARTIAL_75": 8,
+            "LOCAL": 9
+          },
+          "deadline_miss_rate": 0.08333333333333333,
+          "deadline_misses": 5,
+          "decision_modes": {
+            "baseline": 60
+          },
+          "mean_bandwidth_bytes": 147156.71666666667,
+          "mean_latency_ms": 117.61320295492813,
+          "median_latency_ms": 122.9063956249999,
+          "p95_latency_ms": 251.49599999999998
+        },
+        "rl_eval": {
+          "action_counts": {
+            "CLOUD_FULL": 1,
+            "CLOUD_PARTIAL_25": 2,
+            "CLOUD_PARTIAL_50": 4,
+            "CLOUD_PARTIAL_75": 1,
+            "EDGE_FULL": 29,
+            "EDGE_PARTIAL_25": 1,
+            "EDGE_PARTIAL_50": 3,
+            "EDGE_PARTIAL_75": 2,
+            "LOCAL": 17
+          },
+          "deadline_miss_rate": 0.0,
+          "deadline_misses": 0,
+          "decision_modes": {
+            "fallback": 24,
+            "greedy": 36
+          },
+          "mean_bandwidth_bytes": 94381.5,
+          "mean_latency_ms": 58.08248895286358,
+          "median_latency_ms": 39.952507142857144,
+          "p95_latency_ms": 133.31747517857156
+        }
+      },
+      "seed": 45,
+      "tasks": 60
+    }
+  ],
+  "status": "PASS",
+  "tasks_per_seed": [
+    60,
+    60,
+    60
+  ],
+  "total_heldout_tasks": 180,
+  "training_coverage": {
+    "action_count": 9,
+    "decisions": 60,
+    "max_visits_per_state_action_cell": 1,
+    "non_default_q_cells": 60,
+    "state_action_coverage_rate": 0.0005080526342529086,
+    "state_count": 13122,
+    "state_coverage_rate": 0.003429355281207133,
+    "total_state_action_cells": 118098,
+    "unique_visited_state_action_cells": 60,
+    "unique_visited_states": 45,
+    "updates": 60
+  },
+  "training_seed": 42
+}

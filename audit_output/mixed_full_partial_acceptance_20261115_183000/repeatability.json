@@ -1,0 +1,15 @@
+﻿{
+    "task_count":  6,
+    "full_tasks":  3,
+    "partial_tasks":  3,
+    "full_actions":  [
+                         "Local",
+                         "Edge",
+                         "Cloud"
+                     ],
+    "inter_arrival_ms":  1,
+    "primary_validator":  "PASS",
+    "repeat_validator":  "PASS",
+    "trace_byte_identical":  true,
+    "summary_byte_identical":  true
+}

@@ -1,11 +1,28 @@
-# One-Task iFogSim Integration Source
+# iFogSim Integration Source
 
-This folder contains the experiment-owned Java integration source, runner, and validation utility.
+This folder contains experiment-owned Java integrations, isolated runners, and trace validators.
 
-- `org/fog/test/perfeval/RlOffloadingIntegrationExperiment.java` — Java integration experiment.
-- `run_acceptance.ps1` — isolated build and acceptance runner.
-- `validate_integration.py` — checks task correlation, routing, transfer accounting, outcomes, fallback, deadline, and cleanup.
-- `FINAL_STATUS.md` — what the retained acceptance evidence verifies and what remains unverified.
-- `MEASUREMENT_CONTRACT_V1.md` and `ONE_TASK_ACCEPTANCE_TEST.md` — measurement and acceptance definitions.
+## Main integration
+- `org/fog/test/perfeval/RlOffloadingIntegrationExperiment.java` — multi-task full-placement integration with the Python RL service.
+- `run_acceptance.ps1` — isolated full-placement acceptance runner.
+- `validate_integration.py` — full-placement JSONL trace validator.
 
-The implementation is a one-task integration prototype. The retained traces are not a multi-task benchmark and do not establish policy superiority. The original iFogSim source remains an external dependency and is not modified by this package.
+## Partial-offloading feasibility
+- `org/fog/test/perfeval/MultiTaskPartialOffloadingSpike.java` — multi-task Local+Edge split fixture with per-task branch barriers and real CloudSim merge Cloudlets.
+- `run_multi_task_partial.ps1` — builds in an isolated output directory, runs primary and repeat simulations, validates both, and compares trace/summary byte-for-byte.
+- `validate_multi_task_partial.py` — validates task/branch/merge correlation, conservation, barrier order, and transfer attribution.
+- `tests/test_multi_task_partial_validator.py` — negative and positive validator tests using portable CSV fixtures in `tests/fixtures/multi_task_partial_4/`.
+- `MULTI_TASK_PARTIAL_ACCEPTANCE.md` — scope, acceptance evidence, metrics, and limitations.
+- `PARTIAL_ACTION_SPACE_INTEGRATION_AUDIT.md` — current RL/workload action-contract mismatch and versioned migration requirements.
+
+## Mixed full/partial simulator fixture
+- `org/fog/test/perfeval/MixedMultiTaskOffloadingSpike.java` — six-task run with full Local/Edge/Cloud tasks and partial Local+Edge tasks under one coordinator.
+- `run_mixed_full_partial.ps1` — isolated build, primary/repeat simulations, validation, and byte-identity comparison.
+- `validate_mixed_full_partial.py` — validates mode-specific lifecycle and tuple ownership.
+- `tests/test_mixed_full_partial_validator.py` — five positive/negative mixed-lifecycle validator tests using portable CSV fixtures.
+- `MIXED_FULL_PARTIAL_ACCEPTANCE.md` — acceptance evidence and limitations.
+
+## Scope warning
+The Python RL action schema remains Local / Edge / Cloud. The partial fixture is not connected to the learner and uses a fixed 40/60 Local/Edge split. It does not model actual merge-data construction or establish comparative performance.
+
+The external iFogSim source remains a dependency. These experiments do not modify iFogSim core and compile into fresh `audit_output` directories, not the external simulator's tracked `out/production`.

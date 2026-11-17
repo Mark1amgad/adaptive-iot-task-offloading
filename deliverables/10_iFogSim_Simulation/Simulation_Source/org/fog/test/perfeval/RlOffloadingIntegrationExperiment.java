@@ -55,13 +55,14 @@ import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 
 /**
- * A deliberately small, experiment-owned integration of the existing JSONL
- * RL service with classic iFogSim routing.  It neither changes FogDevice nor
- * uses destinationDeviceId as a routing shortcut: the decision selects one of
- * three modules statically hosted on Local, Edge, and Cloud respectively.
+ * Experiment-owned integration of the existing JSONL RL service with classic
+ * iFogSim routing. It supports multiple overlapping full-placement tasks and
+ * does not change FogDevice or use destinationDeviceId as a routing shortcut:
+ * each decision selects one of three modules statically hosted on Local, Edge,
+ * and Cloud respectively.
  */
 public final class RlOffloadingIntegrationExperiment {
-    private static final String APP_ID = "rl-offload-one-task";
+    private static final String APP_ID = "rl-offload-multi-task";
     private static final String LOCAL_MODULE = "local_executor";
     private static final String EDGE_MODULE = "edge_executor";
     private static final String CLOUD_MODULE = "cloud_executor";
@@ -129,27 +130,25 @@ public final class RlOffloadingIntegrationExperiment {
         trace.record("config", mapOf(
             "run_id", options.runId, "python_mode", options.pythonMode,
             "python_policy", options.pythonPolicy, "fault_mode", options.faultMode,
+            "task_count", options.taskCount, "inter_arrival_ms", options.interArrivalMs,
             "task_mi", TASK_MI, "task_pes", TASK_PES, "deadline_ms", options.deadlineMs,
-                "wan_latency_ms_configured", WAN_UPLINK_MS,
-                "input_bytes", INPUT_BYTES, "result_bytes", RESULT_BYTES,
-                "counted_links", "FogDevice parent-child uplink/downlink only",
-                "created_at", Instant.now().toString()));
-        new TaskEmitter("one-task-emitter", local, edge, registry);
+            "wan_latency_ms_configured", WAN_UPLINK_MS,
+            "input_bytes", INPUT_BYTES, "result_bytes", RESULT_BYTES,
+            "counted_links", "FogDevice parent-child uplink/downlink only",
+            "created_at", Instant.now().toString()));
+        new TaskEmitter("multi-task-emitter", local, edge, registry);
         CloudSim.startSimulation();
         CloudSim.stopSimulation();
 
-        if (!registry.terminal || registry.failed) {
-            throw new IllegalStateException("simulation ended without a completed terminal task: " + registry.failureReason);
+        if (!registry.runCompleted || registry.failed || registry.completedCount != options.taskCount) {
+            throw new IllegalStateException("simulation ended before all tasks completed: "
+                    + registry.completedCount + "/" + options.taskCount + "; " + registry.failureReason);
         }
-        if (!registry.agentDecisionAccepted && options.faultMode == null) {
-            throw new IllegalStateException("agent did not provide a valid decision; fallback trace is not an RL pass");
+        if (options.faultMode == null && registry.acceptedDecisionCount != options.taskCount) {
+            throw new IllegalStateException("not every task received an accepted agent decision");
         }
         registry.assertConsistent();
-        trace.record("acceptance", mapOf("status", "PASS", "task_id", registry.taskId,
-                "requested_action", registry.requestedAction, "action_executed", registry.executedAction,
-                "executing_device", registry.executingDevice, "latency_ms", registry.latencyMs,
-                "bandwidth_bytes", registry.bandwidthBytes, "deadline_met", registry.deadlineMet,
-                "decision_source", registry.agentDecisionAccepted ? "agent" : "fallback_error"));
+        trace.record("acceptance", registry.acceptanceFields());
     }
 
     private static Application createApplication(String appId, int userId) {
@@ -185,29 +184,43 @@ public final class RlOffloadingIntegrationExperiment {
         private final InstrumentedFogDevice local;
         private final InstrumentedFogDevice edge;
         private final TaskRegistry registry;
+        private int emitted;
+
         TaskEmitter(String name, InstrumentedFogDevice local, InstrumentedFogDevice edge, TaskRegistry registry) {
             super(name);
             this.local = local;
             this.edge = edge;
             this.registry = registry;
         }
-        @Override public void startEntity() { send(getId(), 5.0, FogEvents.EMIT_TUPLE); }
+
+        @Override public void startEntity() {
+            send(getId(), 5.0, FogEvents.EMIT_TUPLE);
+        }
+
         @Override public void processEvent(SimEvent event) {
             if (event.getTag() == FogEvents.TUPLE_ACK) return;
             if (event.getTag() != FogEvents.EMIT_TUPLE)
                 throw new IllegalStateException("unexpected task-emitter event " + event.getTag());
-            registry.createAndDecide(edge.getObservedUtilization(), edge.getUplinkLatency());
+            if (emitted >= registry.options.taskCount)
+                throw new IllegalStateException("emitter received more task events than configured");
+
+            int sequence = ++emitted;
+            TaskRecord task = registry.createAndDecide(sequence, edge.getObservedUtilization(), edge.getUplinkLatency());
             Tuple tuple = new Tuple(APP_ID, FogUtils.generateTupleId(), Tuple.UP, TASK_MI, TASK_PES, INPUT_BYTES,
                     RESULT_BYTES, new org.cloudbus.cloudsim.UtilizationModelFull(),
                     new org.cloudbus.cloudsim.UtilizationModelFull(), new org.cloudbus.cloudsim.UtilizationModelFull());
             tuple.setUserId(registry.userId);
             tuple.setTupleType("TASK_INPUT");
             tuple.setSrcModuleName("TASK_SOURCE");
-            tuple.setDestModuleName(moduleFor(registry.requestedAction));
+            tuple.setDestModuleName(moduleFor(task.requestedAction));
             tuple.setActualTupleId(tuple.getCloudletId());
-            registry.bindTuple(tuple.getCloudletId(), tuple.getActualTupleId());
+            registry.bindTuple(task, tuple.getCloudletId(), tuple.getActualTupleId());
             sendNow(local.getId(), FogEvents.TUPLE_ARRIVAL, tuple);
+
+            if (emitted < registry.options.taskCount)
+                send(getId(), registry.options.interArrivalMs, FogEvents.EMIT_TUPLE);
         }
+
         @Override public void shutdownEntity() { }
     }
 
@@ -253,39 +266,65 @@ public final class RlOffloadingIntegrationExperiment {
         }
     }
 
-    private static final class TaskRegistry {
-        private final Options options;
-        private final Trace trace;
-        private final PythonAdapter python;
-        final int userId;
-        String taskId;
-        long cloudletId = -1;
-        int actualTupleId = -1;
-        double creationTime;
-        double edgeUtilization;
-        double wanLatency;
+    private static final class TaskRecord {
+        final String taskId;
+        final int sequence;
+        final double creationTime;
+        final double edgeUtilization;
+        final double wanLatency;
         String requestedAction;
         String executedAction;
         String executingDevice;
         String executingModule;
         double executingUtilization = Double.NaN;
+        long cloudletId = -1;
+        int actualTupleId = -1;
         long bandwidthBytes;
         int transferCount;
         boolean agentDecisionAccepted;
+        boolean executionObserved;
         boolean terminal;
-        boolean failed;
-        String failureReason;
+        boolean outcomeAcknowledged;
         double terminalTime;
         double latencyMs;
         boolean deadlineMet;
-        TaskRegistry(Options options, Trace trace, PythonAdapter python, int userId) {
-            this.options = options; this.trace = trace; this.python = python; this.userId = userId;
-        }
-        void createAndDecide(double edgeUtilization, double wanLatency) {
-            creationTime = CloudSim.clock();
+        String failureReason;
+
+        TaskRecord(String taskId, int sequence, double creationTime, double edgeUtilization, double wanLatency) {
+            this.taskId = taskId;
+            this.sequence = sequence;
+            this.creationTime = creationTime;
             this.edgeUtilization = edgeUtilization;
             this.wanLatency = wanLatency;
-            taskId = options.runId + ":task:1";
+        }
+    }
+
+    private static final class TaskRegistry {
+        final Options options;
+        private final Trace trace;
+        private final PythonAdapter python;
+        final int userId;
+        private final Map<String, TaskRecord> tasksById = new LinkedHashMap<String, TaskRecord>();
+        private final Map<Integer, TaskRecord> tasksByTupleId = new LinkedHashMap<Integer, TaskRecord>();
+        int acceptedDecisionCount;
+        int completedCount;
+        boolean runCompleted;
+        boolean failed;
+        String failureReason;
+
+        TaskRegistry(Options options, Trace trace, PythonAdapter python, int userId) {
+            this.options = options;
+            this.trace = trace;
+            this.python = python;
+            this.userId = userId;
+        }
+
+        TaskRecord createAndDecide(int sequence, double edgeUtilization, double wanLatency) {
+            String taskId = options.runId + ":task:" + sequence;
+            TaskRecord task = new TaskRecord(taskId, sequence, CloudSim.clock(), edgeUtilization, wanLatency);
+            if (tasksById.put(taskId, task) != null)
+                throw new IllegalStateException("duplicate task_id " + taskId);
+
             Map<String, Object> features = mapOf("task_mi", TASK_MI, "wan_latency_ms", wanLatency,
                     "edge_utilization", edgeUtilization, "deadline_ms", options.deadlineMs);
             try {
@@ -296,94 +335,172 @@ public final class RlOffloadingIntegrationExperiment {
                 }
                 JSONObject response = python.request(mapOf("protocol_version", "1.0", "type", "observation",
                         "task_id", taskId, "features", features, "available_actions",
-                        Arrays.asList("Local", "Edge", "Cloud"), "sim_time_ms", creationTime));
+                        Arrays.asList("Local", "Edge", "Cloud"), "sim_time_ms", task.creationTime));
                 requireType(response, "action");
                 String responseTask = asString(response.get("task_id"));
                 String action = asString(response.get("action"));
                 long actionId = asLong(response.get("action_id"));
                 if (!taskId.equals(responseTask) || !validAction(action, actionId))
                     throw new IllegalStateException("invalid action correlation");
-                requestedAction = action;
-                agentDecisionAccepted = true;
+                task.requestedAction = action;
+                task.agentDecisionAccepted = true;
+                acceptedDecisionCount++;
                 trace.record("decision", mapOf("task_id", taskId, "source", "agent", "action", action,
-                        "action_id", actionId, "model_version", response.get("model_version"), "features", features));
+                        "action_id", actionId, "model_version", response.get("model_version"), "features", features,
+                        "sim_time_ms", task.creationTime));
             } catch (Exception error) {
-                requestedAction = "Edge";
-                failureReason = error.getClass().getSimpleName() + ": " + error.getMessage();
-                trace.record("decision", mapOf("task_id", taskId, "source", "fallback_error", "action", requestedAction,
-                        "reason", failureReason));
+                task.requestedAction = "Edge";
+                task.failureReason = error.getClass().getSimpleName() + ": " + error.getMessage();
+                trace.record("decision", mapOf("task_id", taskId, "source", "fallback_error", "action", task.requestedAction,
+                        "reason", task.failureReason, "sim_time_ms", task.creationTime));
             }
+            return task;
         }
-        void bindTuple(long cloudletId, int actualTupleId) {
-            this.cloudletId = cloudletId; this.actualTupleId = actualTupleId;
-            trace.record("task_created", mapOf("task_id", taskId, "cloudlet_id", cloudletId,
-                    "actual_tuple_id", actualTupleId, "creation_sim_time_ms", creationTime,
+
+        void bindTuple(TaskRecord task, long cloudletId, int actualTupleId) {
+            if (tasksByTupleId.containsKey(actualTupleId))
+                throw new IllegalStateException("duplicate actualTupleId " + actualTupleId);
+            task.cloudletId = cloudletId;
+            task.actualTupleId = actualTupleId;
+            tasksByTupleId.put(actualTupleId, task);
+            trace.record("task_created", mapOf("task_id", task.taskId, "cloudlet_id", cloudletId,
+                    "actual_tuple_id", actualTupleId, "creation_sim_time_ms", task.creationTime,
                     "task_mi", TASK_MI, "task_pes", TASK_PES, "deadline_ms", options.deadlineMs));
         }
+
+        private TaskRecord resolve(Tuple tuple) {
+            TaskRecord task = tasksByTupleId.get(tuple.getActualTupleId());
+            return task;
+        }
+
         void transfer(Tuple tuple, int from, int to, String direction, long bytes) {
-            if (!matches(tuple)) return;
-            bandwidthBytes += bytes; transferCount++;
-            trace.record("transfer", mapOf("task_id", taskId, "actual_tuple_id", actualTupleId,
+            TaskRecord task = resolve(tuple);
+            if (task == null) return;
+            task.bandwidthBytes += bytes;
+            task.transferCount++;
+            trace.record("transfer", mapOf("task_id", task.taskId, "actual_tuple_id", task.actualTupleId,
                     "from_device_id", from, "to_device_id", to, "direction", direction,
                     "bytes", bytes, "sim_time_ms", CloudSim.clock()));
         }
+
         void execution(Tuple tuple, int deviceId, String device, String module, double utilization) {
-            if (!matches(tuple)) return;
-            executingDevice = device + "#" + deviceId;
-            executingModule = module;
-            executingUtilization = utilization;
-            executedAction = actionForModule(module);
-            trace.record("execution", mapOf("task_id", taskId, "device", executingDevice, "module", module,
-                    "action_executed", executedAction, "utilization_at_admission", utilization,
-                    "sim_time_ms", CloudSim.clock()));
+            TaskRecord task = resolve(tuple);
+            if (task == null) return;
+            if (task.executionObserved)
+                throw new IllegalStateException("duplicate execution admission for " + task.taskId);
+            task.executingDevice = device + "#" + deviceId;
+            task.executingModule = module;
+            task.executingUtilization = utilization;
+            task.executedAction = actionForModule(module);
+            task.executionObserved = true;
+            trace.record("execution", mapOf("task_id", task.taskId, "actual_tuple_id", task.actualTupleId,
+                    "device", task.executingDevice, "module", module, "action_executed", task.executedAction,
+                    "utilization_at_admission", utilization, "sim_time_ms", CloudSim.clock()));
         }
+
         void terminal(Tuple tuple, String endpoint) {
-            if (!matches(tuple) || terminal) return;
-            terminal = true; terminalTime = CloudSim.clock(); latencyMs = terminalTime - creationTime;
-            deadlineMet = latencyMs <= options.deadlineMs;
-            trace.record("terminal", mapOf("task_id", taskId, "endpoint", endpoint,
-                    "terminal_sim_time_ms", terminalTime, "latency_ms", latencyMs,
-                    "deadline_met", deadlineMet, "bandwidth_bytes", bandwidthBytes,
-                    "transfer_count", transferCount));
+            TaskRecord task = resolve(tuple);
+            if (task == null) return;
+            if (task.terminal)
+                throw new IllegalStateException("duplicate terminal event for " + task.taskId);
+            task.terminal = true;
+            task.terminalTime = CloudSim.clock();
+            task.latencyMs = task.terminalTime - task.creationTime;
+            task.deadlineMet = task.latencyMs <= options.deadlineMs;
+            trace.record("terminal", mapOf("task_id", task.taskId, "actual_tuple_id", task.actualTupleId,
+                    "endpoint", endpoint, "terminal_sim_time_ms", task.terminalTime, "latency_ms", task.latencyMs,
+                    "deadline_met", task.deadlineMet, "bandwidth_bytes", task.bandwidthBytes,
+                    "transfer_count", task.transferCount));
+
             try {
-                if (agentDecisionAccepted) {
+                if (task.agentDecisionAccepted) {
                     JSONObject ack = python.request(mapOf("protocol_version", "1.0", "type", "outcome",
-                            "task_id", taskId, "action_executed", executedAction, "status", "completed",
-                            "latency_ms", latencyMs, "deadline_met", deadlineMet,
-                            "resource_metrics", mapOf("bandwidth_bytes", bandwidthBytes,
-                                    "energy_joules", null, "executing_node_utilization", executingUtilization),
-                            "terminal", true, "sim_time_ms", terminalTime));
+                            "task_id", task.taskId, "action_executed", task.executedAction, "status", "completed",
+                            "latency_ms", task.latencyMs, "deadline_met", task.deadlineMet,
+                            "resource_metrics", mapOf("bandwidth_bytes", task.bandwidthBytes,
+                                    "energy_joules", null, "executing_node_utilization", task.executingUtilization),
+                            "terminal", true, "sim_time_ms", task.terminalTime));
                     requireType(ack, "outcome_ack");
-                    if (!taskId.equals(asString(ack.get("task_id")))) throw new IllegalStateException("outcome ack task mismatch");
-                    trace.record("outcome_ack", mapOf("task_id", taskId, "response", ack));
-                    if ("train".equals(options.pythonMode)) {
-                        JSONObject saved = python.request(mapOf("protocol_version", "1.0", "type", "save"));
-                        requireType(saved, "saved");
-                        trace.record("saved", mapOf("response", saved));
-                    }
+                    if (!task.taskId.equals(asString(ack.get("task_id"))))
+                        throw new IllegalStateException("outcome ack task mismatch");
+                    task.outcomeAcknowledged = true;
+                    trace.record("outcome_ack", mapOf("task_id", task.taskId, "response", ack,
+                            "sim_time_ms", CloudSim.clock()));
                 } else {
-                    trace.record("fallback_no_outcome", mapOf("task_id", taskId,
-                            "reason", failureReason));
+                    trace.record("fallback_no_outcome", mapOf("task_id", task.taskId,
+                            "reason", task.failureReason));
                 }
-                JSONObject shutdown = python.request(mapOf("protocol_version", "1.0", "type", "shutdown"));
-                requireType(shutdown, "shutdown_ack");
-                if (asLong(shutdown.get("orphaned_tasks")) != 0) throw new IllegalStateException("orphaned task");
-                trace.record("shutdown_ack", mapOf("response", shutdown));
+                completedCount++;
+                if (completedCount == options.taskCount) finishRun();
             } catch (Exception error) {
-                failed = true; failureReason = "outcome lifecycle failed: " + error;
-                trace.record("failure", mapOf("task_id", taskId, "reason", failureReason));
+                failed = true;
+                failureReason = "outcome lifecycle failed for " + task.taskId + ": " + error;
+                trace.record("failure", mapOf("task_id", task.taskId, "reason", failureReason));
+                CloudSim.abruptallyTerminate();
             }
-            // Controller's normal MAX_SIMULATION_TIME handler calls System.exit(0).
-            // This experiment owns its terminal criterion, so end the event loop now.
+        }
+
+        private void finishRun() throws Exception {
+            if (completedCount != options.taskCount || tasksById.size() != options.taskCount)
+                throw new IllegalStateException("run completion count does not match configured task set");
+            for (TaskRecord task : tasksById.values()) {
+                if (!task.terminal || (task.agentDecisionAccepted && !task.outcomeAcknowledged))
+                    throw new IllegalStateException("task not reconciled before shutdown: " + task.taskId);
+            }
+            if ("train".equals(options.pythonMode) && acceptedDecisionCount > 0) {
+                JSONObject saved = python.request(mapOf("protocol_version", "1.0", "type", "save"));
+                requireType(saved, "saved");
+                trace.record("saved", mapOf("response", saved));
+            }
+            JSONObject shutdown = python.request(mapOf("protocol_version", "1.0", "type", "shutdown"));
+            requireType(shutdown, "shutdown_ack");
+            if (asLong(shutdown.get("orphaned_tasks")) != 0)
+                throw new IllegalStateException("Python shutdown reported orphaned tasks");
+            trace.record("shutdown_ack", mapOf("response", shutdown, "completed_count", completedCount));
+            runCompleted = true;
             CloudSim.abruptallyTerminate();
         }
+
         void assertConsistent() {
-            if (executedAction == null || executingDevice == null || !requestedAction.equals(executedAction))
-                throw new IllegalStateException("requested/executed routing mismatch: " + requestedAction + "/" + executedAction);
-            if (Double.isNaN(latencyMs) || latencyMs < 0 || Double.isNaN(executingUtilization)
-                    || executingUtilization < 0 || executingUtilization > 1) throw new IllegalStateException("invalid measurements");
+            if (tasksById.size() != options.taskCount || tasksByTupleId.size() != options.taskCount)
+                throw new IllegalStateException("task/tuple registry cardinality mismatch");
+            for (TaskRecord task : tasksById.values()) {
+                if (task.actualTupleId < 0 || tasksByTupleId.get(task.actualTupleId) != task)
+                    throw new IllegalStateException("tuple correlation mismatch for " + task.taskId);
+                if (!task.executionObserved || task.executedAction == null || task.executingDevice == null
+                        || !task.requestedAction.equals(task.executedAction))
+                    throw new IllegalStateException("requested/executed routing mismatch for " + task.taskId);
+                if (!task.terminal || (task.agentDecisionAccepted && !task.outcomeAcknowledged))
+                    throw new IllegalStateException("incomplete task lifecycle for " + task.taskId);
+                if (Double.isNaN(task.latencyMs) || task.latencyMs < 0 || Double.isNaN(task.executingUtilization)
+                        || task.executingUtilization < 0 || task.executingUtilization > 1)
+                    throw new IllegalStateException("invalid measurements for " + task.taskId);
+            }
         }
-        private boolean matches(Tuple tuple) { return actualTupleId >= 0 && tuple.getActualTupleId() == actualTupleId; }
+
+        Map<String, Object> acceptanceFields() {
+            Map<String, Object> fields = mapOf("status", "PASS", "task_count", options.taskCount,
+                    "completed_count", completedCount, "accepted_decision_count", acceptedDecisionCount,
+                    "task_ids", taskIds());
+            if (options.taskCount == 1) {
+                TaskRecord task = tasksById.values().iterator().next();
+                fields.put("task_id", task.taskId);
+                fields.put("requested_action", task.requestedAction);
+                fields.put("action_executed", task.executedAction);
+                fields.put("executing_device", task.executingDevice);
+                fields.put("latency_ms", task.latencyMs);
+                fields.put("bandwidth_bytes", task.bandwidthBytes);
+                fields.put("deadline_met", task.deadlineMet);
+                fields.put("decision_source", task.agentDecisionAccepted ? "agent" : "fallback_error");
+            }
+            return fields;
+        }
+
+        List<String> taskIds() {
+            List<String> ids = new ArrayList<String>();
+            for (TaskRecord task : tasksById.values()) ids.add(task.taskId);
+            return ids;
+        }
     }
 
     private static String actionForModule(String module) {
@@ -486,15 +603,26 @@ public final class RlOffloadingIntegrationExperiment {
     }
 
     private static final class Options {
-        Path outputDir; Path pythonExe; Path rlRoot; String runId; String pythonMode; String pythonPolicy;
-        String faultMode; double deadlineMs;
+        Path outputDir;
+        Path pythonExe;
+        Path rlRoot;
+        String runId;
+        String pythonMode;
+        String pythonPolicy;
+        String faultMode;
+        double deadlineMs;
+        int taskCount = 1;
+        double interArrivalMs = 1.0;
+
         static Options parse(String[] args) {
             Options options = new Options();
             Path cwd = new File(".").toPath().toAbsolutePath().normalize();
             options.outputDir = cwd.resolve("audit_output/integration_prototype/runs/latest");
-            options.pythonExe = Path.of("C:/Program Files/Maxon Cinema 4D 2025/resource/modules/python/libs/win64/python.exe");
-            options.rlRoot = cwd.resolve("team-work/Ayoub/rl_model/rl_model");
-            options.runId = "rl-ifogsim-one-task"; options.pythonMode = "train"; options.pythonPolicy = "edge";
+            options.pythonExe = Path.of("C:/Users/DELL/AppData/Roaming/uv/python/cpython-3.15.0b1-windows-x86_64-none/python.exe");
+            options.rlRoot = cwd.resolve("deliverables/08_RL_Model");
+            options.runId = "rl-ifogsim-multi-task";
+            options.pythonMode = "train";
+            options.pythonPolicy = "edge";
             options.deadlineMs = DEADLINE_MS;
             for (int i = 0; i < args.length; i += 2) {
                 if (i + 1 >= args.length) throw new IllegalArgumentException("missing value for " + args[i]);
@@ -507,6 +635,8 @@ public final class RlOffloadingIntegrationExperiment {
                 else if ("--policy".equals(key)) options.pythonPolicy = value;
                 else if ("--fault".equals(key)) options.faultMode = value;
                 else if ("--deadline-ms".equals(key)) options.deadlineMs = Double.parseDouble(value);
+                else if ("--tasks".equals(key)) options.taskCount = Integer.parseInt(value);
+                else if ("--inter-arrival-ms".equals(key)) options.interArrivalMs = Double.parseDouble(value);
                 else throw new IllegalArgumentException("unknown option " + key);
             }
             if (!options.pythonMode.equals("train") && !options.pythonMode.equals("baseline"))
@@ -514,6 +644,13 @@ public final class RlOffloadingIntegrationExperiment {
             if (options.faultMode != null && !options.faultMode.equals("timeout")
                     && !options.faultMode.equals("malformed"))
                 throw new IllegalArgumentException("fault must be timeout or malformed");
+            if (options.taskCount < 1 || options.taskCount > 1000)
+                throw new IllegalArgumentException("tasks must be between 1 and 1000");
+            if (options.faultMode != null && options.taskCount != 1)
+                throw new IllegalArgumentException("fault injection currently requires exactly one task");
+            if (Double.isNaN(options.interArrivalMs) || Double.isInfinite(options.interArrivalMs)
+                    || options.interArrivalMs <= 0)
+                throw new IllegalArgumentException("inter-arrival-ms must be finite and positive");
             if (Double.isNaN(options.deadlineMs) || Double.isInfinite(options.deadlineMs) || options.deadlineMs < 0)
                 throw new IllegalArgumentException("deadline-ms must be finite and non-negative");
             return options;

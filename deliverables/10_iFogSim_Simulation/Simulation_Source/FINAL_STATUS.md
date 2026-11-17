@@ -1,25 +1,48 @@
 # Integration status
 
-## Verified
+## Verified — 2026-11-15
 
-- `validate_integration.py` passes the retained real Python train trace and deterministic Local, Edge, and Cloud traces.
-- Each retained trace is valid JSONL and has one correlated task lifecycle: decision, task creation, execution, terminal result, outcome acknowledgement, and clean shutdown.
-- The retained byte totals are 0 bytes for Local, 14,000 for Edge, and 28,000 for Cloud. These are sums of the instrumented parent-child uplink/downlink rows only; Local's zero is therefore an intentional absence of counted transfers, not a missing measurement.
-- The train trace records `updated=true`, a saved model, `orphaned_tasks=0`, and Python exit code 0. Baseline traces record no model save and no learning update.
-- `run_acceptance.ps1` is the reproducible isolated runner. Its generated `exit_codes.json` records each Java case exit code.
-- The focused run `acceptance_20261013_220748` passed all seven cases with exit code 0: train, Local, Edge, Cloud, timeout fallback, malformed-response fallback, and zero-deadline.
-- Timeout and malformed-response fallback both selected Edge, recorded the injected reason, executed the Edge module, sent no `outcome`, reported `orphaned_tasks=0`, received `shutdown_ack`, and exited Python with code 0.
-- The zero-deadline case completed normally with measured latency `3.51 ms`, configured deadline `0 ms`, `deadline_met=false`, a valid completed outcome, and clean shutdown.
-- The validator now rejects duplicate decisions/outcomes, uncorrelated outcome sends, non-terminal normal outcomes, and non-boolean deadline flags.
-- The strengthened validator was rerun against the retained `acceptance_20261013_220748` artifacts: standard, timeout fallback, malformed fallback, and deadline suites all exited 0. No simulator rerun was needed because only validation logic and documentation changed in this follow-up.
-- `compare_policies.py` provides a reproducible one-task comparison artifact from existing traces: RL train chose Local with 3.51 ms and 0 bytes; deterministic Local matched 3.51 ms and 0 bytes; Edge measured 7.3028571428571425 ms and 14,000 bytes; Cloud measured 97.68580357142858 ms and 28,000 bytes. These are preliminary integration measurements, not a superiority result.
+### Multi-task full placement
+- Four overlapping tasks passed in baseline and training modes.
+- A mixed-action training run selected Local, Edge, Local, and Cloud.
+- Every task was independently correlated through task ID and actual tuple ID; all outcomes were acknowledged before one Python shutdown with zero orphaned tasks.
+- A fixed-seed repeat produced an identical logical task summary.
+- Ten Java acceptance cases passed: single-task training, Local/Edge/Cloud regressions, four-task baseline overlap, four-task training, fixed-seed repeat, timeout fallback, malformed-response fallback, and deadline miss.
+- Evidence: `audit_output/multi_task_final_acceptance_20261115_151500/`.
 
-## Not verified
+### Multi-task partial offloading fixture
+- Added `MultiTaskPartialOffloadingSpike.java`: task-scoped Local/Edge branch registry, two-result barrier per task, unique merge tuple per task, real CloudSim merge Cloudlet, and one terminal state per task.
+- One-task regression, four-task overlap, and eight-task overlap passed.
+- Four-task run: 8 split branches, 4 merge Cloudlets, 12 unique registered tuple IDs.
+- Eight-task run: 16 split branches, 8 merge Cloudlets, 24 unique registered tuple IDs.
+- All tasks in each run were created before the first terminal event.
+- 1-, 4-, and 8-task validator runs passed; 4- and 8-task trace and summary outputs were byte-identical across repeats.
+- Five standard-library validator tests passed, including rejection of duplicate results, cross-task tuple correlation, premature merge barrier, and invalid transfer attribution.
+- Evidence: `audit_output/multi_task_partial_release_20261115_170000/`, `audit_output/multi_task_partial_8tasks_20261115_164000/`, and `audit_output/partial_single_regression_20261115_165000/`.
 
-- The fault tests are safe adapter-boundary simulations, injected before observation transmission. A live Python action cannot be discarded and then shut down with zero orphans: the RL service retains an observation as pending until it receives an outcome. Sending that outcome for an invalid action would violate the fallback contract.
-- Task failure behavior remains unverified. The current experiment only has a successful result endpoint and does not add failure semantics to generic iFogSim behavior; no failure status or fabricated measurements were added.
-- Multi-task mode remains intentionally unsupported. The Java registry is a single-task record, terminal handling shuts down Python after that task, and shared tuple hooks are not yet keyed by a task-record map; adding a task count would risk duplicate shutdowns and cross-task byte attribution.
-- Native task failure remains deferred. The inspected iFogSim tuple path has no failure transition or failure result event; adding one would be experiment semantics rather than an observed simulator behavior.
-- Energy is intentionally sent as `null`; cumulative device energy is not a per-task measurement under the contract.
+## RL partial-action integration audit — 2026-11-15
 
-No claim above treats configured latency, task size, deadline, or static topology values as measured performance results.
+- Audited the Python action map, tabular Q-table dimensions, action-mask parser, protocol schemas, baseline policy, fallback order, model persistence compatibility, and workload task schema.
+- The workload generator defines nine legal actions (Local; Edge partial 25/50/75; Edge full; Cloud partial 25/50/75; Cloud full) and gates partial actions on `DATA_PARALLEL_DIVISIBLE` profiles.
+- The current RL model still supports only three actions (Local / Edge / Cloud), with a 54-state table and three-column Q/visit tables. Persistence rejects any different action list or table shape; old models cannot be silently reused.
+- Current multi-task partial fixture uses fixed Local 40% / Edge 60% and is not one of the workload spec's candidate ratios. It remains mechanism-feasibility evidence only.
+- Wrote `PARTIAL_ACTION_SPACE_INTEGRATION_AUDIT.md`. No Python RL action, protocol, model, or schema files were changed pending approval of the nine-action contract and state-feature set.
+
+### Mixed full/partial simulator fixture
+- Added `MixedMultiTaskOffloadingSpike.java`: six-task run with three full tasks (Local, Edge, Cloud) and three partial Local+Edge tasks under one run-level coordinator.
+- All six tasks were created before the first terminal event; full tasks terminalized directly while partial tasks waited for their own branch barriers and merge Cloudlets.
+- The run registered 12 unique tuple IDs and passed mode-specific lifecycle/tuple validation.
+- A fixed-seed repeat produced byte-identical trace and summary CSVs.
+- Five additional validator unit tests passed, bringing the combined standard-library suite to ten passing tests.
+- Evidence: `audit_output/mixed_full_partial_acceptance_20261115_183000/`.
+
+## Remaining / not verified
+- The partial split remains a fixed 40/60 Local/Edge simulator fixture; it is not a general task partitioner.
+- Actual merge-data construction, copying, serialization, and semantic merge are not modeled; the merge Cloudlet receives an aggregate 1,000-byte input tuple.
+- Learner-selected Partial action, action-schema extension, legality mask, and RL integration are not implemented.
+- Local+Cloud partial execution is not implemented.
+- The target 4 IoT / 2 Edge / 1 Cloud topology is not implemented; tests use one Local, one Edge, and one Cloud device.
+- Task failure/cancellation/horizon semantics and per-task energy remain unimplemented.
+- Workload calibration, paired multi-seed benchmark results, statistical comparisons, and policy-superiority claims remain unverified.
+
+The current evidence establishes multi-task full-placement lifecycle correctness, multi-task Local+Edge partial-fixture feasibility, and mixed full/partial simulator lifecycle handling in one run. It does not establish a complete RL-controlled partial-offloading system or calibrated performance advantage.

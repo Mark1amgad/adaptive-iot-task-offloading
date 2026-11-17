@@ -1,0 +1,24 @@
+{"record":"python_send","type":"hello","task_id":null,"action_executed":null,"status":null,"failure_reason":null}
+{"record":"python_receive","type":"hello_ack","task_id":null,"action":null}
+{"record":"hello_ack","mode":"baseline","policy":"edge_partial_50","actions":["LOCAL","EDGE_PARTIAL_25","EDGE_PARTIAL_50","EDGE_PARTIAL_75","EDGE_FULL","CLOUD_PARTIAL_25","CLOUD_PARTIAL_50","CLOUD_PARTIAL_75","CLOUD_FULL"]}
+{"record":"config","run_id":"v2-partial-fault-drop-edge","task_count":1,"mode":"baseline","action_policy":"EDGE_PARTIAL_50","inter_arrival_ms":1.0,"task_mi":10003,"input_bytes":12001,"output_bytes":1001,"merge_mi":1200,"merge_output_bytes":100,"partition_overhead_ms":0.0,"merge_overhead_ms":0.0,"deadline_ms":1000.0,"watchdog_ms":1000.0,"wan_latency_ms":45.0,"created_at":"2026-11-15T14:56:33.447274500Z"}
+{"record":"watchdog_scheduled","horizon_sim_time_ms":1000.0}
+{"record":"python_send","type":"observation","task_id":"v2-partial-fault-drop-edge:task:1","action_executed":null,"status":null,"failure_reason":null}
+{"record":"python_receive","type":"action","task_id":"v2-partial-fault-drop-edge:task:1","action":"EDGE_PARTIAL_50"}
+{"record":"decision","task_id":"v2-partial-fault-drop-edge:task:1","action":"EDGE_PARTIAL_50","action_id":2,"model_version":"q2-427202c1-u0","mode":"baseline","sim_time_ms":5.0}
+{"record":"partition_overhead_started","task_id":"v2-partial-fault-drop-edge:task:1","duration_ms":0.0,"sim_time_ms":5.0}
+{"record":"partition_overhead_completed","task_id":"v2-partial-fault-drop-edge:task:1","sim_time_ms":5.0}
+{"record":"branch_created","task_id":"v2-partial-fault-drop-edge:task:1","branch":"local","tuple_id":1,"tier":"LOCAL","module":"local_partial_50","mi":5001,"input_bytes":6000,"output_bytes":500,"sim_time_ms":5.0}
+{"record":"branch_created","task_id":"v2-partial-fault-drop-edge:task:1","branch":"edge","tuple_id":2,"tier":"EDGE","module":"edge_partial_50","mi":5002,"input_bytes":6001,"output_bytes":501,"sim_time_ms":5.0}
+{"record":"fault_injection","task_id":"v2-partial-fault-drop-edge:task:1","branch":"edge","fault":"drop_branch_before_tuple_arrival"}
+{"record":"execution","task_id":"v2-partial-fault-drop-edge:task:1","branch":"local","tuple_id":1,"node":"local","module":"local_partial_50","utilization":1.0,"sim_time_ms":5.0}
+{"record":"branch_result","task_id":"v2-partial-fault-drop-edge:task:1","branch":"local","tuple_id":1,"sim_time_ms":11.011000000000001}
+{"record":"watchdog_fired","sim_time_ms":1000.0}
+{"record":"task_failed","task_id":"v2-partial-fault-drop-edge:task:1","action":"EDGE_PARTIAL_50","reason":"execution_horizon_exceeded; missing_results=[edge]","deadline_met":false,"sim_time_ms":1000.0}
+{"record":"python_send","type":"outcome","task_id":"v2-partial-fault-drop-edge:task:1","action_executed":2,"status":"failed","failure_reason":"execution_horizon_exceeded; missing_results=[edge]"}
+{"record":"python_receive","type":"outcome_ack","task_id":"v2-partial-fault-drop-edge:task:1","action":null}
+{"record":"failure_outcome_ack","task_id":"v2-partial-fault-drop-edge:task:1","updated":false,"reward":-3.0}
+{"record":"python_send","type":"shutdown","task_id":null,"action_executed":null,"status":null,"failure_reason":null}
+{"record":"python_receive","type":"shutdown_ack","task_id":null,"action":null}
+{"record":"shutdown_ack","orphaned_tasks":0,"tasks_reported":1}
+{"record":"python_exit","shutdown_ack":true,"exit_code":0}

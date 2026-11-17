@@ -99,3 +99,12 @@ Default expected locations:
 4. Add a Local+Cloud partial option.
 5. Add overlapping tasks with task-scoped branch registries and one terminal state per task.
 6. Only after those gates, connect the calibrated feasibility filter and learner.
+
+
+## Multi-task extension (2026-11-15)
+
+The original class in this folder remains the one-task feasibility spike. Multi-task partial execution was implemented separately in `Simulation_Source/org/fog/test/perfeval/MultiTaskPartialOffloadingSpike.java` to preserve the original evidence and avoid silently changing its semantics.
+
+The separate fixture passed 1-, 4-, and 8-task runs. Each task has its own Local/Edge branch records, two-result barrier, merge tuple, real Local merge Cloudlet, and terminal event. Four-task and eight-task runs were repeated with byte-identical trace and summary files. See `Simulation_Source/MULTI_TASK_PARTIAL_ACCEPTANCE.md` for the full acceptance record and limitations.
+
+This extension does not connect a Partial action to the RL learner. It remains a fixed 40/60 Local+Edge simulator fixture; merge-data construction and serialization are not modeled.

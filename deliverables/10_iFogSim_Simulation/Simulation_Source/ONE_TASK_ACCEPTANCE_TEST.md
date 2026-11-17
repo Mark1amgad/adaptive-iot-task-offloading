@@ -1,4 +1,4 @@
-# One-task acceptance test — Java / Python / iFogSim
+# Single-task regression acceptance test — Java / Python / iFogSim
 
 ## Purpose
 

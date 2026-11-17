@@ -1,0 +1,110 @@
+{
+  "comparison_design": "paired: identical task rows, arrival gaps, deadlines, and network settings per policy",
+  "interpretation": "Descriptive single-seed evaluation only; not evidence of statistical significance, convergence, or generalization.",
+  "paired_rl_differences": {
+    "rl_minus_cloud_latency_ms": {
+      "baseline_faster_tasks": 0,
+      "mean_difference": -110.87097858713295,
+      "rl_faster_tasks": 60,
+      "ties": 0
+    },
+    "rl_minus_edge_latency_ms": {
+      "baseline_faster_tasks": 23,
+      "mean_difference": -6.6247853192757855,
+      "rl_faster_tasks": 33,
+      "ties": 4
+    },
+    "rl_minus_local_latency_ms": {
+      "baseline_faster_tasks": 8,
+      "mean_difference": -132.33673698594254,
+      "rl_faster_tasks": 52,
+      "ties": 0
+    },
+    "rl_minus_random_latency_ms": {
+      "baseline_faster_tasks": 15,
+      "mean_difference": -20.704948710703018,
+      "rl_faster_tasks": 41,
+      "ties": 4
+    }
+  },
+  "policy_metrics": {
+    "cloud": {
+      "action_counts": {
+        "CLOUD_FULL": 60
+      },
+      "deadline_miss_rate": 0.13333333333333333,
+      "deadline_misses": 8,
+      "mean_bandwidth_bytes": 243242.03333333333,
+      "mean_latency_ms": 169.2952916011904,
+      "median_latency_ms": 164.65770705357133,
+      "p95_latency_ms": 216.69449071428562,
+      "tasks": 60
+    },
+    "edge": {
+      "action_counts": {
+        "EDGE_FULL": 60
+      },
+      "deadline_miss_rate": 0.016666666666666666,
+      "deadline_misses": 1,
+      "mean_bandwidth_bytes": 121621.01666666666,
+      "mean_latency_ms": 65.04909833333325,
+      "median_latency_ms": 59.97749285714275,
+      "p95_latency_ms": 112.07389999999975,
+      "tasks": 60
+    },
+    "local": {
+      "action_counts": {
+        "LOCAL": 60
+      },
+      "deadline_miss_rate": 0.23333333333333334,
+      "deadline_misses": 14,
+      "mean_bandwidth_bytes": 0.0,
+      "mean_latency_ms": 190.76105,
+      "median_latency_ms": 175.65750000000003,
+      "p95_latency_ms": 393.94500000000005,
+      "tasks": 60
+    },
+    "random": {
+      "action_counts": {
+        "CLOUD_FULL": 10,
+        "CLOUD_PARTIAL_25": 3,
+        "CLOUD_PARTIAL_50": 3,
+        "CLOUD_PARTIAL_75": 7,
+        "EDGE_FULL": 13,
+        "EDGE_PARTIAL_25": 5,
+        "EDGE_PARTIAL_50": 2,
+        "EDGE_PARTIAL_75": 7,
+        "LOCAL": 10
+      },
+      "deadline_miss_rate": 0.05,
+      "deadline_misses": 3,
+      "mean_bandwidth_bytes": 117318.93333333333,
+      "mean_latency_ms": 79.12926172476048,
+      "median_latency_ms": 59.60810125000012,
+      "p95_latency_ms": 146.09156857142852,
+      "tasks": 60
+    },
+    "rl_eval": {
+      "action_counts": {
+        "CLOUD_FULL": 11,
+        "CLOUD_PARTIAL_25": 2,
+        "CLOUD_PARTIAL_50": 1,
+        "EDGE_FULL": 15,
+        "EDGE_PARTIAL_25": 8,
+        "EDGE_PARTIAL_75": 9,
+        "LOCAL": 14
+      },
+      "deadline_miss_rate": 0.03333333333333333,
+      "deadline_misses": 2,
+      "mean_bandwidth_bytes": 99358.01666666666,
+      "mean_latency_ms": 58.42431301405746,
+      "median_latency_ms": 45.328618147407866,
+      "p95_latency_ms": 126.70179071428561,
+      "tasks": 60
+    }
+  },
+  "status": "PASS",
+  "tasks": 60,
+  "workload_profile": "mixed",
+  "workload_seed": 43
+}
