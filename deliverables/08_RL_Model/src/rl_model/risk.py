@@ -254,8 +254,7 @@ def predict_action_ms(action: int | str, features: Mapping[str, Any],
         return None
     if constraints["splittability"] != "DATA_PARALLEL_DIVISIBLE" or not constraints.get("partition_model_id"):
         raise RiskError("partial prediction requires DATA_PARALLEL_DIVISIBLE and partition_model_id")
-    merge_compute_time = compute(local, context.merge_compute_mi, "LOCAL")
-    if merge_compute_time is None:
+    if local is None or local.effective_mips <= 0:
         return None
     merge_compute_time = context.merge_queue_wait_ms + (
         context.merge_compute_mi / local.effective_mips * 1000.0
