@@ -95,8 +95,20 @@ def main() -> int:
                 if kind != ("ON_TIME" if terminal["deadline_met"] else "LATE"):
                     raise AssertionError(f"{policy}/task{k}: outcome/deadline classification mismatch")
                 latencies.append(float(terminal["latency_ms"]))
-            elif k not in failures:
-                raise AssertionError(f"{policy}/task{k}: non-completed outcome lacks task_failed record")
+            else:
+                failure = failures.get(k)
+                if failure is None:
+                    raise AssertionError(f"{policy}/task{k}: non-completed outcome lacks task_failed record")
+                expected_failure_class = (
+                    "UNRESOLVED_AT_HORIZON"
+                    if str(failure.get("reason", "")).startswith("execution_horizon_exceeded")
+                    else "FAILED"
+                )
+                if kind != expected_failure_class:
+                    raise AssertionError(
+                        f"{policy}/task{k}: outcome {kind} conflicts with failure reason "
+                        f"(expected {expected_failure_class})"
+                    )
 
         actions, modes = {}, {}
         for decision in decisions:
