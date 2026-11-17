@@ -7,6 +7,9 @@ param(
     [string]$ModelIn = '',
     [string]$RiskStateIn = '',
     [ValidateSet('none','analytical','calibrated')][string]$RiskMode = 'calibrated',
+    [string]$SeedRegistry = '',
+    [string]$ExperimentFamily = 'iiot_final_aba',
+    [ValidateSet('development','validation','test')][string]$EvaluationSplit = 'test',
     [string]$OutputRoot = '',
     [double]$PartitionOverheadMs = 3.0,
     [double]$MergeOverheadMs = 2.0,
@@ -29,6 +32,8 @@ $java = Join-Path $JdkHome 'bin\java.exe'
 foreach ($required in @($action,$plan,$contract,$experiment,$analyzer,$manifestBuilder,$PythonExe,$javac,$WorkloadFile,$ModelIn)) {
     if (-not (Test-Path $required)) { throw "Required file not found: $required" }
 }
+if (-not $SeedRegistry) { $SeedRegistry = Join-Path $ProjectRoot 'research\experiments\SEED_REGISTRY_V1.csv' }
+if (-not (Test-Path $SeedRegistry)) { throw "Seed registry not found: $SeedRegistry" }
 if ($RiskMode -ne 'none') {
     if (-not $RiskStateIn) { $RiskStateIn = "$ModelIn.risk.json" }
     if (-not (Test-Path $RiskStateIn)) { throw "Risk state not found for $RiskMode mode: $RiskStateIn" }
@@ -47,7 +52,7 @@ if ($LASTEXITCODE -ne 0) { throw "Java contract tests failed: $LASTEXITCODE" }
 
 # Freeze provenance before any policy run. Every arm receives the exact same manifest.
 $manifestPath = Join-Path $OutputRoot 'experiment_manifest.json'
-$manifestArgs = @($manifestBuilder,'--project-root',$ProjectRoot,'--simulation-source',$simulationSource,'--rl-root',$rlRoot,'--ifogsim-root',$IFogSimRoot,'--jdk-home',$JdkHome,'--workload',$WorkloadFile,'--model',$ModelIn,'--risk-mode',$RiskMode,'--output',$manifestPath,'--partition-overhead-ms',$PartitionOverheadMs,'--merge-overhead-ms',$MergeOverheadMs,'--wan-latency-ms',$WanLatencyMs,'--watchdog-ms',$WatchdogMs)
+$manifestArgs = @($manifestBuilder,'--project-root',$ProjectRoot,'--simulation-source',$simulationSource,'--rl-root',$rlRoot,'--ifogsim-root',$IFogSimRoot,'--jdk-home',$JdkHome,'--workload',$WorkloadFile,'--model',$ModelIn,'--risk-mode',$RiskMode,'--seed-registry',$SeedRegistry,'--experiment-family',$ExperimentFamily,'--expected-split',$EvaluationSplit,'--output',$manifestPath,'--partition-overhead-ms',$PartitionOverheadMs,'--merge-overhead-ms',$MergeOverheadMs,'--wan-latency-ms',$WanLatencyMs,'--watchdog-ms',$WatchdogMs)
 if ($RiskMode -ne 'none') { $manifestArgs += @('--risk-state',$RiskStateIn) }
 & $PythonExe @manifestArgs
 if ($LASTEXITCODE -ne 0) { throw "Experiment manifest creation failed: $LASTEXITCODE" }
