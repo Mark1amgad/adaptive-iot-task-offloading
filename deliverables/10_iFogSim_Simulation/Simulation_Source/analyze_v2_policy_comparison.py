@@ -3,6 +3,7 @@
 from __future__ import annotations
 import argparse
 import json
+import hashlib
 import math
 import statistics
 from pathlib import Path
@@ -35,19 +36,49 @@ def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("--root", type=Path, required=True)
     ap.add_argument("--workload", type=Path, required=True)
+    ap.add_argument("--manifest", type=Path)
     args = ap.parse_args()
+    manifest_path = args.manifest or (args.root / "experiment_manifest.json")
+    manifest_bytes = manifest_path.read_bytes()
+    manifest = json.loads(manifest_bytes)
+    manifest_sha256 = hashlib.sha256(manifest_bytes).hexdigest()
+    if manifest.get("schema_version") != "v1" or manifest.get("evaluation_split") != "test":
+        raise AssertionError("manifest must declare schema_version=v1 and evaluation_split=test")
+    actual_workload_sha = hashlib.sha256(args.workload.read_bytes()).hexdigest()
+    if actual_workload_sha != manifest.get("workload_sha256"):
+        raise AssertionError("workload SHA-256 does not match frozen experiment manifest")
+    if Path(manifest.get("workload_file", "")).name != args.workload.name:
+        raise AssertionError("workload filename does not match experiment manifest")
+    if manifest.get("policies") != list(POLICIES):
+        raise AssertionError("manifest policy arms differ from analyzer policy contract")
     workload = [json.loads(x) for x in args.workload.read_text(encoding="utf-8").splitlines() if x.strip()]
     expected = {r["sequence"]: r for r in workload}
     if not expected or len(expected) != len(workload):
         raise AssertionError("workload must contain unique, non-empty task sequences")
     n = len(expected)
+    seeds = {str(row.get("seed")) for row in workload}
+    profiles = {str(row.get("profile")) for row in workload}
+    if seeds != {str(manifest.get("workload_seed"))} or profiles != {str(manifest.get("workload_profile"))}:
+        raise AssertionError("workload row seed/profile do not match experiment manifest")
     metrics, completed_latency, action_counts = {}, {}, {}
 
     for policy in POLICIES:
-        trace = rows(args.root / f"policy_{policy}" / "partial_trace.jsonl")
+        run_dir = args.root / f"policy_{policy}"
+        run_manifest = run_dir / "experiment_manifest.json"
+        if not run_manifest.is_file() or hashlib.sha256(run_manifest.read_bytes()).hexdigest() != manifest_sha256:
+            raise AssertionError(f"{policy}: missing or modified per-policy experiment manifest")
+        trace = rows(run_dir / "partial_trace.jsonl")
         cfg = one(trace, "config")
         if cfg.get("task_count") != n or Path(cfg.get("workload_file", "")).name != args.workload.name:
             raise AssertionError(f"{policy}: workload identity/config mismatch")
+        for field, expected_value in (
+            ("partition_overhead_ms", manifest["parameters"]["partition_overhead_ms"]),
+            ("merge_overhead_ms", manifest["parameters"]["merge_overhead_ms"]),
+            ("wan_latency_ms", manifest["parameters"]["wan_latency_ms"]),
+            ("watchdog_ms", manifest["parameters"]["watchdog_ms"]),
+        ):
+            if float(cfg.get(field, float("nan"))) != float(expected_value):
+                raise AssertionError(f"{policy}: {field} differs from frozen manifest")
         decisions = [r for r in trace if r.get("record") == "decision"]
         outcomes = [r for r in trace if r.get("record") == "task_outcome"]
         acks = [r for r in trace if r.get("record") == "outcome_ack"]
@@ -156,6 +187,9 @@ def main() -> int:
         "status": "PASS", "workload_seed": workload[0]["seed"],
         "workload_profile": workload[0]["profile"], "tasks": n,
         "comparison_design": "paired task stream and exogenous inputs; all generated tasks retained in outcome denominator",
+        "manifest_sha256": manifest_sha256,
+        "source_git_commit": manifest["source_git_commit"],
+        "evaluation_split": manifest["evaluation_split"],
         "policy_metrics": metrics, "paired_rl_differences": paired,
         "interpretation": "Descriptive single-seed evaluation only; not evidence of statistical significance, convergence, or generalization.",
     }
