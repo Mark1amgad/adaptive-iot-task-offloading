@@ -173,10 +173,10 @@ def test_v2_action_message_conforms_to_json_schema(tmp_path):
 
 
 def risk_context(slack=600):
-    local_edge = [{"bandwidth_mbps": 10, "latency_ms": 2}]
+    local_edge = [{"bandwidth_bytes_per_second": 1000000, "latency_ms": 2}]
     cloud_path = [
-        {"bandwidth_mbps": 10, "latency_ms": 2},
-        {"bandwidth_mbps": 10, "latency_ms": 45},
+        {"bandwidth_bytes_per_second": 1000000, "latency_ms": 2},
+        {"bandwidth_bytes_per_second": 1000000, "latency_ms": 45},
     ]
     return {
         "remaining_deadline_ms": slack,
