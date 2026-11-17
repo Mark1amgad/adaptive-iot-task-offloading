@@ -4,47 +4,238 @@
   "title": "Observation v2 (Java to Python, before offloading decision)",
   "type": "object",
   "additionalProperties": false,
-  "required": ["protocol_version", "type", "task_id", "features", "available_actions", "task_constraints"],
+  "required": [
+    "protocol_version",
+    "type",
+    "task_id",
+    "features",
+    "available_actions",
+    "task_constraints"
+  ],
   "properties": {
-    "protocol_version": {"const": "2.0"},
-    "type": {"const": "observation"},
-    "task_id": {"type": "string", "minLength": 1, "maxLength": 128},
-    "sim_time_ms": {"type": "number", "minimum": 0},
+    "protocol_version": {
+      "const": "2.0"
+    },
+    "type": {
+      "const": "observation"
+    },
+    "task_id": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 128
+    },
+    "sim_time_ms": {
+      "type": "number",
+      "minimum": 0
+    },
     "features": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["task_mi", "input_bytes", "output_bytes", "wan_latency_ms", "local_utilization", "edge_utilization", "cloud_utilization", "deadline_ms", "splittability"],
+      "required": [
+        "task_mi",
+        "input_bytes",
+        "output_bytes",
+        "wan_latency_ms",
+        "local_utilization",
+        "edge_utilization",
+        "cloud_utilization",
+        "deadline_ms",
+        "splittability"
+      ],
       "properties": {
-        "task_mi": {"type": "number", "minimum": 0},
-        "input_bytes": {"type": "number", "minimum": 0},
-        "output_bytes": {"type": "number", "minimum": 0},
-        "wan_latency_ms": {"type": "number", "minimum": 0},
-        "local_utilization": {"type": "number", "minimum": 0, "maximum": 1},
-        "edge_utilization": {"type": "number", "minimum": 0, "maximum": 1},
-        "cloud_utilization": {"type": "number", "minimum": 0, "maximum": 1},
-        "deadline_ms": {"type": "number", "minimum": 0},
-        "splittability": {"enum": [0, 1]}
+        "task_mi": {
+          "type": "number",
+          "minimum": 0
+        },
+        "input_bytes": {
+          "type": "number",
+          "minimum": 0
+        },
+        "output_bytes": {
+          "type": "number",
+          "minimum": 0
+        },
+        "wan_latency_ms": {
+          "type": "number",
+          "minimum": 0
+        },
+        "local_utilization": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "edge_utilization": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "cloud_utilization": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "deadline_ms": {
+          "type": "number",
+          "minimum": 0
+        },
+        "splittability": {
+          "enum": [
+            0,
+            1
+          ]
+        }
       }
     },
     "available_actions": {
-      "type": "array", "minItems": 1, "uniqueItems": true,
-      "items": {"oneOf": [
-        {"enum": ["LOCAL", "EDGE_PARTIAL_25", "EDGE_PARTIAL_50", "EDGE_PARTIAL_75", "EDGE_FULL", "CLOUD_PARTIAL_25", "CLOUD_PARTIAL_50", "CLOUD_PARTIAL_75", "CLOUD_FULL"]},
-        {"type": "integer", "minimum": 0, "maximum": 8}
-      ]}
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {
+        "oneOf": [
+          {
+            "enum": [
+              "LOCAL",
+              "EDGE_PARTIAL_25",
+              "EDGE_PARTIAL_50",
+              "EDGE_PARTIAL_75",
+              "EDGE_FULL",
+              "CLOUD_PARTIAL_25",
+              "CLOUD_PARTIAL_50",
+              "CLOUD_PARTIAL_75",
+              "CLOUD_FULL"
+            ]
+          },
+          {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 8
+          }
+        ]
+      }
     },
     "task_constraints": {
-      "type": "object", "additionalProperties": false,
-      "required": ["splittability", "local_available", "edge_available", "cloud_available"],
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "splittability",
+        "local_available",
+        "edge_available",
+        "cloud_available"
+      ],
       "properties": {
-        "splittability": {"enum": ["INDIVISIBLE", "DATA_PARALLEL_DIVISIBLE"]},
-        "local_available": {"type": "boolean"},
-        "edge_available": {"type": "boolean"},
-        "cloud_available": {"type": "boolean"},
-        "partition_model_id": {"type": "string", "minLength": 1},
-        "partition_overhead_ms": {"type": "number", "minimum": 0},
-        "merge_overhead_ms": {"type": "number", "minimum": 0},
-        "urgency_class": {"enum": ["critical", "high", "normal"]}
+        "splittability": {
+          "enum": [
+            "INDIVISIBLE",
+            "DATA_PARALLEL_DIVISIBLE"
+          ]
+        },
+        "local_available": {
+          "type": "boolean"
+        },
+        "edge_available": {
+          "type": "boolean"
+        },
+        "cloud_available": {
+          "type": "boolean"
+        },
+        "partition_model_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "partition_overhead_ms": {
+          "type": "number",
+          "minimum": 0
+        },
+        "merge_overhead_ms": {
+          "type": "number",
+          "minimum": 0
+        },
+        "urgency_class": {
+          "enum": [
+            "critical",
+            "high",
+            "normal"
+          ]
+        }
+      }
+    },
+    "risk_context": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "remaining_deadline_ms",
+        "resources",
+        "partition_overhead_ms",
+        "merge_overhead_ms",
+        "merge_compute_mi",
+        "merge_queue_wait_ms"
+      ],
+      "properties": {
+        "remaining_deadline_ms": {
+          "type": "number",
+          "minimum": 0
+        },
+        "partition_overhead_ms": {
+          "type": "number",
+          "minimum": 0
+        },
+        "merge_overhead_ms": {
+          "type": "number",
+          "minimum": 0
+        },
+        "merge_compute_mi": {
+          "type": "number",
+          "minimum": 0
+        },
+        "merge_queue_wait_ms": {
+          "type": "number",
+          "minimum": 0
+        },
+        "queue_wait_basis": {
+          "type": "string",
+          "minLength": 1
+        },
+        "resources": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "LOCAL",
+            "EDGE",
+            "CLOUD"
+          ],
+          "properties": {
+            "LOCAL": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "compute_mips",
+                "utilization",
+                "queue_wait_ms"
+              ],
+              "properties": {
+                "compute_mips": {
+                  "type": "number",
+                  "exclusiveMinimum": 0
+                },
+                "utilization": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 1
+                },
+                "queue_wait_ms": {
+                  "type": "number",
+                  "minimum": 0
+                }
+              }
+            },
+            "EDGE": {
+              "$ref": "#/$defs/remoteResource"
+            },
+            "CLOUD": {
+              "$ref": "#/$defs/remoteResource"
+            }
+          }
+        }
       }
     }
   },
@@ -53,17 +244,85 @@
       "if": {
         "properties": {
           "task_constraints": {
-            "properties": {"splittability": {"const": "DATA_PARALLEL_DIVISIBLE"}}
+            "properties": {
+              "splittability": {
+                "const": "DATA_PARALLEL_DIVISIBLE"
+              }
+            }
           }
         }
       },
       "then": {
         "properties": {
           "task_constraints": {
-            "required": ["partition_model_id", "partition_overhead_ms", "merge_overhead_ms"]
+            "required": [
+              "partition_model_id",
+              "partition_overhead_ms",
+              "merge_overhead_ms"
+            ]
           }
         }
       }
     }
-  ]
+  ],
+  "$defs": {
+    "linkHop": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "bandwidth_mbps",
+        "latency_ms"
+      ],
+      "properties": {
+        "bandwidth_mbps": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "latency_ms": {
+          "type": "number",
+          "minimum": 0
+        }
+      }
+    },
+    "remoteResource": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "compute_mips",
+        "utilization",
+        "queue_wait_ms",
+        "uplink_path",
+        "downlink_path"
+      ],
+      "properties": {
+        "compute_mips": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "utilization": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "queue_wait_ms": {
+          "type": "number",
+          "minimum": 0
+        },
+        "uplink_path": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/linkHop"
+          }
+        },
+        "downlink_path": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/linkHop"
+          }
+        }
+      }
+    }
+  }
 }
