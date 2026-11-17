@@ -13,7 +13,7 @@ on:
       - ".github/workflows/abdo-workload-generator.yml"
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   verify-and-generate:
@@ -65,7 +65,27 @@ jobs:
           test "$count" -eq 8
 
       - name: Run automated tests
-        run: python -m pytest -q
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m pytest -q 2>&1 | tee reports/pytest_results_v1_2.txt
+
+      - name: Commit regenerated development-only dataset and verification reports
+        if: success() && github.event_name == 'push' && github.ref == 'refs/heads/abdo/industrial-workload-replay-seed-v2'
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A team-work/Astta-Abdo/data/dev/
+          git add team-work/Astta-Abdo/reports/dev_hashes_v1_2.json
+          git add team-work/Astta-Abdo/reports/*_seed_1300_validation.json
+          git add team-work/Astta-Abdo/reports/pytest_results_v1_2.txt
+          if git diff --cached --quiet; then
+            echo "Development dataset and verification reports already match this run."
+          else
+            git commit -m "data(workloads): add registry-approved synthetic development inputs"
+            git push
+          fi
 
       - name: Upload generated data and validation evidence
         if: always()
