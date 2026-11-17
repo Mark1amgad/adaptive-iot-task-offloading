@@ -100,6 +100,52 @@ def test_industrial_profiles_are_configured(configs):
             assert profile["partition"]["partition_model_id"]
 
 
+def test_all_task_mix_profiles_reference_configured_industrial_profiles(configs):
+
+    workload_cfg, scenario_cfg = configs
+    application_profiles = set(workload_cfg["application_profiles"])
+
+    def check_weights(mix_name, weights):
+        assert weights
+        assert set(weights).issubset(application_profiles), mix_name
+        assert sum(float(value) for value in weights.values()) == pytest.approx(1.0)
+
+    for mix_name, definition in workload_cfg.get("mix_profiles", {}).items():
+        check_weights(mix_name, definition["application_profile_weights"])
+
+    for mix_name, definition in scenario_cfg.get("task_mix_profiles", {}).items():
+        if "profile_weights" in definition:
+            candidates = [definition["profile_weights"]]
+        elif "application_profile_weights" in definition:
+            candidates = [definition["application_profile_weights"]]
+        else:
+            candidates = [
+                regime.get("weights") or regime.get("profile_weights")
+                for regime in definition["regimes"]
+            ]
+        for weights in candidates:
+            check_weights(mix_name, weights)
+
+
+def test_config_validation_rejects_unknown_application_profile(configs):
+
+    workload_cfg, scenario_cfg = configs
+    broken_workload = dict(workload_cfg)
+    broken_mixes = {
+        name: dict(definition)
+        for name, definition in workload_cfg.get("mix_profiles", {}).items()
+    }
+    broken_workload["mix_profiles"] = broken_mixes
+    balanced = dict(broken_mixes["balanced_v1"])
+    balanced_weights = dict(balanced["application_profile_weights"])
+    balanced_weights["OLD_GENERIC_PROFILE"] = 0.01
+    balanced["application_profile_weights"] = balanced_weights
+    broken_mixes["balanced_v1"] = balanced
+
+    with pytest.raises(ValueError, match="unknown application profiles"):
+        gen.validate_configs(broken_workload, scenario_cfg)
+
+
 # --------------------------------------------------
 # 2. Reproducibility Tests
 # --------------------------------------------------

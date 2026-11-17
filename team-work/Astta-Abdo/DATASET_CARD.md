@@ -4,6 +4,10 @@
 
 A reproducible **synthetic input dataset** for evaluating Local / Edge / Cloud full placement and constrained partial offloading on explicitly declared data-parallel tasks. It contains task workload inputs and scenario manifests only. It is not a measured IoT trace, not simulator execution output, and not the final experiment-results dataset.
 
+## Industrial workload profiles
+
+The synthetic application profiles are `PREDICTIVE_MAINTENANCE_INFERENCE`, `VISUAL_INSPECTION_FRAME_BATCH`, `PRODUCTION_MONITORING_AGGREGATION`, `VISUAL_INSPECTION_BULK_FRAME_BATCH`, and `PRODUCTION_MONITORING_LARGE_AGGREGATION`. Only the independent frame-batch and sensor-window profiles are marked `DATA_PARALLEL_DIVISIBLE`; predictive-maintenance inference remains `INDIVISIBLE`. These names are workload-design labels, not observed industry frequencies or measured task traces.
+
 ## Intended use
 
 Development, schema testing, deterministic replay testing, and preparation of paired iFogSim2 experiments after numerical profile approval. Benchmark-generation outputs must be kept in a separate directory and must not be confused with the development samples.
@@ -72,4 +76,4 @@ The repository's `LICENSE_STATUS.md` states that no project license has been sel
 
 - Dataset / pipeline version: 1.1.0
 - Status: development-only; numerical parameters awaiting Mark approval
-- Base repository revision inspected: `main` at `39d6cd448ba5a15e690ac67ff777017a445ce577` (pushed 2026-11-03)
+- Base repository revision inspected: `main` at `2ea77ed66c0d143581bb179565ad0de98035e411` (inspected 2026-11-17)

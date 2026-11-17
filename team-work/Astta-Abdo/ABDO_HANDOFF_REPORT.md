@@ -127,9 +127,9 @@ The 2,500 MI / 12,000-byte / 2,000-byte / 500-ms configuration is an existing **
 
 ECW and SMD are retained as separate versioned technical audit references and are not numerically sampled, concatenated, or relabelled as workload tasks. ECW channel mapping remains unknown; SMD anomaly labels remain telemetry anomaly labels, not task outcomes. Mostafa's dataset inventory is not reproduced here; its dataset audit remains the reference for candidate-source claims.
 
-## 9. Git / scope confirmation
+## 9. Repository delivery and scope
 
-No commits, pushes, staging, branch changes, simulator topology or queue modifications, policy changes, or model training were performed. The GitHub connection was used read-only to inspect `main`. Because the available GitHub write actions create commits and the request explicitly prohibits commits/pushes, the deliverable is supplied as an additive overlay ZIP for local application/review.
+The workload package is now present in the repository under `team-work/Astta-Abdo/`. Corrections are prepared on a dedicated branch for review; `main` is not modified directly. The package scope remains synthetic task inputs, scenario manifests, schemas, validation and reproducibility evidence only. It does not change simulator topology/queues, the policy, model training, or measured task outcomes.
 
 ## 10. Packaging correction addendum (v1.1.1)
 
