@@ -226,6 +226,7 @@ class V2Session:
             response["risk"] = {
                 "filter_applied": False,
                 "status": "missing_context" if self.config.risk.enabled else "disabled",
+                "no_feasible_action": False,
                 "calibration_updates": self.risk_calibrator.updates,
             }
         return response
