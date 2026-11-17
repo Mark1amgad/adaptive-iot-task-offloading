@@ -52,6 +52,22 @@ if ($seedValues.Count -ne 1 -or $profileValues.Count -ne 1) {
 $gitCommit = (& git -C $ProjectRoot rev-parse HEAD).Trim()
 if ($LASTEXITCODE -ne 0 -or -not $gitCommit) { throw "Cannot resolve source Git commit." }
 $javaVersion = (& $java -version 2>&1 | Select-Object -First 1).ToString()
+# Hash the actual source files used, not only Git HEAD: this also captures local edits
+# in a working tree whose commit may be behind the remote branch.
+$sourceFiles = @(
+    Get-ChildItem -LiteralPath $simulationSource -Recurse -File |
+        Where-Object { $_.Extension -in @('.java','.py','.ps1') }
+    Get-ChildItem -LiteralPath (Join-Path $rlRoot 'src') -Recurse -File |
+        Where-Object { $_.Extension -eq '.py' }
+    Get-ChildItem -LiteralPath (Join-Path $rlRoot 'config') -Recurse -File |
+        Where-Object { $_.Extension -in @('.json','.yaml','.yml') }
+) | Sort-Object FullName -Unique
+$sourceInventory = @($sourceFiles | ForEach-Object {
+    [ordered]@{
+        path = $_.FullName.Substring($ProjectRoot.TrimEnd('\\').Length + 1).Replace('\\','/')
+        sha256 = (Get-FileHash -Algorithm SHA256 -LiteralPath $_.FullName).Hash.ToLowerInvariant()
+    }
+})
 $manifest = [ordered]@{
     schema_version = "v1"
     experiment_id = [IO.Path]::GetFileName($OutputRoot)
@@ -63,6 +79,7 @@ $manifest = [ordered]@{
     model_sha256 = (Get-FileHash -Algorithm SHA256 -LiteralPath $ModelIn).Hash.ToLowerInvariant()
     risk_state_sha256 = (Get-FileHash -Algorithm SHA256 -LiteralPath $RiskStateIn).Hash.ToLowerInvariant()
     source_git_commit = $gitCommit
+    source_inventory = $sourceInventory
     java_version = $javaVersion
     simulator_root = [IO.Path]::GetFullPath($IFogSimRoot)
     simulator_jar_inventory = @(
