@@ -27,8 +27,11 @@ $generator = Join-Path $simulationSource 'generate_v2_aba_workload.py'
 $runner = Join-Path $simulationSource 'run_v2_policy_comparison.ps1'
 $inference = Join-Path $simulationSource 'analyze_v2_paired_seed_inference.py'
 $regimeInference = Join-Path $simulationSource 'analyze_v2_aba_regime_inference.py'
-if (-not $RiskStateIn) { $RiskStateIn = "$ModelIn.risk.json" }
-foreach ($required in @($generator,$runner,$inference,$regimeInference,$PythonExe,$InferencePythonExe,$ModelIn,$RiskStateIn,(Join-Path $JdkHome 'bin\javac.exe'),(Join-Path $IFogSimRoot 'jars'))) {
+if (-not $RiskStateIn -and $RiskMode -ne 'none') { $RiskStateIn = "$ModelIn.risk.json" }
+if (-not $SeedRegistry) { $SeedRegistry = Join-Path $ProjectRoot 'research\\experiments\\SEED_REGISTRY_V1.csv' }
+$requiredPaths = @($generator,$runner,$inference,$regimeInference,$PythonExe,$InferencePythonExe,$ModelIn,$SeedRegistry,(Join-Path $JdkHome 'bin\\javac.exe'),(Join-Path $IFogSimRoot 'jars'))
+if ($RiskMode -ne 'none') { $requiredPaths += $RiskStateIn }
+foreach ($required in $requiredPaths) {
     if (-not (Test-Path $required)) { throw "Required file not found: $required" }
 }
 if ($Seeds.Count -lt 2) { throw 'No default seed allocation is provided. Supply at least two explicitly approved seeds after checking the versioned seed registry and local run archives.' }
