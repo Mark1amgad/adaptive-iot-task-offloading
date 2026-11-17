@@ -9,3 +9,6 @@ These eight small CSV task/manifest pairs are deterministic development inputs g
 - Reproduce with `python scripts/generate_workloads.py --scenario all-core --dataset-split development --seed 1300 --seed-count 1 --task-count 48 --output data/dev --hash-report reports/dev_hashes_v1_2.json`.
 - Seed 1300 is Development/CI only. Historical seed 81 and other recorded historical seeds are retired. No final Train, Validation, or Test allocation is approved.
 - All scenario/task parameters remain `PROPOSED` until Mark approves them and Ayoub supplies topology confirmation and simulator calibration evidence.
+
+
+Target topology contract: `v2_target_100iot_20edge_1cloud` = 100 logical IoT sources, 20 target Edge nodes and one target Cloud node, with five source IDs assigned to each target Edge. This is not an actual deployment assertion. `actual_topology_id=null` and `actual_topology_status=NOT_VERIFIED_PENDING_AYOUB_CONFIRMATION` remain until Ayoub verifies the simulator. Bandwidth units, uplink/downlink, IoT–Edge and Edge–Cloud links, latency and network-shift parameters remain BLOCKED pending his confirmation.
